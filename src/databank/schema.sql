@@ -34,7 +34,7 @@ create table evenement (
 	stad varchar,
 	min_deelnemers int constraint positief_min check (min_deelnemers >= 0),
 	max_deelnemers int constraint positief_max check (max_deelnemers >= 0 and max_deelnemers >= min_deelnemers),
-	is_geannuleerd bool default false,
+	is_geannuleerd bool default false, /* TODO: cascade naar inschrijvingen */
 	aantal_zelfde_groep int constraint positief_aantal check (aantal_zelfde_groep >= 0 or aantal_zelfde_groep is null), /* Aantal inschrijvingen van dezelfde groep toegestaan */
 	min_leeftijd int constraint positief_min_leeftijd check (min_leeftijd >= 0 or min_leeftijd is null),
 	_is_weez bool default true,
