@@ -53,6 +53,7 @@ create table inschrijving (
 	is_geannuleerd bool default false,
 	is_terugbetaald bool default false,
 	opmerking varchar,
+	vegetarisch bool default false,
 	_is_weez bool default true,
 	_laatste_sync timestamp default NOW(),
 	
@@ -80,3 +81,10 @@ create table evenement_datum (
 	/* TODO: trigger die overlap checkt? */
 );
 
+create table inschrijving_vraag (
+	evenement int references evenement(id) not null,
+	vraag varchar not null,
+	antwoord varchar,
+	
+	primary key (evenement, vraag) /* Betere key zoeken */
+);
