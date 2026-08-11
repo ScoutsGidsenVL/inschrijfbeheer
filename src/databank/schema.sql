@@ -25,6 +25,7 @@ create table tarief (
 create table evenement (
 	id varchar primary key,
 	titel varchar not null,
+	status varchar,
 	beschrijving varchar,
 	starttijd timestamp not null,
 	eindtijd timestamp not null,
