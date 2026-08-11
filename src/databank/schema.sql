@@ -3,7 +3,7 @@ create table categorie (
 	naam varchar unique not null, /* Zou uniek moeten zijn */
 	alt_naam varchar,
 	
-	is_weez bool default true,
+	_is_weez bool default true,
 	_laatste_sync timestamp default NOW()
 	
 );
@@ -13,7 +13,7 @@ create table tarief (
 	naam varchar, /* Potentieel constraint met ID dat combo uniek is */
 	prijs int constraint positieve_prijs check (prijs >= 0),
 	quota int constraint positief_quota check (quota >= 0), /* Is dit limiet of doel? */
-	is_weez bool default true,
+	_is_weez bool default true,
 	_laatste_sync timestamp default NOW()
 	
 ); /* Meerdere tarieven worden gebruikt oa voor bepalen van een activiteit */
@@ -29,7 +29,7 @@ create table evenement (
 	huisnummer varchar,
 	postcode varchar, /* Voorlopig geen zin in conversies */
 	stad varchar,
-	is_weez bool default true,
+	_is_weez bool default true,
 	_laatste_sync timestamp default NOW(),
 	
 	categorie varchar references categorie(id),
@@ -47,7 +47,7 @@ create table inschrijving (
 	is_geannuleerd bool default false,
 	is_terugbetaald bool default false,
 	opmerking varchar,
-	is_weez bool default true,
+	_is_weez bool default true,
 	_laatste_sync timestamp default NOW(),
 	
 	primary key (evenement, lid) /* Staat 1 inschrijving per lid toe? */
@@ -56,7 +56,7 @@ create table inschrijving (
 create table evenement_tarief (
 	evenement int references evenement(id) not null,
 	tarief varchar references tarief(id) not null,
-	is_weez bool default true,
+	_is_weez bool default true,
 	_laatste_sync timestamp default NOW(),
 	
 	primary key (evenement, tarief)
