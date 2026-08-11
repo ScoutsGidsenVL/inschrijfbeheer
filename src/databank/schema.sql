@@ -68,3 +68,15 @@ create table evenement_tarief (
 	primary key (evenement, tarief)
 );
 
+create table evenement_datum (
+	evenement int references evenement(id) not null,
+	starttijd timestamp not null,
+	eindtijd timestamp not null,
+	_is_weez bool default true,
+	_laatste_sync timestamp default NOW(),
+	
+	primary key (evenement, starttijd),
+	constraint einde_na_start check (eindtijd  > starttijd)
+	/* TODO: trigger die overlap checkt? */
+);
+
