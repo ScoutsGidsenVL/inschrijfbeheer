@@ -13,8 +13,12 @@ create table tarief (
 	naam varchar, /* Potentieel constraint met ID dat combo uniek is */
 	prijs int constraint positieve_prijs check (prijs >= 0),
 	quota int constraint positief_quota check (quota >= 0), /* Is dit limiet of doel? */
+	starttijd_inschrijving timestamp default NOW(),
+	eindtijd_inschrijving timestamp default starttijd,
 	_is_weez bool default true,
 	_laatste_sync timestamp default NOW()
+
+	constraint einde_na_start check (eindtijd_inschrijving  > starttijd_inschrijving)
 	
 ); /* Meerdere tarieven worden gebruikt oa voor bepalen van een activiteit */
 
@@ -29,6 +33,8 @@ create table evenement (
 	huisnummer varchar,
 	postcode varchar, /* Voorlopig geen zin in conversies */
 	stad varchar,
+	min_deelnemers int constraint positief_min check (min_deelnemers >= 0),
+	max_deelnemers int constraint positief_max check (max_deelnemers >= 0 and max_deelnemers >= min_deelnemers),
 	_is_weez bool default true,
 	_laatste_sync timestamp default NOW(),
 	
