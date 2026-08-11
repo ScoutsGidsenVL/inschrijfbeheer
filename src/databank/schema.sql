@@ -27,8 +27,6 @@ create table evenement (
 	titel varchar not null,
 	status varchar,
 	beschrijving varchar,
-	starttijd timestamp not null,
-	eindtijd timestamp not null,
 	locatie varchar, /* Naam van de locatie */
 	straat varchar,
 	huisnummer varchar,
