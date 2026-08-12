@@ -33,6 +33,9 @@ create table evenement (
 	huisnummer varchar,
 	postcode varchar, /* Voorlopig geen zin in conversies */
 	stad varchar,
+	starttijd timestamp not null,
+	eindtijd timestamp not null,
+	constraint einde_na_start check (eindtijd  > starttijd)
 	min_deelnemers int constraint positief_min check (min_deelnemers >= 0),
 	max_deelnemers int constraint positief_max check (max_deelnemers >= 0 and max_deelnemers >= min_deelnemers),
 	is_geannuleerd bool default false, /* TODO: cascade naar inschrijvingen */
@@ -70,18 +73,6 @@ create table inschrijving (
 	module_nummer varchar not null
 	
 	*/
-);
-
-create table evenement_datum (
-	evenement int references evenement(id) not null,
-	starttijd timestamp not null,
-	eindtijd timestamp not null,
-	_is_weez bool default true,
-	_laatste_sync timestamp default NOW(),
-	
-	primary key (evenement, starttijd),
-	constraint einde_na_start check (eindtijd  > starttijd)
-	/* TODO: trigger die overlap checkt? */
 );
 
 create table inschrijving_vraag (
