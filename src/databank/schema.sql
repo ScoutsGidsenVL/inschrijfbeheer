@@ -9,10 +9,11 @@ create table categorie (
 );
 
 create table tarief (
-	id varchar primary key
+	id varchar primary key,
+	evenement int references evenement(id) not null,
 	naam varchar, /* Potentieel constraint met ID dat combo uniek is */
 	prijs int constraint positieve_prijs check (prijs >= 0),
-	quota int constraint positief_quota check (quota >= 0), /* Is dit limiet of doel? */
+	quota int constraint positief_quota check (quota >= 0 or quota is null), /* Is dit limiet of doel? */
 	starttijd_inschrijving timestamp default NOW(),
 	eindtijd_inschrijving timestamp default starttijd,
 	_is_weez bool default true,
@@ -60,15 +61,15 @@ create table inschrijving (
 	_laatste_sync timestamp default NOW(),
 	
 	primary key (evenement, lid) /* Staat 1 inschrijving per lid toe? */
-);
 
-create table evenement_tarief (
-	evenement int references evenement(id) not null,
-	tarief varchar references tarief(id) not null,
-	_is_weez bool default true,
-	_laatste_sync timestamp default NOW(),
+	/*
+	gouw varchar not null,
+	district varchar not null,
+	groep varchar not null,
+	module_naam varchar not null,
+	module_nummer varchar not null
 	
-	primary key (evenement, tarief)
+	*/
 );
 
 create table evenement_datum (
@@ -84,9 +85,9 @@ create table evenement_datum (
 );
 
 create table inschrijving_vraag (
-	evenement int references evenement(id) not null,
+	inschrijving int references inschrijving(evenement) not null,
 	vraag varchar not null,
 	antwoord varchar,
 	
-	primary key (evenement, vraag) /* Betere key zoeken */
+	primary key (inschrijving, vraag) /* Betere key zoeken */
 );
