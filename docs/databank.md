@@ -10,7 +10,9 @@ De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïm
 
 **Integreat_Registration** -> koppeling tussen persoon en evenement, eventueel betaald bedrag
 
-**Integreat_OrganizationUnitSite** -> Groep waarvoor persoon zich inschrijft
+**Integreat_OrganizationUnitSite** -> Groep waarvoor persoon zich inschrijft wordt gekoppeld
+
+**Integreat_OrganizationUnit** -> scoutsgroepen
 
 **Integreat_ParticipantType** -> type waarin de persoon meedeed
 
