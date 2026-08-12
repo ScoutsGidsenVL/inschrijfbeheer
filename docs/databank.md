@@ -2,6 +2,28 @@
 
 De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïmporteerd worden en tegelijkertijd alle data van Weezevent zonder problemen kan toegevoegd worden.
 
+## INIS Databank
+
+**Integreat_Participant** -> leden en deelnemers<br>Mogelijk om 90% van de kolommen te verwijderen<br>StudentNumber -> __lid ID__
+
+**Integreat_Client** -> gedeelte deelnemers, maar geen volledige overlap, minder relevante gegevens
+
+**Integreat_Registration** -> koppeling tussen persoon en evenement, eventueel betaald bedrag
+
+**Integreat_OrganizationUnitSite** -> Groep waarvoor persoon zich inschrijft
+
+**Integreat_ParticipantType** -> type waarin de persoon meedeed
+
+**Integreat_ParticipantFamily** -> contacten? geen duidelijke links naar personen
+
+**Integreat_ParticipantGroup** -> meer info over groep
+
+**Integreat_ParticipantStatus** -> 5 vaste waarden voor status deelnemer
+
+**Integreat_Seminar** -> info over het evenement
+
+## Inschrijfbeheer databank
+
 #### evenement
 
 | Attribuut | Datatype | Uitleg | Opmerkingen |
