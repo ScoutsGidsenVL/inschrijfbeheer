@@ -2,7 +2,7 @@
 
 De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïmporteerd worden en tegelijkertijd alle data van Weezevent zonder problemen kan toegevoegd worden.
 
-**Evenement**
+#### evenement
 
 | Attribuut | Datatype | Uitleg | Opmerkingen |
 |-----------|----------|--------|-------------|
@@ -22,17 +22,17 @@ De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïm
 | `min_leeftijd` | int | minimale leeftijd voor het evenement | minimaal 0 of `NULL` |
 | `_is_weez` | bool | geeft aan of het evenement komt van Weezevent of niet | default `true` voor voorwaartse compatibiliteit met Weezevent |
 | `_laatste_sync` | timestamp | geeft aan wanneer het evenement de laatste keer werd opgevraagd aan de API van Weezevent ||
-| `categorie` | varchar | geeft aan welke categorie een evenement is ||
+| `categorie` | [categorie](#categorie) | geeft aan welke categorie een evenement is ||
 
 
-**Inschrijving**
+#### inschrijving
 
 | Attribuut | Datatype | Uitleg | Opmerkingen |
 |-----------|----------|--------|-------------|
-| `evenement` | evenement ptr | verwijst naar het evenement waarvoor is ingeschreven | nooit `NULL` |
-| `tarief` | tarief ptr | verwijst naar het betaalde tarief/deelnemerstype | nooit `NULL` |
+| `evenement` | [evenement](#evenement) | verwijst naar het evenement waarvoor is ingeschreven | nooit `NULL` |
+| `tarief` | [tarief](#tarief) | verwijst naar het betaalde tarief/deelnemerstype | nooit `NULL` |
 | `lid` | varchar | ID van het lid | nooit `NULL`, eventueel validatie |
-| `tijsdtip` | timestamp | tijdstip van inschrijven | standaard huidige tijd op de server |
+| `tijsdtip` | timestamp | tijdstip van inschrijven | standaard huidige tijd van de databank |
 | `is_betaald` | bool | geeft aan of het betaald is | standaard `true`, digitale betalingen |
 | `is_geannuleerd` | bool | geeft aan of een ticket geannuleerd is | mogelijks cascaden als er nu te weinig mensen zijn |
 | `is_terugbetaald` | bool | geeft aan of een ticket terugbetaald is | standaard `false` |
@@ -40,3 +40,45 @@ De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïm
 | `vegetarisch` | bool | geeft aan of deelnemer vegetarisch is ||
 | `_is_weez` | bool | geeft aan of de inschrijving komt van Weezevent of niet | default `true` voor voorwaartse compatibiliteit met Weezevent |
 | `_laatste_sync` | timestamp | geeft aan wanneer de inschrijving de laatste keer werd opgevraagd aan de API van Weezevent ||
+
+#### tarief
+
+| Attribuut | Datatype | Uitleg | Opmerkingen |
+|-----------|----------|--------|-------------|
+| `id` | varchar | id van het tarief/deelnemerstype, wordt gegeven door Weezevent | primary key |
+| `naam` | varchar | naam van het tarief/deelnemerstype ||
+| `prijs` | int | prijs van het tarief/deelnemerstype | moet positief zijn |
+| `quota` | int | quotum van het tarief om te behalen | moet positief zijn |
+| `starttijd_inschrijvingen` | timestamp | geeft aan wanneer inschrijvingen voor dit tarief beginnen | standaard huidige tijd van de databank |
+| `eindtijd_inschrijvingen` | timestamp | geeft aan wanneer inschrijvingen voor dit tarief eindigen | moet strikt groter zijn dan `starttijd_inschrijvingen` |
+| `_is_weez` | bool | geeft aan of het tarief komt van Weezevent of niet | default `true` voor voorwaartse compatibiliteit met Weezevent |
+| `_laatste_sync` | timestamp | geeft aan wanneer het tarief de laatste keer werd opgevraagd aan de API van Weezevent ||
+| `evenement` | [evenement](#evenement) | evenement waar het tarief bijhoort ||
+
+#### categorie
+
+| Attribuut | Datatype | Uitleg | Opmerkingen |
+|-----------|----------|--------|-------------|
+| `id` | varchar | id van de categorie ||
+| `naam` | varchar | naam van de categorie | moet uniek zijn en niet `NULL`, eventueel aanpassen moesten oude categorieën overlap tonen met categoriën Weezevent ||
+| `alt_naam` | varchar | alternatieve benaming voor categorie ||
+| `_is_weez` | bool | geeft aan of de categorie komt van Weezevent of niet | default `true` voor voorwaartse compatibiliteit met Weezevent |
+| `_laatste_sync` | timestamp | geeft aan wanneer de categorie de laatste keer werd opgevraagd aan de API van Weezevent ||
+
+#### evenement_datum
+
+| Attribuut | Datatype | Uitleg | Opmerkingen |
+|-----------|----------|--------|-------------|
+| `evenement` | [evenement](#evenement) | evenement waar data bij horen ||
+| `starttijd` | timestamp | start van het evenement | nooit `NULL`, moet uniek zijn in combinatie met evenement |
+| `eindtijd` | timestamp | eind van het evenement | nooit `NULL`, strikt groter dan `starttijd` |
+| `_is_weez` | bool | geeft aan of de datum komt van Weezevent of niet | default `true` voor voorwaartse compatibiliteit met Weezevent |
+| `_laatste_sync` | timestamp | geeft aan wanneer de datum de laatste keer werd opgevraagd aan de API van Weezevent ||
+
+#### inschrijving_vraag
+
+| Attribuut | Datatype | Uitleg | Opmerkingen |
+|-----------|----------|--------|-------------|
+| `inschrijving` | [inschrijving](#inschrijving) | inschrijving waar vraag bij gesteld werd ||
+| `vraag` | varchar || wordt gebruikt in primary key -> pseudo ID instellen |
+| `antwoord` | varchar | antwoord op de vraag ||
