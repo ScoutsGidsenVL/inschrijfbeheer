@@ -22,6 +22,10 @@ De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïm
 
 **Integreat_Seminar** -> info over het evenement
 
+**Seminar_FreeField** -> vrije vragen hangen vast aan event
+
+**Integreat_RegistrationFreeField** -> antwoorden op vrije vragen, hangt aan registration en freefield
+
 ## Inschrijfbeheer databank
 
 #### evenement
