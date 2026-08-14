@@ -1,7 +1,7 @@
 from django.db import models
 
 class Lid(models.Model):
-    pass
+    id = models.CharField(primary_key=True)
 
 # @dataclass
 # class Locatie:
