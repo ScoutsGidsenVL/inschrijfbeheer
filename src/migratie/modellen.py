@@ -31,6 +31,10 @@ class EvenementStatus(models.Model):
     id = models.AutoField(primary_key=True)
     beschrijving = models.CharField()
 
+    class Meta:
+        app_label = "Integreat_migratie"
+        db_table = "evenement_status" # geeft naam van de tabel in de nieuwe databank aan
+
 # @dataclass
 # class Categorie:
 #     id: str
