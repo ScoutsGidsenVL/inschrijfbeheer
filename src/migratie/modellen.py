@@ -90,7 +90,17 @@ class Evenement(models.Model):
 #     eindtijd_inschrijving: datetime
 
 class DeelnemerType(models.Model):
-    pass
+    id = models.CharField(primary_key=True)
+    evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE)
+    naam = models.CharField()
+    prijs = models.PositiveIntegerField()
+    quota = models.PositiveIntegerField()
+    starttijd_inschrijvingen = models.DateTimeField()
+    eindtijd_inschrijvingen = models.DateTimeField()
+
+    class Meta:
+        app_label = "Integreat_migratie"
+        db_table = "deelnemertype" # geeft naam van de tabel in de nieuwe databank aan
 
 class Inschrijving(models.Model):
     pk = models.CompositePrimaryKey("evenement", "lid")
