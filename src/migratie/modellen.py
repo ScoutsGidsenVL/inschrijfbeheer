@@ -1,5 +1,36 @@
 from django.db import models
 
+class Lid(models.Model):
+    pass
+
+# @dataclass
+# class Locatie:
+#     id: int
+#     naam: str = None
+#     huisnummer: str = None
+#     postcode: str = None
+#     stad: str = None
+
+class Locatie(models.Model):
+    pass
+
+# @dataclass
+# class EvenementStatus:
+#     id: int
+#     beschrijving: str
+
+class EvenementStatus(models.Model):
+    pass
+
+# @dataclass
+# class Categorie:
+#     id: str
+#     naam: str
+#     alt_naam: str = None
+
+class Categorie(models.Model):
+    pass
+
 # @dataclass
 # class Evenement:
 #     id: str
@@ -15,11 +46,23 @@ from django.db import models
 #     min_leeftijd: int
 #     categorie: str # verwijst naar Categorie
 
-class Lid(models.Model):
-    pass
-
 class Evenement(models.Model):
-    pass
+    id = models.CharField(primary_key=True)
+    titel = models.CharField()
+    beschrijving = models.CharField()
+    status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL)
+    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT)
+    starttijd = models.DateTimeField()
+    eindtijd = models.DateTimeField()
+    min_deelnemers = models.PositiveIntegerField()
+    max_deelnemers = models.PositiveIntegerField()
+    aantal_zelfde_groep = models.PositiveIntegerField()
+    min_leeftijd = models.PositiveIntegerField()
+    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL)
+
+    class Meta:
+        app_label = "Integreat_migratie"
+        db_table = "evenement" # geeft naam van de tabel in de nieuwe databank aan
 
 # @dataclass
 # class DeelnemerType:
@@ -35,10 +78,12 @@ class DeelnemerType(models.Model):
     pass
 
 class Inschrijving(models.Model):
+    pk = models.CompositePrimaryKey("evenement", "lid")
+
     evenement = models.ForeignKey(Evenement, on_delete=models.RESTRICT)
     lid = models.ForeignKey(Lid, on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, on_delete=models.RESTRICT)
-    tijdstip = models.DateField()
+    tijdstip = models.DateTimeField()
     is_betaald = models.BooleanField()
     is_geannuleerd = models.BooleanField()
     is_terugbetaald = models.BooleanField()
@@ -46,22 +91,3 @@ class Inschrijving(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
-
-# @dataclass
-# class Categorie:
-#     id: str
-#     naam: str
-#     alt_naam: str = None
-
-# @dataclass
-# class EvenementStatus:
-#     id: int
-#     beschrijving: str
-
-# @dataclass
-# class Locatie:
-#     id: int
-#     naam: str = None
-#     huisnummer: str = None
-#     postcode: str = None
-#     stad: str = None
