@@ -3,14 +3,6 @@ from django.db import models
 class Lid(models.Model):
     id = models.CharField(primary_key=True)
 
-# @dataclass
-# class Locatie:
-#     id: int
-#     naam: str = None
-#     huisnummer: str = None
-#     postcode: str = None
-#     stad: str = None
-
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
     naam = models.CharField()
@@ -22,11 +14,6 @@ class Locatie(models.Model):
         app_label = "Integreat_migratie"
         db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
 
-# @dataclass
-# class EvenementStatus:
-#     id: int
-#     beschrijving: str
-
 class EvenementStatus(models.Model):
     id = models.AutoField(primary_key=True)
     beschrijving = models.CharField()
@@ -35,31 +22,10 @@ class EvenementStatus(models.Model):
         app_label = "Integreat_migratie"
         db_table = "evenement_status" # geeft naam van de tabel in de nieuwe databank aan
 
-# @dataclass
-# class Categorie:
-#     id: str
-#     naam: str
-#     alt_naam: str = None
-
 class Categorie(models.Model):
     id = models.CharField(primary_key=True)
     naam = models.CharField()
     alt_naam = models.CharField()
-
-# @dataclass
-# class Evenement:
-#     id: str
-#     titel: str
-#     beschrijving: str
-#     status: int
-#     locatie: int
-#     starttijd: datetime
-#     eindtijd: datetime
-#     min_deelnemers: int
-#     max_deelnemers: int
-#     aantal_zelfde_groep: int
-#     min_leeftijd: int
-#     categorie: str # verwijst naar Categorie
 
 class Evenement(models.Model):
     id = models.CharField(primary_key=True)
@@ -78,16 +44,6 @@ class Evenement(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "evenement" # geeft naam van de tabel in de nieuwe databank aan
-
-# @dataclass
-# class DeelnemerType:
-#     id: str
-#     evenement: str
-#     naam: str
-#     prijs: int
-#     quota: int
-#     starttijd_inschrijving: datetime
-#     eindtijd_inschrijving: datetime
 
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
