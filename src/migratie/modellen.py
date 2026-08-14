@@ -12,7 +12,15 @@ class Lid(models.Model):
 #     stad: str = None
 
 class Locatie(models.Model):
-    pass
+    id = models.AutoField(primary_key=True)
+    naam = models.CharField()
+    huisnummer = models.CharField()
+    postcode = models.CharField()
+    stad = models.CharField()
+
+    class Meta:
+        app_label = "Integreat_migratie"
+        db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
 
 # @dataclass
 # class EvenementStatus:
