@@ -42,7 +42,9 @@ class EvenementStatus(models.Model):
 #     alt_naam: str = None
 
 class Categorie(models.Model):
-    pass
+    id = models.CharField(primary_key=True)
+    naam = models.CharField()
+    alt_naam = models.CharField()
 
 # @dataclass
 # class Evenement:
