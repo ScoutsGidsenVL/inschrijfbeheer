@@ -28,6 +28,10 @@ De databank voor inschrijfbeheer is opgebouwd zodat alle data uit INIS kan geïm
 
 **Integreat_RegistrationFreeField** -> antwoorden op vrije vragen, hangt aan registration en freefield
 
+**Integreat_SeminarCertificate** -> geeft weer welke certificaten gegeven mogen worden/zijn
+
+**Integreat_CertificateTemplate** -> houdt templates bij voor een bepaald attest
+
 ## Inschrijfbeheer databank
 
 #### evenement
