@@ -28,7 +28,8 @@ class Locatie(models.Model):
 #     beschrijving: str
 
 class EvenementStatus(models.Model):
-    pass
+    id = models.AutoField(primary_key=True)
+    beschrijving = models.CharField()
 
 # @dataclass
 # class Categorie:
