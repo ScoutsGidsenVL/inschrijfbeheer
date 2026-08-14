@@ -40,7 +40,7 @@ class Evenement:
 class Categorie:
     id: str
     naam: str
-    alt_naam: str
+    alt_naam: str = None
 
 @dataclass
 class EvenementStatus:
@@ -50,7 +50,7 @@ class EvenementStatus:
 @dataclass
 class Locatie:
     id: int
-    naam: str
-    huisnummer: str
-    postcode: str
-    stad: str
+    naam: str = None
+    huisnummer: str = None
+    postcode: str = None
+    stad: str = None
