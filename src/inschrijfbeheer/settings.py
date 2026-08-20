@@ -89,7 +89,7 @@ DATABASES = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    "mozilla_django_oidc.auth.OIDCAuthenticationBackend",
+    "inschrijfbeheer.oidc.KeycloakOIDCBackend",
     "django.contrib.auth.backends.ModelBackend",
 )
 
