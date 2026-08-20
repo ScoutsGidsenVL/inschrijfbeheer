@@ -16,8 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 
 urlpatterns = [
+    path("oidc/", include("mozilla_django_oidc.urls")),
     path('admin/', admin.site.urls),
-    path('migratie/', include("migratie.urls"))
+    path('migratie/', include("migratie.urls")),
+    path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
 ]
