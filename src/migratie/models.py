@@ -14,6 +14,7 @@ class Lid(models.Model):
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
     naam = models.CharField()
+    straat = models.CharField()
     huisnummer = models.CharField()
     postcode = models.CharField()
     stad = models.CharField()
