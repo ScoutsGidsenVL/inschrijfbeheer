@@ -86,6 +86,14 @@ DATABASES = {
         'USER': os.getenv("DB_username"),
         'PASSWORD': os.getenv('DB_password'),
         'PORT': '5432'
+    },
+    'INTEGREAT': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('INTEGREAT_DB_NAME'),
+        'HOST': os.getenv('INTEGREAT_DB_HOST'),
+        'USER': os.getenv('INTEGREAT_DB_USER'),
+        'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
+        'PORT': os.getenv('INTEGREAT_DB_PORT'),
     }
 }
 
