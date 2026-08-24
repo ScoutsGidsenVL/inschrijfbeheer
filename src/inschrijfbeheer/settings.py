@@ -88,12 +88,13 @@ DATABASES = {
         'PORT': '5432'
     },
     'INTEGREAT': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'mssql',
         'NAME': os.getenv('INTEGREAT_DB_NAME'),
         'HOST': os.getenv('INTEGREAT_DB_HOST'),
-        'USER': os.getenv('INTEGREAT_DB_USER'),
-        'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
-        'PORT': os.getenv('INTEGREAT_DB_PORT'),
+        'PORT': '',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        }
     }
 }
 
