@@ -1,0 +1,34 @@
+{% block content %}
+<form method="get" class="kolom-keuze">
+    <label>
+        <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek evenement">
+    </label>
+    {% for kolom, label in alle_kolommen.items %}
+        <label>
+            <input type="checkbox" name="kolom" value="{{ kolom }}"
+                {% if kolom in gekozen_kolommen %}checked{% endif %}>
+            {{ label }}
+        </label>
+    {% endfor %}
+    <button type="submit">Toon kolommen</button>
+</form>
+
+<table class="evenement-tabel">
+    <thead>
+        <tr>
+            {% for label in gekozen_labels %}
+                <th>{{ label }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for rij in rijen %}
+            <tr>
+                {% for waarde in rij %}
+                    <td>{{ waarde }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}
