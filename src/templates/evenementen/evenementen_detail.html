@@ -6,8 +6,9 @@
 {% endblock extra_headers %}
 
 {% block content %}
-<button onclick="history.back()">Back</button>
-<h1> {{ evenement.id }} - {{ evenement.titel }} </h1>
+
+{% include "evenementen/evenementen_header.html" %}
+
 <div class="evenement-attribuut-container">
     <div class="evenement-attribuut-label">Beschrijving</div>
     <div class="evenement-attribuut-waarde">

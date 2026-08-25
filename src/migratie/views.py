@@ -50,6 +50,9 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     })
 
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=id)
+
+
     velden = Inschrijving._meta.fields
     kolommen = [veld.verbose_name for veld in velden]
 
@@ -62,5 +65,5 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     ]
 
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
-        "kolommen": kolommen, "inschrijvingen": inschrijvingen
+        "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
     })
