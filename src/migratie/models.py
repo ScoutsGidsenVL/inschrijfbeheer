@@ -14,11 +14,19 @@ class Lid(models.Model):
 
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
-    naam = models.CharField()
-    straat = models.CharField()
-    huisnummer = models.CharField()
-    postcode = models.CharField()
-    stad = models.CharField()
+    naam = models.CharField(null=True)
+    straat = models.CharField(null=True)
+    huisnummer = models.CharField(null=True)
+    postcode = models.CharField(null=True)
+    stad = models.CharField(null=True)
+
+    models.CheckConstraint(
+        condition=(
+            models.Q(naam__isnull=False) |
+            models.Q(straat__isnull=False, huisnummer__isnull=False, postcode__isnull=False, stad__isnull=False)
+        ),
+        name="locatie_of_adres"
+    )
 
     class Meta:
         app_label = "migratie"
