@@ -1,5 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-{{value}}
+<table class="inschrijving-tabel">
+    <thead>
+        <tr>
+            {% for kolom in kolommen %}
+                <th>{{ kolom }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for rij in inschrijvingen %}
+            <tr class="inschrijving-rij">
+                {% for waarde in rij.waarden %}
+                    <td>{{ waarde }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock content %}

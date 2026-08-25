@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from .models import Evenement
+from .models import Evenement, Inschrijving
 from django.contrib.auth.decorators import login_required
 
 KOLOMMEN = {
@@ -50,6 +50,17 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     })
 
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
+    velden = Inschrijving._meta.fields
+    kolommen = [veld.verbose_name for veld in velden]
+
+    inschrijvingen = [
+        {
+            "instantie": instantie,
+            "waarden": [veld.value_from_object(instantie) for veld in velden],
+        }
+        for instantie in Inschrijving.objects.filter(evenement=id)
+    ]
+
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
-        "value": "oeps"
+        "kolommen": kolommen, "inschrijvingen": inschrijvingen
     })
