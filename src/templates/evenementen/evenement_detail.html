@@ -3,4 +3,7 @@
 {% block content %}
 <button onclick="history.back()">Back</button>
 <h1> {{ evenement.id }} - {{ evenement.titel }} </h1>
+<div class="evenement-beschrijving">
+    {{ evenement.beschrijving|safe }}
+</div>
 {% endblock content %}

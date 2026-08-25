@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from .models import Evenement
 from django.contrib.auth.decorators import login_required
@@ -42,9 +42,9 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     })
 
 # @login_required
-def evenement_detail(request: HttpRequest, id:str) -> HttpResponse:
-    evenement = Evenement.objects.get(id=id)
+def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=id)
 
     return render(request, "evenementen/evenement_detail.html", {
-        "evenement" : evenement
+        "evenement": evenement
     })
