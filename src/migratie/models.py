@@ -80,7 +80,7 @@ class Evenement(models.Model):
 
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
-    evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE)
+    # evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE)
     naam = models.CharField()
     prijs = models.PositiveIntegerField()
     quota = models.PositiveIntegerField()
@@ -109,6 +109,15 @@ class Inschrijving(models.Model):
 """
 Modellen voor de oude databank van Integreat
 """
+
+class IntegreatParticipantType(models.Model):
+    oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
+    naam = models.CharField(db_column='Name')
+
+    class Meta:
+        app_label = "migratie"
+        db_table = "Integreat_ParticipantType"
+        managed = False
 
 class IntegreatParticipant(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -187,4 +196,17 @@ class IntegreatSeminar(models.Model):
     class Meta:
         app_label = "migratie"
         db_table = "Integreat_Seminar"
+        managed = False
+
+class IntegreatRegistration(models.Model):
+    oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
+    seminar = models.ForeignKey(IntegreatSeminar, db_column="Seminar", on_delete=models.RESTRICT)
+    deelnemers_type = models.ForeignKey(IntegreatParticipantType, db_column="ParticipantType", on_delete=models.RESTRICT)
+    deelnemer = models.ForeignKey(IntegreatParticipant, db_column="Participant", on_delete=models.RESTRICT)
+    tijdstip = models.DateTimeField(db_column="CreatedOn")
+    annulatie = models.DateTimeField(db_column="CanceledDate", null=True)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = "Integreat_Registration"
         managed = False

@@ -9,17 +9,22 @@ QueryInfoType terug: (aangemaakt, bijgewerkt, overgeslagen).
 """
 
 import re
+from django.utils import timezone
 
 from .models import (
     Categorie,
+    Inschrijving,
+    DeelnemerType,
     Evenement,
     EvenementStatus,
+    IntegreatParticipantType,
     IntegreatParticipant,
     IntegreatSeminar,
     IntegreatSeminarStatus,
     IntegreatSeminarType,
     Lid,
     Locatie,
+    IntegreatRegistration
 )
 
 QueryInfoType = tuple[int, int, int]
@@ -174,12 +179,80 @@ def laad_leden(limiet: None | int = None) -> QueryInfoType:
 
 
 def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
-    raise NotImplementedError(
-        "laad_deelnemertypes: bronmodel voor deelnemertype-gegevens ontbreekt nog"
-    )
+    """
+    Laad alle bestaande deelnemertypes in van Integreat.
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    types = IntegreatParticipantType.objects.using("integreat").order_by("oid")
+    if limiet is not None:
+        types = types[:limiet]
+
+    for type in types:
+        _, is_nieuw = DeelnemerType.objects.update_or_create(
+            id=str(type.oid),
+            defaults={
+                "naam": (type.naam or "").strip(),
+                # OPEN VRAAG: Integreat_ParticipantType heeft geen
+                # brongegevens voor prijs, quota of inschrijvingsperiode
+                # -> placeholders tot dit is uitgeklaard
+                "prijs": 0,
+                "quota": 0,
+                "starttijd_inschrijvingen": timezone.now(),
+                "eindtijd_inschrijvingen": timezone.now(),
+            },
+        )
+        aangemaakt += int(is_nieuw)
+        bijgewerkt += int(not is_nieuw)
+
+    return aangemaakt, bijgewerkt, overgeslagen
 
 
 def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
-    raise NotImplementedError(
-        "laad_inschrijvingen: bronmodel met seminar/deelnemertype/betaalstatus ontbreekt nog"
+    """
+    Laad inschrijvingen in van Integreat.
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    registraties = (
+        IntegreatRegistration.objects.using("integreat")
+        .select_related("seminar", "deelnemer")
+        .order_by("oid")
     )
+    if limiet is not None:
+        registraties = registraties[:limiet]
+
+    for registratie in registraties:
+        seminar = registratie.seminar
+        deelnemer = registratie.deelnemer
+
+        if not seminar.code or not deelnemer.lid_id:
+            overgeslagen += 1
+            continue
+
+        try:
+            evenement = Evenement.objects.get(id=seminar.code.strip())
+            lid = Lid.objects.get(id=deelnemer.lid_id.strip())
+            deelnemertype = DeelnemerType.objects.get(id=str(registratie.deelnemers_type_id))
+        except (Evenement.DoesNotExist, Lid.DoesNotExist, DeelnemerType.DoesNotExist) as fout:
+            print(f"Inschrijving {registratie.oid} overgeslagen: {fout}")
+            overgeslagen += 1
+            continue
+
+        _, is_nieuw = Inschrijving.objects.update_or_create(
+            evenement=evenement,
+            lid=lid,
+            defaults={
+                "deelnemertype": deelnemertype,
+                "tijdstip": registratie.tijdstip,
+                # OPEN VRAAG: Integreat_Registration heeft geen apart veld
+                # voor betaal- of terugbetalingsstatus -> placeholders
+                "is_betaald": False,
+                "is_geannuleerd": registratie.annulatie is not None,
+                "is_terugbetaald": False,
+            },
+        )
+        aangemaakt += int(is_nieuw)
+        bijgewerkt += int(not is_nieuw)
+
+    return aangemaakt, bijgewerkt, overgeslagen

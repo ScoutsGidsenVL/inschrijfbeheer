@@ -4,8 +4,8 @@ from django.db import transaction
 from migratie.mappers import (
     laad_evenementen,
     laad_leden,
-    # laad_deelnemertypes,
-    # laad_inschrijvingen,
+    laad_deelnemertypes,
+    laad_inschrijvingen,
 )
 
 QueryInfoType = tuple[int, int, int]  # aangemaakt, bijgewerkt, overgeslagen
@@ -29,8 +29,8 @@ class Command(BaseCommand):
         stappen = [
             ("leden", laad_leden),
             ("evenementen", laad_evenementen),
-            # ("deelnemertypes", laad_deelnemertypes),
-            # ("inschrijvingen", laad_inschrijvingen),
+            ("deelnemertypes", laad_deelnemertypes),
+            ("inschrijvingen", laad_inschrijvingen),
         ]
 
         with transaction.atomic():
