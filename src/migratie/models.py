@@ -38,7 +38,7 @@ class Categorie(models.Model):
 
     class Meta:
         app_label = "Integreat_migratie"
-        db_table = "evenement_categorie" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "categorie" # geeft naam van de tabel in de nieuwe databank aan
 
 class Evenement(models.Model):
     id = models.CharField(primary_key=True)
