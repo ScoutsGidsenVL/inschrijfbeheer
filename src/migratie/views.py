@@ -50,6 +50,6 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     })
 
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
-    return render(request, "evenementen/evenementen_deelnemers.html", {
+    return render(request, "evenementen/evenementen_inschrijvingen.html", {
         "value": "oeps"
     })
