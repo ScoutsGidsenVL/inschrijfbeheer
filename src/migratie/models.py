@@ -169,9 +169,9 @@ class IntegreatSeminar(models.Model):
     status = models.ForeignKey(IntegreatSeminarStatus, db_column='Status', on_delete=models.DO_NOTHING)
     type = models.ForeignKey(IntegreatSeminarType, db_column='Type', on_delete=models.DO_NOTHING)
     organisator = models.ForeignKey(IntegreatOrganisationUnitSite, db_column='OrganizationUnitSite', on_delete=models.DO_NOTHING)
-    locatie_naam = models.CharField(db_column='LocationName')
-    locatie_straat = models.CharField(db_column='LocationStreet')
-    locatie_stad = models.ForeignKey(IntegreatCity, db_column='LocationCity', on_delete=models.DO_NOTHING)
+    locatie_naam = models.CharField(db_column='LocationName', null=True)
+    locatie_straat = models.CharField(db_column='LocationStreet', null=True)
+    locatie_stad = models.ForeignKey(IntegreatCity, db_column='LocationCity', on_delete=models.DO_NOTHING, null=True)
 
     class Meta:
         app_label = "migratie"

@@ -46,12 +46,21 @@ def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
     stad = seminar.locatie_stad
     naam = seminar.locatie_naam
 
+    if stad is None:
+        if naam is None:
+            raise Exception("Geen locatie gegeven")
+        postcode = None
+        stad = None
+    else:
+        postcode = stad.postcode
+        stad = stad.naam
+
     locatie, _ = Locatie.objects.get_or_create(
         naam=naam,
         straat=straat,
         huisnummer=huisnummer,
-        postcode=stad.postcode,
-        stad=stad.naam,
+        postcode=postcode,
+        stad=stad,
     )
     return locatie
 
