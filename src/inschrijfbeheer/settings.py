@@ -91,12 +91,13 @@ DATABASES = {
         'ENGINE': 'mssql',
         'NAME': os.getenv('INTEGREAT_DB_NAME'),
         'HOST': os.getenv('INTEGREAT_DB_HOST'),
-        #'USER': os.getenv('INTEGREAT_DB_USER'),
-        #'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
         'PORT': '1433',
+        'USER': os.getenv('INTEGREAT_DB_USER'),
+        'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'Trusted_Connection=yes;Connection Timeout=60',
+            'driver': 'FreeTDS',
+            'host_is_server': True,
+            'extra_params': 'TDS_Version=7.4;TrustServerCertificate=yes;',
         }
     }
 }
