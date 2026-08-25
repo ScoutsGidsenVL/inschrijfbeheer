@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+
 {% block content %}
-<h1></h1>
+<button onclick="history.back()">Back</button>
+<h1> {{ evenement.id }} - {{ evenement.titel }} </h1>
 {% endblock content %}

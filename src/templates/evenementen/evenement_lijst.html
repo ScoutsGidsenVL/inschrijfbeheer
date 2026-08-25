@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {% block content %}
 <form method="get" class="kolom-keuze">
     <label>
@@ -22,13 +24,23 @@
         </tr>
     </thead>
     <tbody>
-        {% for rij in rijen %}
-            <tr>
-                {% for waarde in rij %}
+        {% for evenement_id, waarden in rijen %}
+            <tr class="evenement-rij" onclick="window.location.href='{% url "evenement_detail" id=evenement_id %}'">
+                {% for waarde in waarden %}
                     <td>{{ waarde }}</td>
                 {% endfor %}
             </tr>
         {% endfor %}
     </tbody>
 </table>
+<style>
+    .evenement-rij {
+        cursor: pointer;
+    }
+
+    .evenement-rij:nth-child(even) {
+        background-color: grey;
+    }
+</style>
+
 {% endblock content %}

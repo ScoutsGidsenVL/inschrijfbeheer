@@ -30,7 +30,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(titel__contains=sleutelwoord.strip())
 
     rijen = [
-        [getattr(evenement, kolom) for kolom in gekozen_kolommen]
+        (evenement.id, [getattr(evenement, kolom) for kolom in gekozen_kolommen])
         for evenement in evenementen
     ]
 
@@ -41,6 +41,10 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
         "rijen": rijen,
     })
 
-@login_required
-def evenement_detail(request: HttpRequest) -> HttpResponse:
-    pass
+# @login_required
+def evenement_detail(request: HttpRequest, id:str) -> HttpResponse:
+    evenement = Evenement.objects.get(id=id)
+
+    return render(request, "evenementen/evenement_detail.html", {
+        "evenement" : evenement
+    })
