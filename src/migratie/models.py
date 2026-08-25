@@ -99,6 +99,7 @@ class IntegreatParticipant(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "Integreat_Participant" # geeft naam van de tabel in de nieuwe databank aan
+        managed = False
 
 class IntegreatSeminarStatus(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -108,6 +109,7 @@ class IntegreatSeminarStatus(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "Integreat_SeminarStatus" 
+        managed = False
 
 class IntegreatSeminarType(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -117,6 +119,7 @@ class IntegreatSeminarType(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "Integreat_SeminarType" 
+        managed = False
 
 class IntegreatLocationCity(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -126,6 +129,7 @@ class IntegreatLocationCity(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "Integreat_LocationCity" 
+        managed = False
 
 class IntegreatOrganisationUnit(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -134,6 +138,7 @@ class IntegreatOrganisationUnit(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "Integreat_OrganizationUnit" 
+        managed = False
 
 class IntegreatOrganisationUnitSite(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -142,6 +147,7 @@ class IntegreatOrganisationUnitSite(models.Model):
     class Meta:
         app_label = "Integreat_migratie"
         db_table = "Integreat_OrganizationUnitLocation" 
+        managed = False
 
 class IntegreatSeminar(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
@@ -160,4 +166,5 @@ class IntegreatSeminar(models.Model):
 
     class Meta:
         app_label = "Integreat_migratie"
-        db_table = "Integreat_Seminar" 
+        db_table = "Integreat_Seminar"
+        managed = False
