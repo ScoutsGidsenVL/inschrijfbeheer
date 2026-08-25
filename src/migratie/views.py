@@ -34,7 +34,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
         for evenement in evenementen
     ]
 
-    return render(request, "evenementen/evenement_lijst.html", {
+    return render(request, "evenementen/evenementen_lijst.html", {
         "alle_kolommen": KOLOMMEN,
         "gekozen_kolommen": gekozen_kolommen,
         "gekozen_labels": [KOLOMMEN[k] for k in gekozen_kolommen],
@@ -45,6 +45,6 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
 def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 
-    return render(request, "evenementen/evenement_detail.html", {
+    return render(request, "evenementen/evenementen_detail.html", {
         "evenement": evenement
     })
