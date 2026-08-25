@@ -1,0 +1,7 @@
+{% block content %}
+    {% for evenement in evenementen %}
+        <div class="evenement-preview">
+            <p>{{ evenement.titel }}</p>
+        </div>
+    {% endfor %}
+{% endblock content %}

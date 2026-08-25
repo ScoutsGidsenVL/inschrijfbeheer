@@ -1,10 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from .models import EvenementStatus
+from django.template.loader import render_to_string
+from .models import Evenement
+from django.contrib.auth.decorators import login_required
 
-def index(request):
-    stat = EvenementStatus(
-        beschrijving='testing1,2'
+@login_required
+def evenement_lijst(request):
+    evenementen = Evenement.objects.all()
+    return render(
+        request,
+        "evenementen/evenement_lijst.html",
+        {"evenementen": evenementen}
     )
-    stat.save()
-    return HttpResponse("Hello, world. You're at the polls index.")

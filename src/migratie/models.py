@@ -44,15 +44,15 @@ class Evenement(models.Model):
     id = models.CharField(primary_key=True)
     titel = models.CharField()
     beschrijving = models.CharField()
-    status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL)
-    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT)
+    status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL, null=True, db_column="status")
+    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT, db_column="locatie")
     starttijd = models.DateTimeField()
     eindtijd = models.DateTimeField()
     min_deelnemers = models.PositiveIntegerField()
     max_deelnemers = models.PositiveIntegerField()
     aantal_zelfde_groep = models.PositiveIntegerField()
     min_leeftijd = models.PositiveIntegerField()
-    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL)
+    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
 
     class Meta:
         app_label = "Integreat_migratie"

@@ -22,6 +22,6 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path("oidc/", include("mozilla_django_oidc.urls")),
     path('admin/', admin.site.urls),
-    path('migratie/', include("migratie.urls")),
     path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
+    path("", include("migratie.urls")),
 ]
