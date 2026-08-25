@@ -47,7 +47,7 @@ def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
     naam = seminar.locatie_naam
 
     if stad is None:
-        if naam is None:
+        if naam == '':
             raise Exception("Geen locatie gegeven")
         postcode = None
         stad = None
