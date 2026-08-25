@@ -53,7 +53,7 @@ class Evenement(models.Model):
     max_deelnemers = models.PositiveIntegerField()
     aantal_zelfde_groep = models.PositiveIntegerField()
     min_leeftijd = models.PositiveIntegerField()
-    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True)
+    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
 
     class Meta:
         app_label = "migratie"
@@ -122,14 +122,14 @@ class IntegreatSeminarType(models.Model):
         db_table = "Integreat_SeminarType" 
         managed = False
 
-class IntegreatLocationCity(models.Model):
+class IntegreatCity(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
     postcode = models.CharField(db_column='Postcode')
     naam = models.CharField(db_column='Name')
 
     class Meta:
         app_label = "migratie"
-        db_table = "Integreat_LocationCity" 
+        db_table = "Integreat_City" 
         managed = False
 
 class IntegreatOrganisationUnit(models.Model):
@@ -163,7 +163,7 @@ class IntegreatSeminar(models.Model):
     organisator = models.ForeignKey(IntegreatOrganisationUnitSite, db_column='OrganizationUnitSite', on_delete=models.DO_NOTHING)
     locatie_naam = models.CharField(db_column='LocationName')
     locatie_straat = models.CharField(db_column='LocationStreet')
-    locatie_stad = models.ForeignKey(IntegreatLocationCity, db_column='LocationCity', on_delete=models.DO_NOTHING)
+    locatie_stad = models.ForeignKey(IntegreatCity, db_column='LocationCity', on_delete=models.DO_NOTHING)
 
     class Meta:
         app_label = "migratie"
