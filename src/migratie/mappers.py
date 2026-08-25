@@ -111,10 +111,14 @@ def map_evenement(seminar: IntegreatSeminar) -> dict:
     }
 
 
-def laad_evenementen() -> QueryInfoType:
+def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    for seminar in IntegreatSeminar.objects.using("integreat").all():
+    seminars = IntegreatSeminar.objects.using("integreat").all()
+    if limiet is not None:
+        seminars = seminars[:limiet]
+
+    for seminar in seminars:
         if not seminar.code:
             overgeslagen += 1
             continue
@@ -136,7 +140,7 @@ def laad_evenementen() -> QueryInfoType:
     return aangemaakt, bijgewerkt, overgeslagen
 
 
-def laad_leden() -> QueryInfoType:
+def laad_leden(limiet: None | int = None) -> QueryInfoType:
     """
     Maakt Lid-records aan op basis van het StudentNumber (lid_id) van elke
     Integreat-deelnemer. Lid heeft enkel een id-veld, dus er is niets om
@@ -144,7 +148,12 @@ def laad_leden() -> QueryInfoType:
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    for deelnemer in IntegreatParticipant.objects.using("integreat").all():
+    participants = IntegreatParticipant.objects.using("integreat").all()
+
+    if limiet is not None:
+        participants = participants[:limiet]
+
+    for deelnemer in participants:
         if not deelnemer.lid_id:
             overgeslagen += 1
             continue
@@ -155,13 +164,13 @@ def laad_leden() -> QueryInfoType:
     return aangemaakt, bijgewerkt, overgeslagen
 
 
-def laad_deelnemertypes() -> QueryInfoType:
+def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
     raise NotImplementedError(
         "laad_deelnemertypes: bronmodel voor deelnemertype-gegevens ontbreekt nog"
     )
 
 
-def laad_inschrijvingen() -> QueryInfoType:
+def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
     raise NotImplementedError(
         "laad_inschrijvingen: bronmodel met seminar/deelnemertype/betaalstatus ontbreekt nog"
     )

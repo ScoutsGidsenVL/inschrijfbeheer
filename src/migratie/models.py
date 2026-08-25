@@ -9,7 +9,8 @@ class Lid(models.Model):
     id = models.CharField(primary_key=True)
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
+        db_table = "lid"
 
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
@@ -20,7 +21,7 @@ class Locatie(models.Model):
     stad = models.CharField()
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
 
 class EvenementStatus(models.Model):
@@ -28,7 +29,7 @@ class EvenementStatus(models.Model):
     beschrijving = models.CharField()
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "evenement_status" # geeft naam van de tabel in de nieuwe databank aan
 
 class Categorie(models.Model):
@@ -37,7 +38,7 @@ class Categorie(models.Model):
     alt_naam = models.CharField()
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "categorie" # geeft naam van de tabel in de nieuwe databank aan
 
 class Evenement(models.Model):
@@ -45,7 +46,7 @@ class Evenement(models.Model):
     titel = models.CharField()
     beschrijving = models.CharField()
     status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL, null=True, db_column="status")
-    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT, db_column="locatie")
+    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT, null=True, db_column="locatie")
     starttijd = models.DateTimeField()
     eindtijd = models.DateTimeField()
     min_deelnemers = models.PositiveIntegerField()
@@ -55,7 +56,7 @@ class Evenement(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "evenement" # geeft naam van de tabel in de nieuwe databank aan
 
 class DeelnemerType(models.Model):
@@ -68,7 +69,7 @@ class DeelnemerType(models.Model):
     eindtijd_inschrijvingen = models.DateTimeField()
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "deelnemertype" # geeft naam van de tabel in de nieuwe databank aan
 
 class Inschrijving(models.Model):
@@ -82,7 +83,7 @@ class Inschrijving(models.Model):
 
     class Meta:
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
 
 
@@ -97,7 +98,7 @@ class IntegreatParticipant(models.Model):
 
     # Niet geïnteresseerd in andere velden -> worden genegeerd
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_Participant" # geeft naam van de tabel in de nieuwe databank aan
         managed = False
 
@@ -107,7 +108,7 @@ class IntegreatSeminarStatus(models.Model):
     beschrijving = models.CharField(db_column='Description')
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_SeminarStatus" 
         managed = False
 
@@ -117,7 +118,7 @@ class IntegreatSeminarType(models.Model):
     naam = models.CharField(db_column='Name')
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_SeminarType" 
         managed = False
 
@@ -127,7 +128,7 @@ class IntegreatLocationCity(models.Model):
     naam = models.CharField(db_column='Name')
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_LocationCity" 
         managed = False
 
@@ -136,7 +137,7 @@ class IntegreatOrganisationUnit(models.Model):
     code = models.CharField(db_column='')
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_OrganizationUnit" 
         managed = False
 
@@ -145,7 +146,7 @@ class IntegreatOrganisationUnitSite(models.Model):
     organisatie = models.ForeignKey(IntegreatOrganisationUnit, db_column='OrganizationUnit', on_delete=models.DO_NOTHING)
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_OrganizationUnitLocation" 
         managed = False
 
@@ -159,12 +160,12 @@ class IntegreatSeminar(models.Model):
     eind_inschrijvingen = models.DateTimeField(db_column='EndRegistration')
     status = models.ForeignKey(IntegreatSeminarStatus, db_column='Status', on_delete=models.DO_NOTHING)
     type = models.ForeignKey(IntegreatSeminarType, db_column='Type', on_delete=models.DO_NOTHING)
-    organisator = models.ForeignKey(IntegreatOrganisationUnitSite, db_column='OrganizerUnitSite', on_delete=models.DO_NOTHING)
+    organisator = models.ForeignKey(IntegreatOrganisationUnitSite, db_column='OrganizationUnitSite', on_delete=models.DO_NOTHING)
     locatie_naam = models.CharField(db_column='LocationName')
     locatie_straat = models.CharField(db_column='LocationStreet')
     locatie_stad = models.ForeignKey(IntegreatLocationCity, db_column='LocationCity', on_delete=models.DO_NOTHING)
 
     class Meta:
-        app_label = "Integreat_migratie"
+        app_label = "migratie"
         db_table = "Integreat_Seminar"
         managed = False
