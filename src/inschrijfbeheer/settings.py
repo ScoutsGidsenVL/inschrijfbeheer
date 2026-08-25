@@ -87,11 +87,13 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_password'),
         'PORT': '5432'
     },
-    'INTEGREAT': {
+    'integreat': {
         'ENGINE': 'mssql',
         'NAME': os.getenv('INTEGREAT_DB_NAME'),
         'HOST': os.getenv('INTEGREAT_DB_HOST'),
-        'PORT': '',
+        #'USER': os.getenv('INTEGREAT_DB_USER'),
+        #'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
+        #'PORT': os.getenv('INTEGREAT_DB_PORT'),
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
         }

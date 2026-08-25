@@ -1,8 +1,8 @@
 """
 Mapping- en dedupliceerlogica om records uit de oude Integreat-databank
-("INTEGREAT") om te zetten naar de nieuwe modellen (standaarddatabank).
+("integreat") om te zetten naar de nieuwe modellen (standaarddatabank).
 
-Elke laad_*-functie leest uit de INTEGREAT-databank en schrijft naar de
+Elke laad_*-functie leest uit de integreat-databank en schrijft naar de
 standaarddatabank, via get_or_create/update_or_create zodat een herhaalde
 run van de synchronisatie geen dubbels aanmaakt. Elke functie geeft een
 QueryInfoType terug: (aangemaakt, bijgewerkt, overgeslagen).
@@ -114,7 +114,7 @@ def map_evenement(seminar: IntegreatSeminar) -> dict:
 def laad_evenementen() -> QueryInfoType:
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    for seminar in IntegreatSeminar.objects.using("INTEGREAT").all():
+    for seminar in IntegreatSeminar.objects.using("integreat").all():
         if not seminar.code:
             overgeslagen += 1
             continue
@@ -144,7 +144,7 @@ def laad_leden() -> QueryInfoType:
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    for deelnemer in IntegreatParticipant.objects.using("INTEGREAT").all():
+    for deelnemer in IntegreatParticipant.objects.using("integreat").all():
         if not deelnemer.lid_id:
             overgeslagen += 1
             continue
