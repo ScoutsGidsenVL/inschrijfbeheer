@@ -93,9 +93,10 @@ DATABASES = {
         'HOST': os.getenv('INTEGREAT_DB_HOST'),
         #'USER': os.getenv('INTEGREAT_DB_USER'),
         #'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
-        #'PORT': os.getenv('INTEGREAT_DB_PORT'),
+        'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
+            'extra_params': 'Trusted_Connection=yes;Connection Timeout=60',
         }
     }
 }
