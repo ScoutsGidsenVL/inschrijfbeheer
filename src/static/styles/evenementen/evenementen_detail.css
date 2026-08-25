@@ -1,4 +1,19 @@
-.evenement-beschrijving {
+.evenement-attribuut-container {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.evenement-attribuut-label {
+    font-weight: bold;
+    width: 260px;
+    flex-shrink: 0;
+}
+
+.evenement-attribuut-waarde {
     border: solid 1px;
     border-color: black;
+    padding: 4px 8px;
+    flex-grow: 1;
 }
