@@ -1,5 +1,10 @@
+{% load static %}
+
 <head>
     <title>Inschrijfbeheer</title>
+    <link rel="stylesheet" href="{% static "styles/base.css" %}">
+    {% block extra_headers %}
+    {% endblock extra_headers %}
 </head>
 <body>
     {%block content%}{%endblock content%}

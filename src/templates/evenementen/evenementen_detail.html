@@ -1,9 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_headers %}
+    <link rel="stylesheet" href="{% static "styles/evenementen/evenementen_detail.css" %}">
+{% endblock extra_headers %}
 
 {% block content %}
 <button onclick="history.back()">Back</button>
 <h1> {{ evenement.id }} - {{ evenement.titel }} </h1>
-<div class="evenement-beschrijving">
-    {{ evenement.beschrijving|safe }}
+<div class="evenement-beschrijving-container">
+    <div class="evenement-beschrijving-label">Beschrijving</div>
+    <div class="evenement-beschrijving"> 
+        {{ evenement.beschrijving|safe }}
+    </div>
 </div>
 {% endblock content %}
