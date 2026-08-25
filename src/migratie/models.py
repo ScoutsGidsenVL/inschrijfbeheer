@@ -32,6 +32,11 @@ class Locatie(models.Model):
         app_label = "migratie"
         db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
 
+    def __str__(self):
+        if self.naam:
+            return self.naam
+        return f"{self.straat} {self.huisnummer}, {self.postcode} {self.stad}"
+
 class EvenementStatus(models.Model):
     id = models.AutoField(primary_key=True)
     beschrijving = models.CharField()
@@ -39,6 +44,9 @@ class EvenementStatus(models.Model):
     class Meta:
         app_label = "migratie"
         db_table = "evenement_status" # geeft naam van de tabel in de nieuwe databank aan
+
+    def __str__(self):
+        return self.beschrijving
 
 class Categorie(models.Model):
     id = models.CharField(primary_key=True)
