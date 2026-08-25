@@ -53,7 +53,7 @@ class Evenement(models.Model):
     max_deelnemers = models.PositiveIntegerField()
     aantal_zelfde_groep = models.PositiveIntegerField()
     min_leeftijd = models.PositiveIntegerField()
-    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL)
+    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         app_label = "migratie"
