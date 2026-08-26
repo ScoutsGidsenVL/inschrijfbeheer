@@ -25,5 +25,5 @@ Voor het uitvoeren van een migratie van de data van Integreat naar de databank v
 ```shell
 > cd src
 > python manage.py synchroniseer [--dry-run] [--limiet LIMIET]
-> > python manage.py synchroniseer --help # meer info
+> python manage.py synchroniseer --help # meer info
 ```
