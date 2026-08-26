@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_headers %}
+    <link rel="stylesheet" href="{% static "styles/evenementen/evenementen_detail.css" %}">
+{% endblock extra_headers %}
+
+{% block content %}
+
+{% include "evenementen/evenementen_header.html" %}
+
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Beschrijving</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.beschrijving|safe }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Status</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.status }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Locatie</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.locatie }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Starttijd</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.starttijd }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Eindtijd</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.eindtijd }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Minimum aantal deelnemers</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.min_deelnemers }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Maximum aantal deelnemers</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.max_deelnemers }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Aantal deelnemers uit dezelfde groep</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.aantal_zelfde_groep }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Minimumleeftijd</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.min_leeftijd }}
+    </div>
+</div>
+<div class="evenement-attribuut-container">
+    <div class="evenement-attribuut-label">Categorie</div>
+    <div class="evenement-attribuut-waarde">
+        {{ evenement.categorie }}
+    </div>
+</div>
+{% endblock content %}

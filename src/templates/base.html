@@ -1,0 +1,23 @@
+{% load static %}
+
+<head>
+    <title>Inschrijfbeheer</title>
+    <link rel="stylesheet" href="{% static "styles/base.css" %}">
+    {% block extra_headers %}
+    {% endblock extra_headers %}
+</head>
+<body>
+    <header class="hoofding">
+        <h1>Inschrijfbeheer</h1>
+    </header>
+    <div class="layout">
+        <nav class="zijbalk">
+            <ul>
+                <li><a href="/evenementen">Evenementen</a></li>
+            </ul>
+        </nav>
+        <main class="inhoud">
+            {% block content %}{% endblock content %}
+        </main>
+    </div>
+</body>

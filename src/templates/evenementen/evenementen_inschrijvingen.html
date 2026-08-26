@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load type_filters %}
+
+{% block content %}
+
+{% include "evenementen/evenementen_header.html" %}
+
+<table class="inschrijving-tabel">
+    <thead>
+        <tr>
+            {% for kolom in kolommen %}
+                <th>{{ kolom }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for rij in inschrijvingen %}
+            <tr class="inschrijving-rij">
+                {% for waarde in rij.waarden %}
+                    <td>
+                        {% if waarde|is_boolean %}
+                            <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
+                        {% else %}
+                            {{ waarde }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

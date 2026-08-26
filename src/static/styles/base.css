@@ -1,0 +1,56 @@
+body {
+    background-color: gainsboro;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.hoofding {
+    background-color: #333;
+    color: white;
+    padding: 1rem 1.5rem;
+}
+
+.hoofding h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.layout {
+    display: flex;
+}
+
+.zijbalk {
+    width: 200px;
+    background-color: #e0e0e0;
+    padding: 1rem;
+    box-sizing: border-box;
+    min-height: calc(100vh - 4rem);
+}
+
+.zijbalk ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.zijbalk li {
+    margin-bottom: 0.5rem;
+}
+
+.zijbalk a {
+    text-decoration: none;
+    color: #333;
+}
+
+.zijbalk a:hover {
+    text-decoration: underline;
+}
+
+.inhoud {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+tr:nth-child(even) {
+    background-color: lightgray;
+}
