@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 # Inschrijfbeheer
 
 ## Opzet
@@ -50,4 +49,3 @@ Het is ook mogelijk om manueel het programma uit te voeren.
 ```
 
 Dit opent de applicatie op [http://localhost:8000](http://localhost:8000)
-</html>
