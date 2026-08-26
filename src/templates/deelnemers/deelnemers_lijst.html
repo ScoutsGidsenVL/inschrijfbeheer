@@ -16,7 +16,7 @@
     </thead>
     <tbody>
         {% for lid_id in deelnemers %}
-            <tr class="deelnemer-rij">
+            <tr class="deelnemer-rij" onclick="window.location.href='{% url "deelnemers_detail" id=lid_id.lid %}'">
                 <td>{{ lid_id.lid }}</td>
             </tr>
         {% endfor %}
