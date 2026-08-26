@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="get" class="zoekbalk">
+    <label>
+        <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek deelnemer">
+    </label>
+    <button type="submit">Zoek</button>
+</form>
+
+<table class="deelnemer-tabel">
+    <thead>
+        <tr>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lid_id in deelnemers %}
+            <tr class="deelnemer-rij">
+                <td>{{ lid_id.lid }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock content %}
