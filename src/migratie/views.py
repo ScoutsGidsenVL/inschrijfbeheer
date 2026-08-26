@@ -59,9 +59,12 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     inschrijvingen = [
         {
             "instantie": instantie,
-            "waarden": [veld.value_from_object(instantie) for veld in velden],
+            "waarden": [
+                getattr(instantie, veld.name) if veld.is_relation else veld.value_from_object(instantie)
+                for veld in velden
+            ],
         }
-        for instantie in Inschrijving.objects.filter(evenement=id)
+        for instantie in Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement")
     ]
 
     return render(request, "evenementen/evenementen_inschrijvingen.html", {

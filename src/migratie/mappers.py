@@ -189,7 +189,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    registraties = (
+    registraties: list[IntegreatRegistration] = (
         IntegreatRegistration.objects.using("integreat")
         .select_related("seminar", "deelnemer")
         .order_by("oid")
@@ -207,7 +207,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
 
         try:
             evenement = Evenement.objects.get(id=seminar.code.strip())
-            deelnemertype = DeelnemerType.objects.get(id=str(registratie.deelnemers_type_id))
+            deelnemertype = DeelnemerType.objects.get(id=str(registratie.deelnemers_type.oid))
         except (Evenement.DoesNotExist, DeelnemerType.DoesNotExist) as fout:
             print(f"Inschrijving {registratie.oid} overgeslagen: {fout}")
             overgeslagen += 1
@@ -215,7 +215,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
 
         _, is_nieuw = Inschrijving.objects.update_or_create(
             evenement=evenement,
-            lid=deelnemer,
+            lid=deelnemer.lid_id,
             defaults={
                 "deelnemertype": deelnemertype,
                 "tijdstip": registratie.tijdstip,

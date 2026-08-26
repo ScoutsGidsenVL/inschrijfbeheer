@@ -73,7 +73,6 @@ class Evenement(models.Model):
 
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
-    # evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE)
     naam = models.CharField()
     prijs = models.PositiveIntegerField()
     quota = models.PositiveIntegerField()
@@ -84,10 +83,13 @@ class DeelnemerType(models.Model):
         app_label = "migratie"
         db_table = "deelnemertype" # geeft naam van de tabel in de nieuwe databank aan
 
+    def __str__(self):
+        return self.naam
+
 class Inschrijving(models.Model):
-    evenement = models.ForeignKey(Evenement, on_delete=models.RESTRICT)
+    evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
-    deelnemertype = models.ForeignKey(DeelnemerType, on_delete=models.RESTRICT)
+    deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.RESTRICT)
     tijdstip = models.DateTimeField()
     is_betaald = models.BooleanField()
     is_geannuleerd = models.BooleanField()
