@@ -18,7 +18,6 @@ from .models import (
     Evenement,
     EvenementStatus,
     IntegreatParticipantType,
-    IntegreatParticipant,
     IntegreatSeminar,
     IntegreatSeminarStatus,
     IntegreatSeminarType,
@@ -32,6 +31,14 @@ _HUISNUMMER_PATROON = re.compile(r"^(?P<straat>.*\D)\s*(?P<huisnummer>\d+\w*)\s*
 
 
 def _splits_straat_en_nummer(adres: str) -> tuple[str, str]:
+    """Splits '<straatnaam> <huisnummer>' in aparte straatnaam en huisnummer
+
+    Args:
+        adres (str): string die straatnaam en huisnummer bevat
+
+    Returns:
+        tuple[str, str]: straatnaam, huisnummer
+    """
     adres = (adres or "").strip()
     match = _HUISNUMMER_PATROON.match(adres)
     if not match:
@@ -40,11 +47,16 @@ def _splits_straat_en_nummer(adres: str) -> tuple[str, str]:
 
 
 def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
-    """
-    Zoekt of maakt een Locatie op basis van de adresvelden van het seminar.
+    """Maakt een nieuwe locatie of geeft een al bestaande match
 
-    Omdat er geen extern ID is om op te matchen, wordt hier gededuplice-
-    erd op de combinatie straat + huisnummer + postcode + stad.
+    Args:
+        seminar (IntegreatSeminar): Seminar uit de Integreat databank
+
+    Raises:
+        ValueError: Gooit een error als geen adres gegeven is
+
+    Returns:
+        Locatie: Nieuwe locatie of al bestaande locatie
     """
     straat, huisnummer = _splits_straat_en_nummer(seminar.locatie_straat)
     stad = seminar.locatie_stad
@@ -52,7 +64,7 @@ def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
 
     if stad is None:
         if naam == '':
-            raise Exception("Geen locatie gegeven")
+            raise ValueError("Geen locatie gegeven voor seminar")
         postcode = None
         stad = None
     else:
@@ -69,41 +81,51 @@ def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
     return locatie
 
 
-def haal_of_maak_status(oude_status: IntegreatSeminarStatus) -> EvenementStatus:
-    """
-    EvenementStatus heeft evenmin een extern-ID-veld, dus dedupliceren
-    gebeurt op de beschrijving zelf. Twee statussen met exact dezelfde
-    beschrijving worden dus altijd als dezelfde status behandeld.
+def haal_of_maak_status(seminar_status: IntegreatSeminarStatus) -> EvenementStatus:
+    """Maakt een nieuwe EvenementStatus of geeft een bestaande terug.
+    Deduplicatie gebeurt ahv `beschrijving`, er kunnen dus geen 2 statussen met dezelfde beschrijving bestaan.
+
+    Args:
+        seminar_status (IntegreatSeminarStatus): Status uit de Integreat databank
+
+    Returns:
+        EvenementStatus: nieuwe `EvenementStatus` of al bestaande
     """
     status, _ = EvenementStatus.objects.get_or_create(
-        beschrijving=(oude_status.beschrijving or "").strip(),
+        beschrijving=(seminar_status.beschrijving or "").strip(),
     )
     return status
 
 
-def haal_of_maak_categorie(oud_type: IntegreatSeminarType) -> Categorie:
-    """
-    Categorie.id is een CharField, dus we gebruiken de businesscode van
-    het seminartype (Code) als primaire key. Die is stabiel over meerdere
-    runs, in tegenstelling tot een automatisch ID.
+def haal_of_maak_categorie(seminar_type: IntegreatSeminarType) -> Categorie:
+    """Maakt een nieuwe Categorie aan voor een evemenent of geeft een bestaande terug.
+    Maakt gebruik van de ID van het originele object als primaire sleutel.
+    
+    Args:
+        seminar_type (IntegreatSeminarType): Type uit de Integreat databank
+
+    Returns:
+        Categorie: nieuwe `Categorie` of al bestaande
     """
     categorie, _ = Categorie.objects.update_or_create(
-        id=oud_type.code.strip(),
+        id=seminar_type.code.strip(),
         defaults={
-            "naam": (oud_type.naam or "").strip(),
+            "naam": (seminar_type.naam or "").strip(),
             # Integreat_SeminarType heeft geen apart alt_naam-veld.
-            "alt_naam": (oud_type.naam or "").strip(),
+            "alt_naam": (seminar_type.naam or "").strip(),
         },
     )
     return categorie
 
 
 def map_evenement(seminar: IntegreatSeminar) -> dict:
-    """
-    Zet een IntegreatSeminar om naar de velden van het nieuwe Evenement.
+    """Maakt een mapping voor een `Evenement` aan ahv een Seminar uit de Integreat databank
 
-    OPEN VRAAG: Integreat_Seminar heeft geen bronveld voor
-    min_deelnemers, max_deelnemers, aantal_zelfde_groep of min_leeftijd
+    Args:
+        seminar (IntegreatSeminar): oude Seminar van Integreat
+
+    Returns:
+        dict: dict met de nodige attributen voor een `Evenement`
     """
     status = haal_of_maak_status(seminar.status)
     locatie = haal_of_maak_locatie(seminar)
@@ -125,6 +147,15 @@ def map_evenement(seminar: IntegreatSeminar) -> dict:
 
 
 def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
+    """Laad objecten uit de Integreat databank en zet deze om naar nieuwe objecten van het type `Evenement`.
+    Maakt de nodige andere objecten aan om geen foreign key constraints te schenden.
+
+    Args:
+        limiet (None | int, optional): limiet voor het aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
     seminars = IntegreatSeminar.objects.using("integreat").all()
@@ -154,8 +185,14 @@ def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
 
 
 def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
-    """
-    Laad alle bestaande deelnemertypes in van Integreat.
+    """Laad objecten uit de Integreat databank en zet deze om naar nieuwe objecten van het type `DeelnemerType`.
+    Maakt de nodige andere objecten aan om geen foreign key constraints te schenden.
+
+    Args:
+        limiet (None | int, optional): limiet voor het aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
@@ -184,8 +221,14 @@ def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
 
 
 def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
-    """
-    Laad inschrijvingen in van Integreat.
+    """Laad objecten uit de Integreat databank en zet deze om naar nieuwe objecten van het type `Inschrijving`.
+    Maakt de nodige andere objecten aan om geen foreign key constraints te schenden.
+
+    Args:
+        limiet (None | int, optional): limiet voor het aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
@@ -219,8 +262,6 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
             defaults={
                 "deelnemertype": deelnemertype,
                 "tijdstip": registratie.tijdstip,
-                # OPEN VRAAG: Integreat_Registration heeft geen apart veld
-                # voor betaal- of terugbetalingsstatus -> placeholders
                 "is_betaald": False,
                 "is_geannuleerd": registratie.annulatie is not None,
                 "is_terugbetaald": False,
