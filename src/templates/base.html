@@ -7,5 +7,17 @@
     {% endblock extra_headers %}
 </head>
 <body>
-    {%block content%}{%endblock content%}
+    <header class="hoofding">
+        <h1>Inschrijfbeheer</h1>
+    </header>
+    <div class="layout">
+        <nav class="zijbalk">
+            <ul>
+                <li><a href="/evenementen">Evenementen</a></li>
+            </ul>
+        </nav>
+        <main class="inhoud">
+            {% block content %}{% endblock content %}
+        </main>
+    </div>
 </body>
