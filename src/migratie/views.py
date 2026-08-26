@@ -70,3 +70,11 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
         "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
     })
+
+
+def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
+    deelnemers = Inschrijving.objects.values("lid") # Eventueel aanpassen naar apart model
+
+    return render(request, "deelnemers/deelnemers_lijst.html", {
+        "deelnemers": deelnemers
+    })
