@@ -22,7 +22,6 @@ from .models import (
     IntegreatSeminar,
     IntegreatSeminarStatus,
     IntegreatSeminarType,
-    Lid,
     Locatie,
     IntegreatRegistration
 )
@@ -154,30 +153,6 @@ def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
     return aangemaakt, bijgewerkt, overgeslagen
 
 
-def laad_leden(limiet: None | int = None) -> QueryInfoType:
-    """
-    Maakt Lid-records aan op basis van het StudentNumber (lid_id) van elke
-    Integreat-deelnemer. Lid heeft enkel een id-veld, dus er is niets om
-    bij te werken; 'bijgewerkt' blijft hier altijd 0.
-    """
-    aangemaakt = bijgewerkt = overgeslagen = 0
-
-    participants = IntegreatParticipant.objects.using("integreat").all()
-
-    if limiet is not None:
-        participants = participants[:limiet]
-
-    for deelnemer in participants:
-        if not deelnemer.lid_id:
-            overgeslagen += 1
-            continue
-
-        _, is_nieuw = Lid.objects.get_or_create(id=deelnemer.lid_id.strip())
-        aangemaakt += int(is_nieuw)
-
-    return aangemaakt, bijgewerkt, overgeslagen
-
-
 def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
     """
     Laad alle bestaande deelnemertypes in van Integreat.
@@ -232,16 +207,15 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
 
         try:
             evenement = Evenement.objects.get(id=seminar.code.strip())
-            lid = Lid.objects.get(id=deelnemer.lid_id.strip())
             deelnemertype = DeelnemerType.objects.get(id=str(registratie.deelnemers_type_id))
-        except (Evenement.DoesNotExist, Lid.DoesNotExist, DeelnemerType.DoesNotExist) as fout:
+        except (Evenement.DoesNotExist, DeelnemerType.DoesNotExist) as fout:
             print(f"Inschrijving {registratie.oid} overgeslagen: {fout}")
             overgeslagen += 1
             continue
 
         _, is_nieuw = Inschrijving.objects.update_or_create(
             evenement=evenement,
-            lid=lid,
+            lid=deelnemer,
             defaults={
                 "deelnemertype": deelnemertype,
                 "tijdstip": registratie.tijdstip,

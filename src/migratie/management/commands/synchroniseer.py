@@ -3,7 +3,6 @@ from django.db import transaction
 
 from migratie.mappers import (
     laad_evenementen,
-    laad_leden,
     laad_deelnemertypes,
     laad_inschrijvingen,
 )
@@ -27,7 +26,6 @@ class Command(BaseCommand):
         limiet = options["limiet"] if options["limiet"] else None
 
         stappen = [
-            ("leden", laad_leden),
             ("evenementen", laad_evenementen),
             ("deelnemertypes", laad_deelnemertypes),
             ("inschrijvingen", laad_inschrijvingen),

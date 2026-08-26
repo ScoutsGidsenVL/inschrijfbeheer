@@ -5,13 +5,6 @@ from django.db import models
 Modellen voor de nieuwe databank die Integreat zal vervangen, momenteel redelijk compact
 """
 
-class Lid(models.Model):
-    id = models.CharField(primary_key=True)
-
-    class Meta:
-        app_label = "migratie"
-        db_table = "lid"
-
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
     naam = models.CharField(null=True)
@@ -93,7 +86,7 @@ class DeelnemerType(models.Model):
 
 class Inschrijving(models.Model):
     evenement = models.ForeignKey(Evenement, on_delete=models.RESTRICT)
-    lid = models.ForeignKey(Lid, on_delete=models.RESTRICT)
+    lid = models.CharField()
     deelnemertype = models.ForeignKey(DeelnemerType, on_delete=models.RESTRICT)
     tijdstip = models.DateTimeField()
     is_betaald = models.BooleanField()
