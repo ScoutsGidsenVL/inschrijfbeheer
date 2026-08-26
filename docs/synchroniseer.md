@@ -14,3 +14,6 @@ Het doet dit door gebruik te maken van Django modellen te vinden in [src/migrati
 |--------|--------------|
 | --limiet LIMIET | stelt een limiet in voor het aantal ingeladen objecten van iedere tabel |
 | --dry-run | voer een run uit zonder weg te schrijven naar de nieuwe databank |
+| --help | geef alle opties en gebruik weer |
+
+Verder zijn ook alle standaard opties voor een Django Admin command te gebruiken. Deze zijn zichtbaar door het commando uit te voeren met `--help`
