@@ -1,3 +1,7 @@
 body{
     background-color: gainsboro;
 }
+
+tr:nth-child(even) {
+    background-color: lightgray;
+}
