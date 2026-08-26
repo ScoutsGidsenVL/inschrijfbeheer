@@ -71,6 +71,9 @@ class Evenement(models.Model):
         app_label = "migratie"
         db_table = "evenement" # geeft naam van de tabel in de nieuwe databank aan
 
+    def __str__(self):
+        return self.titel
+
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
     naam = models.CharField()
