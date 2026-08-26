@@ -2,17 +2,18 @@
 """
 
 from dataclasses import dataclass, field
+import os
+from dotenv import load_dotenv
 
-from lxml import etree
 from zeep import Client
 from zeep.transports import Transport
 
-# Pas deze twee waarden aan naar je eigen omgeving.
-WSDL_URL = "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/webservice?wsdl"
-APPLICATIE_NAAM = "test-plain"
+load_dotenv()
 
-# Namespace zoals gebruikt in het voorbeeld (soapenv:Header / web:Applicatie).
-WEB_NAMESPACE = "http://groepsadmin.scoutsengidsenvlaanderen.be/webservice/"
+WSDL_URL = os.getenv("WSDL_URL")
+APPLICATIE_NAAM = os.getenv("APPLICATIE_NAAM")
+
+WEB_NAMESPACE = os.getenv("WEB_NAMESPACE")
 
 
 @dataclass
