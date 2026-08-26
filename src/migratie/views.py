@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from .models import Evenement, Inschrijving
 from django.contrib.auth.decorators import login_required
-from .utils.soap import haal_lidgegevens
+from .utils.soap import haal_lidgegevens, haal_lidnaam
 
 KOLOMMEN = {
     "titel": "Titel",
@@ -50,24 +50,33 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
-def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
+def evenement_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
-
-
-    velden = Inschrijving._meta.fields
-    kolommen = [veld.verbose_name for veld in velden]
-
-    inschrijvingen = [
-        {
+ 
+    kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Is betaald", "Is geannuleerd", "Is terugbetaald"]
+    namen_per_lid_id = {}
+ 
+    inschrijvingen = []
+    for instantie in Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement"):
+        lid_id = instantie.lid
+ 
+        if lid_id not in namen_per_lid_id:
+            namen_per_lid_id[lid_id] = haal_lidnaam(lid_id)
+ 
+        inschrijvingen.append({
             "instantie": instantie,
             "waarden": [
-                getattr(instantie, veld.name) if veld.is_relation else veld.value_from_object(instantie)
-                for veld in velden
+                instantie.id,
+                str(instantie.evenement),
+                namen_per_lid_id[lid_id],
+                str(instantie.deelnemertype),
+                instantie.tijdstip,
+                instantie.is_betaald,
+                instantie.is_geannuleerd,
+                instantie.is_terugbetaald,
             ],
-        }
-        for instantie in Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement")
-    ]
-
+        })
+ 
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
         "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
     })

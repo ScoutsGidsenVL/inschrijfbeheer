@@ -169,4 +169,16 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
     )
  
     return LidGegevens.van_respons(resultaat)
- 
+
+def haal_lidnaam(lid_id, client=None, applicatie_naam=APPLICATIE_NAAM):
+    """
+    Vraagt enkel voornaam + naam op voor het gegeven lid-id, als leesbare
+    string ("Voornaam Naam"). Als de aanvraag om welke reden dan ook faalt
+    (lid niet gevonden, service niet bereikbaar, ...) wordt het originele
+    lid_id teruggegeven, zodat de aanroepende pagina niet crasht.
+    """
+    try:
+        gegevens = haal_lidgegevens(lid_id, client=client, applicatie_naam=applicatie_naam)
+        return gegevens.volledige_naam or str(lid_id)
+    except Exception:
+        return str(lid_id)
