@@ -16,6 +16,31 @@ Alle dependencies zijn te vinden in [requirements.txt](../requirements.txt). Het
 > python manage.py migrate
 ```
 
+[settings.py](../src/inschrijfbeheer/settings.py) verwacht een aantal environment variables, dus een bestand met naam `.env` moet aangemaakt worden in de root van het project.
+Dit bestand moet de volgende attributen bevatten.
+
+```shell
+DJANGO_KEY=
+
+# attributen voor de nieuwe databank
+DB_name=
+DB_host=
+DB_username=
+DB_password=
+
+# attributen voor de Integreat databank
+INTEGREAT_DB_NAME=
+INTEGREAT_DB_HOST=
+INTEGREAT_DB_USER=
+INTEGREAT_DB_PASSWORD=
+
+# Keycloak configuratie
+KEYCLOAK_BASE_URL=
+KEYCLOAK_REALM=
+KEYCLOAK_CLIENT_ID=
+KEYCLOAK_CLIENT_SECRET=
+```
+
 ## Uitvoeren
 
 ### Synchronisatie
