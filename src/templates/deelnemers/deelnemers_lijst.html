@@ -11,13 +11,17 @@
 <table class="deelnemer-tabel">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>lidnummer</th>
+            <th>voornaam</th>
+            <th>naam</th>
         </tr>
     </thead>
     <tbody>
-        {% for lid_id in deelnemers %}
-            <tr class="deelnemer-rij" onclick="window.location.href='{% url "deelnemers_detail" id=lid_id.lid %}'">
-                <td>{{ lid_id.lid }}</td>
+        {% for lid in deelnemers %}
+            <tr class="deelnemer-rij" onclick="window.location.href='{% url "deelnemers_detail" id=lid.id %}'">
+                <td>{{ lid.lidnummer }}</td>
+                <td>{{ lid.voornaam }}</td>
+                <td>{{ lid.naam }}</td>
             </tr>
         {% endfor %}
     </tbody>
