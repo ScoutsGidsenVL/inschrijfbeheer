@@ -82,5 +82,5 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
 
 def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     return render(request, "deelnemers/deelnemers_detail.html", {
-        
+        "deelnemer": id
     })
