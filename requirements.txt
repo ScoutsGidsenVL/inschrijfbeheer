@@ -3,7 +3,7 @@ certifi==2026.7.22
 cffi==2.1.1
 charset-normalizer==3.5.1
 cryptography==50.0.0
-Django==5.1
+Django==5.2.16
 dotenv==0.9.9
 idna==3.19
 mozilla-django-oidc==5.0.2
