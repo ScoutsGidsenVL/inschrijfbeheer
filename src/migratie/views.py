@@ -73,7 +73,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
 
 
 def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
-    deelnemers = Inschrijving.objects.values("lid") # Eventueel aanpassen naar apart model
+    zoekterm = request.GET.get("q", '')
+    deelnemers = Inschrijving.objects.values("lid").filter(lid__icontains=zoekterm).distinct() # Eventueel aanpassen naar apart model
 
     return render(request, "deelnemers/deelnemers_lijst.html", {
         "deelnemers": deelnemers
