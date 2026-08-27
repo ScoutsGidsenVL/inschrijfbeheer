@@ -14,6 +14,8 @@ from migratie.models import Inschrijving
 
 from migratie.utils.soap import haal_lidgegevens
 
+
+@login_required
 def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
     """View voor het oplijsten van alle deelnemers in de databank.
     Deze view wordt gebruikt voor `/deelnemers/`.
@@ -33,6 +35,8 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
         "deelnemers": deelnemers
     })
 
+
+@login_required
 def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     """View voor het weergeven van de details van een deelnemer.
     Deze view wordt gebruikt voor `/deelnemers/<str:id>/`
