@@ -11,7 +11,7 @@ QueryInfoType terug: (aangemaakt, bijgewerkt, overgeslagen).
 import re
 from django.utils import timezone
 
-from .models import (
+from migratie.models import (
     Categorie,
     Inschrijving,
     DeelnemerType,
@@ -23,7 +23,9 @@ from .models import (
     IntegreatSeminarStatus,
     IntegreatSeminarType,
     Locatie,
-    IntegreatRegistration
+    IntegreatRegistration,
+    IntegreatSeminarFreeFieldType,
+    EvenementVraagType
 )
 
 QueryInfoType = tuple[int, int, int]
@@ -147,8 +149,11 @@ def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
             id=seminar.code.strip(),
             defaults=gegevens,
         )
-        aangemaakt += int(is_nieuw)
-        bijgewerkt += int(not is_nieuw)
+        
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen
 
@@ -177,8 +182,11 @@ def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
                 "eindtijd_inschrijvingen": timezone.now(),
             },
         )
-        aangemaakt += int(is_nieuw)
-        bijgewerkt += int(not is_nieuw)
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen
 
@@ -226,7 +234,41 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
                 "is_terugbetaald": False,
             },
         )
-        aangemaakt += int(is_nieuw)
-        bijgewerkt += int(not is_nieuw)
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
+
+    return aangemaakt, bijgewerkt, overgeslagen
+
+
+def laad_evenement_vraagtypes(limiet: None | int = None) -> QueryInfoType:
+    """Functie die EvenementVraagType objecten overzet van de oude naar de nieuwe databank
+
+    Args:
+        limiet (None | int, optional): limiet voor aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    types = IntegreatSeminarFreeFieldType.objects.using("integreat").all()
+
+    if limiet is not None:
+        types = types[:limiet]
+
+    for type in types:
+        _, is_nieuw = EvenementVraagType.objects.get_or_create(
+            naam=type.code,
+            items_vereist=type.itemsrequired,
+            items_toegestaan=type.itemsallowed
+        )
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen

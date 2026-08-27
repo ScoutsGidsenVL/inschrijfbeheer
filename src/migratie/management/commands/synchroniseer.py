@@ -5,6 +5,7 @@ from migratie.mappers import (
     laad_evenementen,
     laad_deelnemertypes,
     laad_inschrijvingen,
+    laad_evenement_vraagtypes,
 )
 
 QueryInfoType = tuple[int, int, int]  # aangemaakt, bijgewerkt, overgeslagen
@@ -29,6 +30,7 @@ class Command(BaseCommand):
             ("evenementen", laad_evenementen),
             ("deelnemertypes", laad_deelnemertypes),
             ("inschrijvingen", laad_inschrijvingen),
+            ("evenement vraagtypes", laad_evenement_vraagtypes)
         ]
 
         with transaction.atomic():
