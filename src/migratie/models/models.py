@@ -342,6 +342,12 @@ class IntegreatRegistrationfreefield(models.Model):
         db_table = 'Integreat_RegistrationFreeField'
 
 class IntegreatSalesInvoicedetail(models.Model):
+    """Integreat model voor een betalingsdetail.
+    Dit bevat betaalde bedragen, dus wordt gebruikt voor te bepalen hoeveel een gebruiker betaalde voor een vorming.
+
+    Attributes:
+        oid (str): object identifier
+    """
     oid = models.BigIntegerField(db_column='OID', primary_key=True)
     header = models.ForeignKey('IntegreatSalesInvoice', models.DO_NOTHING, db_column='Header', blank=True, null=True) # ticketinfo
     article = models.ForeignKey('IntegreatArticle', models.DO_NOTHING, db_column='Article', blank=True, null=True)  # Artikel is steeds een vorming
