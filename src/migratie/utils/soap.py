@@ -134,7 +134,7 @@ def _maak_client(wsdl_url=WSDL_URL, transport=None):
     return Client(wsdl=wsdl_url, transport=transport or Transport())
  
  
-def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAAM):
+def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAAM, scope=None):
     """
     Vraagt de lidgegevens (LidGegevensV3) op voor het lid met het gegeven
     identificatie, en geeft die terug als een LidGegevens-object.
@@ -158,10 +158,11 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
     client = client or _maak_client()
  
     scope_type = client.get_type(f"{{{WEB_NAMESPACE}}}LidDataV3Keuze")
-    scope = scope_type(
-        basis={},
-        functies={"actief": True},
-    )
+    if scope is None:
+        scope = scope_type(
+            basis={},
+            functies={"actief": True},
+        )
  
     resultaat = client.service.LidGegevensV3(
         gebruikersnaam=gebruikersnaam,
@@ -179,7 +180,11 @@ def haal_lidnaam(lid_id, client=None, applicatie_naam=APPLICATIE_NAAM):
     lid_id teruggegeven, zodat de aanroepende pagina niet crasht.
     """
     try:
-        gegevens = haal_lidgegevens(lid_id, client=client, applicatie_naam=applicatie_naam)
+        scope_type = client.get_type(f"{{{WEB_NAMESPACE}}}LidDataV3Keuze")
+        scope = scope_type(
+            basis={}
+        )
+        gegevens = haal_lidgegevens(lid_id, client=client, applicatie_naam=applicatie_naam, scope=scope)
         return gegevens.volledige_naam or str(lid_id)
     except Exception:
         return str(lid_id)
