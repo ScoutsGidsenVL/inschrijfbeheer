@@ -104,9 +104,11 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
 
 def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=evenement_id)
+    vraag = get_object_or_404(EvenementVraag, id=vraag_id)
 
     antwoorden = InschrijvingVraagAntwoord.objects.filter(vraag=vraag_id)
     return render(request, "evenementen/vragen/evenementen_vragen_antwoorden.html", {
         "antwoorden" : antwoorden,
+        "vraag": vraag,
         "evenement": evenement
     })

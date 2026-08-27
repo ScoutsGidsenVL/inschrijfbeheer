@@ -1,7 +1,8 @@
 {% extends "evenementen/evenementen_base.html" %}
 
 {% block evenement_content %}
-<h1>Antwoorden op deze vraag</h1>
+<h1>Antwoorden</h1>
+<h2>{{ vraag.vraag }}</h2>
 
 {% if antwoorden %}
 <table class="table">
