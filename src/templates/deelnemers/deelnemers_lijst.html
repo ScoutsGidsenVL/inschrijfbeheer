@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="get" class="zoekbalk">
+    <label>
+        <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek deelnemer">
+    </label>
+    <button type="submit">Zoek</button>
+</form>
+
+<table class="deelnemer-tabel">
+    <thead>
+        <tr>
+            <th>lidnummer</th>
+            <th>voornaam</th>
+            <th>naam</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lid in deelnemers %}
+            <tr class="deelnemer-rij" onclick="window.location.href='{% url "deelnemers_detail" id=lid.id %}'">
+                <td>{{ lid.lidnummer }}</td>
+                <td>{{ lid.voornaam }}</td>
+                <td>{{ lid.naam }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock content %}
