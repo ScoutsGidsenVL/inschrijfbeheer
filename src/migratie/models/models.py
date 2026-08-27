@@ -104,6 +104,9 @@ class Inschrijving(models.Model):
         app_label = "migratie"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
 
+    def __str__(self):
+        return self.lid
+
 
 class EvenementVraagType(models.Model):
     """Model voor het type van vrije vragen bij een evenement
