@@ -21,7 +21,7 @@ KOLOMMEN = {
 STANDAARD_KOLOMMEN = ["titel", "status", "locatie", "starttijd"]
 
 
-# @login_required
+@login_required
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
     sleutelwoord: str = request.GET.get('q', '')
     gekozen_kolommen = [k for k in request.GET.getlist("kolom") if k in KOLOMMEN]
@@ -42,7 +42,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
         "rijen": rijen,
     })
 
-# @login_required
+@login_required
 def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 
@@ -50,7 +50,8 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
-def evenement_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
+@login_required
+def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
  
     kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Is betaald", "Is geannuleerd", "Is terugbetaald"]
