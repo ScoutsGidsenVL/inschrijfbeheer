@@ -7,6 +7,7 @@ from migratie.mappers import (
     laad_inschrijvingen,
     laad_evenement_vraagtypes,
     laad_evenement_vragen,
+    laad_inschrijving_vraagantwoorden
 )
 
 QueryInfoType = tuple[int, int, int]  # aangemaakt, bijgewerkt, overgeslagen
@@ -28,11 +29,12 @@ class Command(BaseCommand):
         limiet = options["limiet"] if options["limiet"] else None
 
         stappen = [
-            # ("evenementen", laad_evenementen),
-            # ("deelnemertypes", laad_deelnemertypes),
-            # ("inschrijvingen", laad_inschrijvingen),
-            # ("evenement vraagtypes", laad_evenement_vraagtypes),
+            ("evenementen", laad_evenementen),
+            ("deelnemertypes", laad_deelnemertypes),
+            ("inschrijvingen", laad_inschrijvingen),
+            ("evenement vraagtypes", laad_evenement_vraagtypes),
             ("evenement vragen", laad_evenement_vragen),
+            ("inschrijving antwoord", laad_inschrijving_vraagantwoorden),
         ]
 
         with transaction.atomic():

@@ -27,7 +27,9 @@ from migratie.models import (
     IntegreatSeminarFreeFieldType,
     EvenementVraagType,
     IntegreatSeminarFreeField,
-    EvenementVraag
+    EvenementVraag,
+    IntegreatRegistrationfreefield,
+    InschrijvingVraagAntwoord
 )
 
 QueryInfoType = tuple[int, int, int]
@@ -224,6 +226,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
             continue
 
         _, is_nieuw = Inschrijving.objects.update_or_create(
+            id=registratie.oid,
             evenement=evenement,
             lid=deelnemer.lid_id,
             defaults={
@@ -300,12 +303,47 @@ def laad_evenement_vragen(limiet: None | int = None) -> QueryInfoType:
             continue
 
         _ = EvenementVraag.objects.create(
+            id=vraag.oid,
             type=type,
             vraag=vraag.question,
             items=vraag.items,
             evenement=evenement,
             vereist=vraag.required,
             volgorde=vraag.sortorder
+        )
+
+        aangemaakt += 1
+
+    return aangemaakt, bijgewerkt, overgeslagen
+
+def laad_inschrijving_vraagantwoorden(limiet: None | int = None) -> QueryInfoType:
+    """Functie die InschrijvingVraagAntwoord objecten overzet van de oude databank naar de nieuwe
+
+    Args:
+        limiet (None | int, optional): limiet voor aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    antwoorden: list[IntegreatRegistrationfreefield] = IntegreatRegistrationfreefield.objects.using("integreat").filter(answer__isnull=False).exclude(answer="")
+
+    if limiet is not None:
+        antwoorden = antwoorden[:limiet]
+
+    for antwoord in antwoorden:
+        try:
+            vraag = EvenementVraag.objects.get(id=antwoord.field.oid)
+            inschrijving = Inschrijving.objects.get(id=antwoord.registration.oid)
+        except (EvenementVraag.DoesNotExist, Inschrijving.DoesNotExist) as e:
+            overgeslagen += 1
+            continue
+
+        _ = InschrijvingVraagAntwoord.objects.create(
+            vraag=vraag,
+            antwoord=antwoord.answer,
+            inschrijving=inschrijving,
         )
 
         aangemaakt += 1

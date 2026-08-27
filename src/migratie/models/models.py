@@ -90,7 +90,7 @@ class DeelnemerType(models.Model):
         return self.naam
 
 class Inschrijving(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.RESTRICT)
@@ -133,7 +133,7 @@ class EvenementVraag(models.Model):
         vereist (bool): geeft aan of de vraag vereist is. Nullable
         volgorde (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
     """
-    id = models.AutoField(primary_key=True)
+    id = models.CharField(primary_key=True)
     type = models.ForeignKey(EvenementVraagType, models.DO_NOTHING, blank=True, null=True)
     vraag = models.TextField()
     items = models.TextField(blank=True, null=True)
