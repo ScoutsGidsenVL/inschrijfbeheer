@@ -105,6 +105,64 @@ class Inschrijving(models.Model):
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
 
 
+class EvenementVraagType(models.Model):
+    """Model voor het type van vrije vragen bij een evenement
+
+    Attributes:
+        naam (str): naam van het type. Primaire sleutel
+        items_vereist (bool): onduidelijk. Nullable
+        items_toegestaan (bool): onduidelijk. Nullable
+    """
+    naam = models.CharField(primary_key=True, db_column='Code', max_length=50)
+    items_vereist = models.BooleanField(blank=True, null=True)
+    items_toegestaan = models.BooleanField(blank=True, null=True)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = 'evenement_vraagtype'
+
+class EvenementVraag(models.Model):
+    """Model voor vrije vragen bij een evenement
+
+    Attributes:
+        id (int): automatisch id voor in de databank
+        type (EvenementVraagType): type van de vraag. Nullable
+        vraag (str): vraag.
+        items (str): mogelijke antwoorden op de vraag (bij meerdere opties gescheiden door ';'). Nullable
+        evenement (Evenement): seminar waarvoor de vraag moet gesteld worden
+        vereist (bool): geeft aan of de vraag vereist is. Nullable
+        volgorde (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
+    """
+    id = models.AutoField(primary_key=True)
+    type = models.ForeignKey(EvenementVraagType, models.DO_NOTHING, blank=True, null=True)
+    vraag = models.TextField()
+    items = models.TextField(blank=True, null=True)
+    evenement = models.ForeignKey(Evenement, models.CASCADE)
+    vereist = models.BooleanField(blank=True, null=True)
+    volgorde = models.IntegerField(blank=True, null=True)
+    class Meta:
+        app_label = "migratie"
+        db_table = 'evenement_vraag'
+
+class InschrijvingVraagAntwoord(models.Model):
+    """Model voor een antwoord op een vrije vraag bij een evenement
+
+    Attributes:
+        id (int): automatisch id voor in de databank
+        vraag (EvenementVraag): verwijst naar de beantwoorde vraag. Nullable
+        antwoord (str): antwoord op de vraag. Nullable
+        inschrijving (Inschrijving): verwijst naar de inschrijving. Nullable
+    """
+    id = models.AutoField(primary_key=True)
+    vraag = models.ForeignKey(EvenementVraag, models.CASCADE)
+    antwoord = models.TextField(blank=True, null=True)
+    inschrijving = models.ForeignKey(Inschrijving, models.CASCADE)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = 'inschrijving_vraagantwoord'
+
+
 """
 Modellen voor de oude databank van Integreat
 """
