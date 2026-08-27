@@ -25,7 +25,9 @@ from migratie.models import (
     Locatie,
     IntegreatRegistration,
     IntegreatSeminarFreeFieldType,
-    EvenementVraagType
+    EvenementVraagType,
+    IntegreatSeminarFreeField,
+    EvenementVraag
 )
 
 QueryInfoType = tuple[int, int, int]
@@ -149,7 +151,7 @@ def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
             id=seminar.code.strip(),
             defaults=gegevens,
         )
-        
+
         if is_nieuw:
             aangemaakt += 1
         else:
@@ -270,5 +272,42 @@ def laad_evenement_vraagtypes(limiet: None | int = None) -> QueryInfoType:
             aangemaakt += 1
         else:
             bijgewerkt += 1
+
+    return aangemaakt, bijgewerkt, overgeslagen
+
+def laad_evenement_vragen(limiet: None | int = None) -> QueryInfoType:
+    """Functie die EvenementVraag objecten overzet van de oude databank naar de nieuwe
+
+    Args:
+        limiet (None | int, optional): limiet voor aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    vragen: list[IntegreatSeminarFreeField] = IntegreatSeminarFreeField.objects.using("integreat").all()
+
+    if limiet is not None:
+        vragen = vragen[:limiet]
+
+    for vraag in vragen:
+        try:
+            type = EvenementVraagType.objects.get(naam=vraag.type.code)
+            evenement = Evenement.objects.get(id=vraag.seminar.code)
+        except (Evenement.DoesNotExist, EvenementVraagType.DoesNotExist) as e:
+            overgeslagen += 1
+            continue
+
+        _ = EvenementVraag.objects.create(
+            type=type,
+            vraag=vraag.question,
+            items=vraag.items,
+            evenement=evenement,
+            vereist=vraag.required,
+            volgorde=vraag.sortorder
+        )
+
+        aangemaakt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen
