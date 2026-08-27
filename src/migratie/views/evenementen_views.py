@@ -84,19 +84,29 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
 
 
 def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, inschrijving_id: str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=evenement_id)
+
+
     vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
     return render(request, "evenementen/inschrijvingen/inschrijvingen_detail.html", {
-        "vraag_antwoorden" : vraag_antwoorden
+        "vraag_antwoorden" : vraag_antwoorden,
+        "evenement": evenement
     })
 
 def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=id)
+
     vragen = EvenementVraag.objects.filter(evenement=id).select_related("type").order_by("volgorde")
     return render(request, "evenementen/vragen/evenementen_vragen.html", {
-        "vragen" : vragen
+        "vragen" : vragen,
+        "evenement": evenement
     })
 
 def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=evenement_id)
+
     antwoorden = InschrijvingVraagAntwoord.objects.filter(vraag=vraag_id)
     return render(request, "evenementen/vragen/evenementen_vragen_antwoorden.html", {
-        "antwoorden" : antwoorden
+        "antwoorden" : antwoorden,
+        "evenement": evenement
     })

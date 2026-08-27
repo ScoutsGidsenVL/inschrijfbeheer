@@ -1,5 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
 <button onclick="history.back()">Back</button>
 <h1> {{ evenement.id }} - {{ evenement.titel }} </h1>
 <a href="/evenementen/{{ evenement.id }}">Algemeen</a>
 <a href="/evenementen/{{ evenement.id }}/inschrijvingen">Inschrijvingen</a>
 <a href="/evenementen/{{ evenement.id }}/vragen">Vragen</a>
+
+{% block evenement_content %}
+{% endblock evenement_content %}
+
+{% endblock content %}
+

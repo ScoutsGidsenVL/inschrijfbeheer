@@ -1,13 +1,11 @@
-{% extends "base.html" %}
+{% extends "evenementen/evenementen_base.html" %}
 {% load static %}
 
 {% block extra_headers %}
     <link rel="stylesheet" href="{% static "styles/evenementen/evenementen_detail.css" %}">
 {% endblock extra_headers %}
 
-{% block content %}
-
-{% include "evenementen/evenementen_header.html" %}
+{% block evenement_content %}
 
 <div class="evenement-attribuut-container">
     <div class="evenement-attribuut-label">Beschrijving</div>
@@ -69,4 +67,4 @@
         {{ evenement.categorie }}
     </div>
 </div>
-{% endblock content %}
+{% endblock evenement_content %}

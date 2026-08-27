@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "evenementen/evenementen_base.html" %}
 
-{% block content %}
+{% block evenement_content %}
 <h1>Vragen</h1>
 
 {% if vragen %}
@@ -31,4 +31,4 @@
 {% else %}
 <p>Voor dit evenement zijn geen vragen geregistreerd.</p>
 {% endif %}
-{% endblock %}
+{% endblock evenement_content %}

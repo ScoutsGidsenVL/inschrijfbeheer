@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "evenementen/evenementen_base.html" %}
 
-{% block content %}
+{% block evenement_content %}
 <h1>Antwoorden op vragen</h1>
 
 {% if vraag_antwoorden %}
@@ -25,4 +25,4 @@
 {% else %}
 <p>Voor deze inschrijving zijn geen antwoorden op vragen geregistreerd.</p>
 {% endif %}
-{% endblock %}
+{% endblock evenement_content %}

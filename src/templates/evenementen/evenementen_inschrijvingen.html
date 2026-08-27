@@ -1,9 +1,7 @@
-{% extends "base.html" %}
+{% extends "evenementen/evenementen_base.html" %}
 {% load type_filters %}
 
-{% block content %}
-
-{% include "evenementen/evenementen_header.html" %}
+{% block evenement_content %}
 
 <table class="inschrijving-tabel">
     <thead>
@@ -29,4 +27,4 @@
         {% endfor %}
     </tbody>
 </table>
-{% endblock content %}
+{% endblock evenement_content %}
