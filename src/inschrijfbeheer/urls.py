@@ -22,7 +22,6 @@ from django.conf import settings
 
 urlpatterns = [
     path("oidc/", include("mozilla_django_oidc.urls")),
-    path('admin/', admin.site.urls),
     path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
     path("docs/", serve, {"document_root": settings.BASE_DIR / '..' / 'docs', "path": "README.md"}),
     path("docs/<path:path>", serve, {"document_root": settings.BASE_DIR / '..' / 'docs'}),
