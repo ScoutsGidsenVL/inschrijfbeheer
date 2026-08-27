@@ -340,3 +340,19 @@ class IntegreatRegistrationfreefield(models.Model):
     class Meta:
         managed = False
         db_table = 'Integreat_RegistrationFreeField'
+
+class IntegreatSalesInvoicedetail(models.Model):
+    oid = models.BigIntegerField(db_column='OID', primary_key=True)
+    header = models.ForeignKey('IntegreatSalesInvoice', models.DO_NOTHING, db_column='Header', blank=True, null=True) # ticketinfo
+    article = models.ForeignKey('IntegreatArticle', models.DO_NOTHING, db_column='Article', blank=True, null=True)  # Artikel is steeds een vorming
+    unitprice = models.DecimalField(db_column='UnitPrice', max_digits=18, decimal_places=4, blank=True, null=True)  # BELANGRIJK BEVAT BETAALD BEDRAG
+    participant = models.ForeignKey('IntegreatParticipant', models.DO_NOTHING, db_column='Participant', blank=True, null=True)  # afleidbaar
+    seminar = models.ForeignKey('IntegreatSeminar', models.DO_NOTHING, db_column='Seminar', blank=True, null=True)  # afleidbaar
+    registration = models.ForeignKey('IntegreatRegistration', models.DO_NOTHING, db_column='Registration', blank=True, null=True)  # BELANGRIJK BEVAT INSCHRIJVING
+    createdon = models.DateTimeField(db_column='CreatedOn', blank=True, null=True)  # Wanneer betaald werd??
+    nettoamount = models.DecimalField(db_column='NettoAmount', max_digits=18, decimal_places=4, blank=True, null=True)  # duplicate voor bedrag
+    totalamount = models.DecimalField(db_column='TotalAmount', max_digits=18, decimal_places=4, blank=True, null=True)  # duplicate voor bedrag
+
+    class Meta:
+        managed = False
+        db_table = 'Integreat_Sales_InvoiceDetail'
