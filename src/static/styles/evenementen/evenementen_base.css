@@ -1,0 +1,59 @@
+.evenement-hoofding {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.evenement-titelrij {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.evenement-terug-knop {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.evenement-terug-knop:hover {
+    background-color: #555;
+}
+
+.evenement-titel {
+    margin: 0;
+    font-size: 1.5rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.evenement-nav {
+    display: flex;
+    gap: 1.5rem;
+    border-bottom: 2px solid #ccc;
+}
+
+.evenement-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 0.5rem 0.25rem;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    font-size: 0.9rem;
+}
+
+.evenement-nav a:hover {
+    color: #000;
+    border-bottom-color: #999;
+}
+
+.evenement-nav a.geselecteerd {
+    font-weight: bold;
+    border-bottom-color: #333;
+}
