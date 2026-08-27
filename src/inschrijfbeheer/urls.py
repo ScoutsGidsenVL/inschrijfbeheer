@@ -15,8 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+from django.views.static import serve
+from django.conf import settings
 
 urlpatterns = [
     path("oidc/", include("mozilla_django_oidc.urls")),
+    path('admin/', admin.site.urls),
+    path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
+    path("docs/", serve, {"document_root": settings.BASE_DIR / '..' / 'docs', "path": "README.md"}),
+    path("docs/<path:path>", serve, {"document_root": settings.BASE_DIR / '..' / 'docs'}),
     path("", include("migratie.urls")),
 ]
