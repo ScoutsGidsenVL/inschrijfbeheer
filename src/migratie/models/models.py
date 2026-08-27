@@ -245,7 +245,7 @@ class IntegreatSeminarFreeField(models.Model):
     Attributes:
         oid (str): object id
         type (IntegreatSeminarFreeFieldType): type van de vraag. Nullable
-        question (str): type van de vraag. Nullable
+        question (str): vraag. Nullable
         items (str): mogelijke antwoorden op de vraag (bij meerdere opties gescheiden door ';'). Nullable
         seminar (IntegreatSeminar): seminar waarvoor de vraag moet gesteld worden. Nullable
         required (bool): geeft aan of de vraag vereist is. Nullable
