@@ -1,0 +1,34 @@
+{% extends "evenementen/evenementen_base.html" %}
+
+{% block evenement_content %}
+<h1>Vragen</h1>
+
+{% if vragen %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Volgorde</th>
+            <th>Vraag</th>
+            <th>Type</th>
+            <th>Mogelijke antwoorden</th>
+            <th>Vereist</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vraag in vragen %}
+        <tr>
+            <td>{{ vraag.volgorde|default:"-" }}</td>
+            <td>{{ vraag.vraag }}</td>
+            <td>{{ vraag.type.naam|default:"-" }}</td>
+            <td>{{ vraag.items|default:"-" }}</td>
+            <td>{% if vraag.vereist %}Ja{% else %}Nee{% endif %}</td>
+            <td><a href="/evenementen/{{ vraag.evenement_id }}/vragen/{{ vraag.id }}/antwoorden/">Antwoorden bekijken</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Voor dit evenement zijn geen vragen geregistreerd.</p>
+{% endif %}
+{% endblock evenement_content %}

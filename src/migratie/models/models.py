@@ -90,6 +90,7 @@ class DeelnemerType(models.Model):
         return self.naam
 
 class Inschrijving(models.Model):
+    id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.RESTRICT)
@@ -102,6 +103,67 @@ class Inschrijving(models.Model):
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
         app_label = "migratie"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
+
+    def __str__(self):
+        return self.lid
+
+
+class EvenementVraagType(models.Model):
+    """Model voor het type van vrije vragen bij een evenement
+
+    Attributes:
+        naam (str): naam van het type. Primaire sleutel
+        items_vereist (bool): onduidelijk. Nullable
+        items_toegestaan (bool): onduidelijk. Nullable
+    """
+    naam = models.CharField(primary_key=True, db_column='Code', max_length=50)
+    items_vereist = models.BooleanField(blank=True, null=True)
+    items_toegestaan = models.BooleanField(blank=True, null=True)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = 'evenement_vraagtype'
+
+class EvenementVraag(models.Model):
+    """Model voor vrije vragen bij een evenement
+
+    Attributes:
+        id (int): automatisch id voor in de databank
+        type (EvenementVraagType): type van de vraag. Nullable
+        vraag (str): vraag.
+        items (str): mogelijke antwoorden op de vraag (bij meerdere opties gescheiden door ';'). Nullable
+        evenement (Evenement): seminar waarvoor de vraag moet gesteld worden
+        vereist (bool): geeft aan of de vraag vereist is. Nullable
+        volgorde (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
+    """
+    id = models.CharField(primary_key=True)
+    type = models.ForeignKey(EvenementVraagType, models.DO_NOTHING, blank=True, null=True)
+    vraag = models.TextField()
+    items = models.TextField(blank=True, null=True)
+    evenement = models.ForeignKey(Evenement, models.CASCADE)
+    vereist = models.BooleanField(blank=True, null=True)
+    volgorde = models.IntegerField(blank=True, null=True)
+    class Meta:
+        app_label = "migratie"
+        db_table = 'evenement_vraag'
+
+class InschrijvingVraagAntwoord(models.Model):
+    """Model voor een antwoord op een vrije vraag bij een evenement
+
+    Attributes:
+        id (int): automatisch id voor in de databank
+        vraag (EvenementVraag): verwijst naar de beantwoorde vraag. Nullable
+        antwoord (str): antwoord op de vraag. Nullable
+        inschrijving (Inschrijving): verwijst naar de inschrijving. Nullable
+    """
+    id = models.AutoField(primary_key=True)
+    vraag = models.ForeignKey(EvenementVraag, models.CASCADE)
+    antwoord = models.TextField(blank=True, null=True)
+    inschrijving = models.ForeignKey(Inschrijving, models.CASCADE)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = 'inschrijving_vraagantwoord'
 
 
 """
@@ -208,3 +270,73 @@ class IntegreatRegistration(models.Model):
         app_label = "migratie"
         db_table = "Integreat_Registration"
         managed = False
+
+class IntegreatSeminarFreeFieldType(models.Model):
+    """Integreat model voor het type van vrije vragen.
+    Mogelijke waarden zijn:
+     - Checkbox
+     - Radiobutton
+     - Combobox
+     - Date
+     - Number
+     - Memo
+     - Preference
+     - Text
+
+    Attributes:
+        oid (str): object id
+        code (str): naam van het type. Nullable
+        description (str): omschrijving van het type. Defaults to code. Nullable
+        itemsrequired (bool): onduidelijk. Nullable
+        itemsallowed (bool): onduidelijk. Nullable
+    """
+    oid = models.BigIntegerField(db_column='OID', primary_key=True)
+    code = models.CharField(db_column='Code', max_length=50, blank=True, null=True) # identiek aan Description
+    description = models.CharField(db_column='Description', max_length=50, blank=True, null=True)
+    itemsrequired = models.BooleanField(db_column='ItemsRequired', blank=True, null=True)  # Onduidelijk
+    itemsallowed = models.BooleanField(db_column='ItemsAllowed', blank=True, null=True)  # Onduidelijk
+
+    class Meta:
+        managed = False
+        db_table = 'Integreat_SeminarFreeFieldType'
+
+class IntegreatSeminarFreeField(models.Model):
+    """Integreat model voor vrije vragen
+
+    Attributes:
+        oid (str): object id
+        type (IntegreatSeminarFreeFieldType): type van de vraag. Nullable
+        question (str): vraag. Nullable
+        items (str): mogelijke antwoorden op de vraag (bij meerdere opties gescheiden door ';'). Nullable
+        seminar (IntegreatSeminar): seminar waarvoor de vraag moet gesteld worden. Nullable
+        required (bool): geeft aan of de vraag vereist is. Nullable
+        sortorder (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
+    """
+    oid = models.BigIntegerField(db_column='OID', primary_key=True)
+    type = models.ForeignKey(IntegreatSeminarFreeFieldType, models.DO_NOTHING, db_column='Type', blank=True, null=True)
+    question = models.TextField(db_column='Caption', blank=True, null=True)
+    items = models.TextField(db_column='Items', blank=True, null=True)
+    seminar = models.ForeignKey(IntegreatSeminar, models.DO_NOTHING, db_column='Seminar', blank=True, null=True)
+    required = models.BooleanField(db_column='Required', blank=True, null=True)
+    sortorder = models.IntegerField(db_column='SortOrder', blank=True, null=True)
+    class Meta:
+        managed = False
+        db_table = 'Integreat_SeminarFreeField'
+
+class IntegreatRegistrationfreefield(models.Model):
+    """Integreat model voor een antwoord op een vrije vraag
+
+    Attributes:
+        oid (str): object id
+        field (IntegreatSeminarFreeField): verwijst naar de beantwoorde vraag. Nullable
+        answer (str): antwoord op de vraag. Nullable
+        registration (IntegreatRegistration): verwijst naar de inschrijving. Nullable
+    """
+    oid = models.BigIntegerField(db_column='OID', primary_key=True)
+    field = models.ForeignKey(IntegreatSeminarFreeField, models.DO_NOTHING, db_column='Field', blank=True, null=True)
+    answer = models.TextField(db_column='Answer', blank=True, null=True)
+    registration = models.ForeignKey(IntegreatRegistration, models.DO_NOTHING, db_column='Registration', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Integreat_RegistrationFreeField'

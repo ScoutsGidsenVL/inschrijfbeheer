@@ -1,0 +1,27 @@
+{% extends "evenementen/evenementen_base.html" %}
+
+{% block evenement_content %}
+<h1>Antwoorden</h1>
+<h2>{{ vraag.vraag }}</h2>
+
+{% if antwoorden %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Inschrijving</th>
+            <th>Antwoord</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for antwoord in antwoorden %}
+        <tr>
+            <td>{{ antwoord.inschrijving }}</td>
+            <td>{{ antwoord.antwoord|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Op deze vraag zijn nog geen antwoorden geregistreerd.</p>
+{% endif %}
+{% endblock evenement_content %}

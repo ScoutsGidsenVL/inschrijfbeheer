@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from migratie.models import Evenement, Inschrijving
+from migratie.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord
 from django.contrib.auth.decorators import login_required
 from migratie.utils.soap import haal_lidnaam
 
@@ -80,4 +80,35 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
  
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
         "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
+    })
+
+
+def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, inschrijving_id: str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=evenement_id)
+
+
+    vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+    return render(request, "evenementen/inschrijvingen/inschrijvingen_detail.html", {
+        "vraag_antwoorden" : vraag_antwoorden,
+        "evenement": evenement
+    })
+
+def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=id)
+
+    vragen = EvenementVraag.objects.filter(evenement=id).select_related("type").order_by("volgorde")
+    return render(request, "evenementen/vragen/evenementen_vragen.html", {
+        "vragen" : vragen,
+        "evenement": evenement
+    })
+
+def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=evenement_id)
+    vraag = get_object_or_404(EvenementVraag, id=vraag_id)
+
+    antwoorden = InschrijvingVraagAntwoord.objects.filter(vraag=vraag_id)
+    return render(request, "evenementen/vragen/evenementen_vragen_antwoorden.html", {
+        "antwoorden" : antwoorden,
+        "vraag": vraag,
+        "evenement": evenement
     })

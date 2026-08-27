@@ -11,7 +11,7 @@ QueryInfoType terug: (aangemaakt, bijgewerkt, overgeslagen).
 import re
 from django.utils import timezone
 
-from .models import (
+from migratie.models import (
     Categorie,
     Inschrijving,
     DeelnemerType,
@@ -22,7 +22,13 @@ from .models import (
     IntegreatSeminarStatus,
     IntegreatSeminarType,
     Locatie,
-    IntegreatRegistration
+    IntegreatRegistration,
+    IntegreatSeminarFreeFieldType,
+    EvenementVraagType,
+    IntegreatSeminarFreeField,
+    EvenementVraag,
+    IntegreatRegistrationfreefield,
+    InschrijvingVraagAntwoord
 )
 
 QueryInfoType = tuple[int, int, int]
@@ -178,8 +184,11 @@ def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
             id=seminar.code.strip(),
             defaults=gegevens,
         )
-        aangemaakt += int(is_nieuw)
-        bijgewerkt += int(not is_nieuw)
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen
 
@@ -214,8 +223,11 @@ def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
                 "eindtijd_inschrijvingen": timezone.now(),
             },
         )
-        aangemaakt += int(is_nieuw)
-        bijgewerkt += int(not is_nieuw)
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen
 
@@ -257,6 +269,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
             continue
 
         _, is_nieuw = Inschrijving.objects.update_or_create(
+            id=registratie.oid,
             evenement=evenement,
             lid=deelnemer.lid_id,
             defaults={
@@ -267,7 +280,113 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
                 "is_terugbetaald": False,
             },
         )
-        aangemaakt += int(is_nieuw)
-        bijgewerkt += int(not is_nieuw)
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
+
+    return aangemaakt, bijgewerkt, overgeslagen
+
+
+def laad_evenement_vraagtypes(limiet: None | int = None) -> QueryInfoType:
+    """Functie die EvenementVraagType objecten overzet van de oude naar de nieuwe databank
+
+    Args:
+        limiet (None | int, optional): limiet voor aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    types = IntegreatSeminarFreeFieldType.objects.using("integreat").all()
+
+    if limiet is not None:
+        types = types[:limiet]
+
+    for type in types:
+        _, is_nieuw = EvenementVraagType.objects.get_or_create(
+            naam=type.code,
+            items_vereist=type.itemsrequired,
+            items_toegestaan=type.itemsallowed
+        )
+
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
+
+    return aangemaakt, bijgewerkt, overgeslagen
+
+def laad_evenement_vragen(limiet: None | int = None) -> QueryInfoType:
+    """Functie die EvenementVraag objecten overzet van de oude databank naar de nieuwe
+
+    Args:
+        limiet (None | int, optional): limiet voor aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    vragen: list[IntegreatSeminarFreeField] = IntegreatSeminarFreeField.objects.using("integreat").all()
+
+    if limiet is not None:
+        vragen = vragen[:limiet]
+
+    for vraag in vragen:
+        try:
+            type = EvenementVraagType.objects.get(naam=vraag.type.code)
+            evenement = Evenement.objects.get(id=vraag.seminar.code)
+        except (Evenement.DoesNotExist, EvenementVraagType.DoesNotExist) as e:
+            overgeslagen += 1
+            continue
+
+        _ = EvenementVraag.objects.create(
+            id=vraag.oid,
+            type=type,
+            vraag=vraag.question,
+            items=vraag.items,
+            evenement=evenement,
+            vereist=vraag.required,
+            volgorde=vraag.sortorder
+        )
+
+        aangemaakt += 1
+
+    return aangemaakt, bijgewerkt, overgeslagen
+
+def laad_inschrijving_vraagantwoorden(limiet: None | int = None) -> QueryInfoType:
+    """Functie die InschrijvingVraagAntwoord objecten overzet van de oude databank naar de nieuwe
+
+    Args:
+        limiet (None | int, optional): limiet voor aantal in te laden objecten. Defaults to None.
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    antwoorden: list[IntegreatRegistrationfreefield] = IntegreatRegistrationfreefield.objects.using("integreat").filter(answer__isnull=False).exclude(answer="")
+
+    if limiet is not None:
+        antwoorden = antwoorden[:limiet]
+
+    for antwoord in antwoorden:
+        try:
+            vraag = EvenementVraag.objects.get(id=antwoord.field.oid)
+            inschrijving = Inschrijving.objects.get(id=antwoord.registration.oid)
+        except (EvenementVraag.DoesNotExist, Inschrijving.DoesNotExist) as e:
+            overgeslagen += 1
+            continue
+
+        _ = InschrijvingVraagAntwoord.objects.create(
+            vraag=vraag,
+            antwoord=antwoord.answer,
+            inschrijving=inschrijving,
+        )
+
+        aangemaakt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_headers %}
+    <link rel="stylesheet" href="{% static "styles/evenementen/evenementen_base.css" %}">
+    {% block extra_evenement_headers %}{% endblock extra_evenement_headers %}
+{% endblock extra_headers %}
+
+{% block content %}
+<div class="evenement-hoofding">
+    <button class="evenement-terug-knop" onclick="history.back()">Back</button>
+    <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
+    <nav class="evenement-nav">
+        <a href="/evenementen/{{ evenement.id }}" class="geselecteerd">Algemeen</a>
+        <a href="/evenementen/{{ evenement.id }}/inschrijvingen">Inschrijvingen</a>
+        <a href="/evenementen/{{ evenement.id }}/vragen">Vragen</a>
+    </nav>
+</div>
+
+{% block evenement_content %}
+{% endblock evenement_content %}
+
+{% endblock content %}
