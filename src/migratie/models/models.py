@@ -347,6 +347,12 @@ class IntegreatSalesInvoicedetail(models.Model):
 
     Attributes:
         oid (str): object identifier
+        unitprice (float): betaalde bedrag
+        seminar (IntegreatSeminar): seminar waarvoor er betaald werd
+        registration (IntegreatRegistration): verwijst naar de inschrijving
+        createdon (datetime): verwijst naar het tijdstip van betaling
+        nettoamount (float): betaalde netto bedrag (equivalent aan totaalbedrag)
+        totalamount (float): betaalde totaal bedrag (equivalent aan nettoamount)
     """
     oid = models.BigIntegerField(db_column='OID', primary_key=True)
     # header = models.ForeignKey('IntegreatSalesInvoice', models.DO_NOTHING, db_column='Header', blank=True, null=True) # ticketinfo
