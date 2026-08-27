@@ -90,6 +90,7 @@ class DeelnemerType(models.Model):
         return self.naam
 
 class Inschrijving(models.Model):
+    id = models.AutoField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.RESTRICT)
