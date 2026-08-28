@@ -23,7 +23,7 @@
     </thead>
     <tbody>
         {% for rij in inschrijvingen %}
-            <tr class="inschrijving-rij" onclick="window.location.href='{% url "evenement_inschrijving_detail" evenement_id=evenement.id inschrijving_id=rij.instantie.id %}'">
+            <tr class="inschrijving-rij" onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=rij.instantie.id %}'">
                 {% for waarde in rij.waarden %}
                     <td>
                         {% if waarde|is_boolean %}

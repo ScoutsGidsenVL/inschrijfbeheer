@@ -102,19 +102,6 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     })
 
 @login_required
-def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, inschrijving_id: str) -> HttpResponse:
-    evenement = get_object_or_404(Evenement, id=evenement_id)
-    inschrijving = get_object_or_404(Inschrijving, id=inschrijving_id)
-
-
-    vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
-    return render(request, "evenementen/inschrijvingen/inschrijvingen_detail.html", {
-        "vraag_antwoorden" : vraag_antwoorden,
-        "evenement": evenement,
-        "inschrijving": inschrijving,
-    })
-
-@login_required
 def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 

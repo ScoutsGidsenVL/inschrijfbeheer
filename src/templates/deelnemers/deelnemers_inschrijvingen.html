@@ -23,7 +23,7 @@
     </thead>
     <tbody>
         {% for inschrijving in inschrijvingen %}
-            <tr class="inschrijving-rij" onclick="window.location.href='{% url "evenement_inschrijving_detail" evenement_id=inschrijving.evenement.id inschrijving_id=inschrijving.id %}'">
+            <tr class="inschrijving-rij" onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=inschrijving.id %}'">
                 <td>{{ inschrijving.evenement }}</td>
                 <td>{{ inschrijving.deelnemertype }}</td>
                 <td>{{ inschrijving.prijs|default:"" }}</td>

@@ -1,6 +1,6 @@
-{% extends "evenementen/evenementen_base.html" %}
+{% extends "base.html" %}
 
-{% block evenement_content %}
+{% block content %}
 <h1>{{ inschrijving.id }}</h1>
 <h2>Algemene informatie</h2>
 
@@ -34,4 +34,4 @@
 {% else %}
 <p>Voor deze inschrijving zijn geen antwoorden op vragen geregistreerd.</p>
 {% endif %}
-{% endblock evenement_content %}
+{% endblock content %}
