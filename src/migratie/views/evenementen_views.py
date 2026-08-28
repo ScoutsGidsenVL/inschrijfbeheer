@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from migratie.utils.soap import haal_lidnaam
 
 KOLOMMEN = {
+    "id": "ID",
     "titel": "Titel",
     "beschrijving": "Beschrijving",
     "status": "Status",
@@ -18,7 +19,7 @@ KOLOMMEN = {
     "categorie": "Categorie",
 }
 
-STANDAARD_KOLOMMEN = ["titel", "status", "locatie", "starttijd"]
+STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "starttijd"]
 
 
 @login_required
