@@ -304,7 +304,7 @@ class IntegreatRegistration(models.Model):
     """
     oid = models.BigIntegerField(db_column='OID', primary_key=True)
     seminar = models.ForeignKey(IntegreatSeminar, models.DO_NOTHING, db_column='Seminar', blank=True, null=True)
-    deelnemer = models.ForeignKey('IntegreatParticipant', models.DO_NOTHING, db_column='Participant', blank=True, null=True)
+    deelnemer = models.ForeignKey(IntegreatParticipant, models.DO_NOTHING, db_column='Participant', blank=True, null=True)
     price = models.DecimalField(db_column='Price', max_digits=18, decimal_places=2, blank=True, null=True) 
     annulatie = models.DateTimeField(db_column='CanceledDate', blank=True, null=True)
     canceledmotivation = models.TextField(db_column='CanceledMotivation', blank=True, null=True)

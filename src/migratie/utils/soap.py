@@ -134,7 +134,7 @@ def _maak_client(wsdl_url=WSDL_URL, transport=None):
     return Client(wsdl=wsdl_url, transport=transport or Transport())
  
  
-def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAAM):
+def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAAM) -> LidGegevens:
     """
     Vraagt de lidgegevens (LidGegevensV3) op voor het lid met het gegeven
     identificatie, en geeft die terug als een LidGegevens-object.
