@@ -14,5 +14,6 @@ from migratie.views.deelnemers_views import (
 )
 
 from migratie.views.inschrijvingen_views import (
-    inschrijvingen_detail
+    inschrijvingen_detail,
+    inschrijvingen_vragen,
 )

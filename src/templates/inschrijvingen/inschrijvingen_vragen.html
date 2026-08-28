@@ -1,0 +1,28 @@
+{% extends "inschrijvingen/inschrijvingen_base.html" %}
+
+{% block inschrijvingen_content %}
+
+{% if vraag_antwoorden %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Vraag</th>
+            <th>Type</th>
+            <th>Antwoord</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vraag_antwoord in vraag_antwoorden %}
+        <tr>
+            <td>{{ vraag_antwoord.vraag.vraag }}</td>
+            <td>{{ vraag_antwoord.vraag.type.naam|default:"-" }}</td>
+            <td>{{ vraag_antwoord.antwoord|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Voor deze inschrijving zijn geen antwoorden op vragen geregistreerd.</p>
+{% endif %}
+
+{% endblock inschrijvingen_content %}

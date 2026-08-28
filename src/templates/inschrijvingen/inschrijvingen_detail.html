@@ -1,37 +1,33 @@
-{% extends "base.html" %}
+{% extends "inschrijvingen/inschrijvingen_base.html" %}
 
-{% block content %}
-<h1>{{ inschrijving.id }}</h1>
+{% block inschrijvingen_content %}
 <h2>Algemene informatie</h2>
+
+<div class="inschrijving-attribuut-container">
+    <div class="inschrijving-attribuut-label">Evenement</div>
+    <div class="inschrijving-attribuut-waarde">
+        {{ inschrijving.evenement }}
+    </div>
+</div>
+
+<div class="inschrijving-attribuut-container">
+    <div class="inschrijving-attribuut-label">Deelnemertype</div>
+    <div class="inschrijving-attribuut-waarde">
+        {{ inschrijving.deelnemertype|default:"-" }}
+    </div>
+</div>
 
 <div class="inschrijving-attribuut-container">
     <div class="inschrijving-attribuut-label">Prijs</div>
     <div class="inschrijving-attribuut-waarde">
-        {{ inschrijving.prijs }}
+        {{ inschrijving.prijs|default:"-" }}
     </div>
 </div>
 
-<h2>Antwoorden op de vragen</h2>
-{% if vraag_antwoorden %}
-<table class="table">
-    <thead>
-        <tr>
-            <th>Vraag</th>
-            <th>Type</th>
-            <th>Antwoord</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for vraag_antwoord in vraag_antwoorden %}
-        <tr>
-            <td>{{ vraag_antwoord.vraag.vraag }}</td>
-            <td>{{ vraag_antwoord.vraag.type.naam|default:"-" }}</td>
-            <td>{{ vraag_antwoord.antwoord|default:"-" }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>Voor deze inschrijving zijn geen antwoorden op vragen geregistreerd.</p>
-{% endif %}
-{% endblock content %}
+<div class="inschrijving-attribuut-container">
+    <div class="inschrijving-attribuut-label">Aanwezig</div>
+    <div class="inschrijving-attribuut-waarde">
+        <input type="checkbox" disabled {% if inschrijving.annulatie == None %}checked{% endif %}>
+    </div>
+</div>
+{% endblock inschrijvingen_content %}

@@ -28,3 +28,12 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
         "vraag_antwoorden" : vraag_antwoorden,
         "inschrijving": inschrijving,
     })
+
+def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    inschrijving = get_object_or_404(Inschrijving, id=inschrijving_id)
+    vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+
+    return render(request, "inschrijvingen/inschrijvingen_vragen.html", {
+        "vraag_antwoorden" : vraag_antwoorden,
+        "inschrijving": inschrijving,
+    })
