@@ -5,6 +5,29 @@ from django.db import models
 Modellen voor de nieuwe databank die Integreat zal vervangen, momenteel redelijk compact
 """
 
+class Lid(models.Model):
+    """Model voor een lid.
+    Dit model is niet strikt nodig, als enkel het lid id wordt bijgehouden in Inschrijving, 
+    moet de UI steeds SOAP calls maken naar de GA wat lange wachttijden tot gevolg heeft
+
+    Attributes:
+        id (str): id van het lid uit de GA. maximale lengte van 32
+        voornaam (str): voornaam van het lid
+        achternaam (str): achternaam van het lid
+        mailadres (str): mailadres van het lid
+    """
+    id = models.CharField(primary_key=True, max_length=32)
+    voornaam = models.CharField(null=False)
+    achternaam = models.CharField(null=False)
+    mailadres = models.CharField(null=False)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = "lid" # geeft naam van de tabel in de nieuwe databank aan
+
+    def __str__(self):
+        return f"{self.voornaam} {self.achternaam}"
+
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
     naam = models.CharField(null=True)
@@ -104,7 +127,7 @@ class Inschrijving(models.Model):
     """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
-    lid = models.CharField()
+    lid = models.ForeignKey(Lid, db_column="lid", on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField()
@@ -284,7 +307,7 @@ class IntegreatRegistration(models.Model):
     """
     oid = models.BigIntegerField(db_column='OID', primary_key=True)
     seminar = models.ForeignKey(IntegreatSeminar, models.DO_NOTHING, db_column='Seminar', blank=True, null=True)
-    deelnemer = models.ForeignKey('IntegreatParticipant', models.DO_NOTHING, db_column='Participant', blank=True, null=True)
+    deelnemer = models.ForeignKey(IntegreatParticipant, models.DO_NOTHING, db_column='Participant', blank=True, null=True)
     price = models.DecimalField(db_column='Price', max_digits=18, decimal_places=2, blank=True, null=True) 
     annulatie = models.DateTimeField(db_column='CanceledDate', blank=True, null=True)
     canceledmotivation = models.TextField(db_column='CanceledMotivation', blank=True, null=True)

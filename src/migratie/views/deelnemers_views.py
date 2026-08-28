@@ -9,8 +9,9 @@ De views in deze module worden gebruikt voor het pad `/deelnemers/*`
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
-from migratie.models import Inschrijving
+from migratie.models import Inschrijving, Lid
 
 from migratie.utils.soap import haal_lidgegevens
 
@@ -27,9 +28,12 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
         HttpResponse: HTML document dat de pagina voorstelt
     """
     zoekterm = request.GET.get("q", '')
-    deelnemers = Inschrijving.objects.values("lid").filter(lid__icontains=zoekterm).distinct() # Eventueel aanpassen naar apart model
-
-    deelnemers = [haal_lidgegevens(lid_id["lid"]) for lid_id in deelnemers]
+    deelnemers = Lid.objects.filter(
+        Q(id__icontains=zoekterm)
+        | Q(voornaam__icontains=zoekterm)
+        | Q(achternaam__icontains=zoekterm)
+        | Q(mailadres__icontains=zoekterm)
+    ).distinct()
 
     return render(request, "deelnemers/deelnemers_lijst.html", {
         "deelnemers": deelnemers

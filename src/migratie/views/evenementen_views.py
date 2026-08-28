@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from migratie.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord
+from migratie.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from migratie.utils.soap import haal_lidnaam
 
 KOLOMMEN = {
     "id": "ID",
@@ -24,23 +24,37 @@ STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "starttijd"]
 
 @login_required
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
-    sleutelwoord: str = request.GET.get('q', '')
+    zoekterm: str = request.GET.get('q', '').strip()
+    categorie_naam: str = request.GET.get('categorie', '').strip()
     gekozen_kolommen = [k for k in request.GET.getlist("kolom") if k in KOLOMMEN]
     if not gekozen_kolommen:
         gekozen_kolommen = STANDAARD_KOLOMMEN
 
-    evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(titel__contains=sleutelwoord.strip())
+    evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(
+        Q(titel__icontains=zoekterm)
+        | Q(id__icontains=zoekterm)
+    )
+
+    if categorie_naam:
+        print(categorie_naam)
+        categorie = Categorie.objects.get(naam=categorie_naam)
+        evenementen = evenementen.filter(
+            categorie=categorie.id
+        )
 
     rijen = [
         (evenement.id, [getattr(evenement, kolom) for kolom in gekozen_kolommen])
         for evenement in evenementen
     ]
 
+    categorieen = Categorie.objects.all()
+
     return render(request, "evenementen/evenementen_lijst.html", {
         "alle_kolommen": KOLOMMEN,
         "gekozen_kolommen": gekozen_kolommen,
         "gekozen_labels": [KOLOMMEN[k] for k in gekozen_kolommen],
         "rijen": rijen,
+        "categorieen": categorieen,
     })
 
 @login_required
@@ -67,17 +81,12 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         queryset = queryset.exclude(annulatie__isnull=True)
 
     inschrijvingen = []
-    for instantie in queryset:
-        lid_id = instantie.lid
- 
-        if lid_id not in namen_per_lid_id:
-            namen_per_lid_id[lid_id] = haal_lidnaam(lid_id)
- 
+    for instantie in queryset: 
         inschrijvingen.append({
             "instantie": instantie,
             "waarden": [
                 instantie.id,
-                namen_per_lid_id[lid_id],
+                instantie.lid,
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
                 instantie.prijs,
@@ -90,7 +99,6 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "kolommen": kolommen,
         "inschrijvingen": inschrijvingen,
         "evenement": evenement,
-        "aanwezig_filter": aanwezig_filter,
     })
 
 @login_required

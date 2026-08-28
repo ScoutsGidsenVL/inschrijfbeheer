@@ -12,7 +12,13 @@
             {{ label }}
         </label>
     {% endfor %}
-    <button type="submit">Toon kolommen</button>
+    <select name="categorie" id="categorie">
+        <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
+        {% for categorie in categorieen %}
+            <option value="{{categorie.naam}}" {% if request.GET.categorie == categorie.naam %}selected{% endif %}>{{ categorie.naam }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
 </form>
 
 <table class="evenement-tabel">

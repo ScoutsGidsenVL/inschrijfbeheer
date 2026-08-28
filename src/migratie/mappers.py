@@ -28,8 +28,10 @@ from migratie.models import (
     IntegreatSeminarFreeField,
     EvenementVraag,
     IntegreatRegistrationfreefield,
-    InschrijvingVraagAntwoord
+    InschrijvingVraagAntwoord,
+    Lid
 )
+from migratie.utils.soap import haal_lidgegevens, LidGegevens
 
 QueryInfoType = tuple[int, int, int]
 
@@ -231,6 +233,26 @@ def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
 
     return aangemaakt, bijgewerkt, overgeslagen
 
+def haal_of_maak_lid(id: str) -> Lid:
+    """Maakt een nieuw lid object aan of haalt een match uit de databank
+
+    Args:
+        id (str): id van het lid
+
+    Returns:
+        Lid: het aangemaakte of gematchte lid
+    """
+    gegevens = haal_lidgegevens(gebruikersnaam=id)
+
+    lid, _ = Lid.objects.get_or_create(
+        id=id,
+        voornaam=gegevens.voornaam,
+        achternaam=gegevens.naam,
+        mailadres=gegevens.emailadres,
+    )
+
+    return lid
+
 
 def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
     """Laad objecten uit de Integreat databank en zet deze om naar nieuwe objecten van het type `Inschrijving`.
@@ -255,6 +277,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
     for registratie in registraties:
         seminar = registratie.seminar
         deelnemer = registratie.deelnemer
+        lid = haal_of_maak_lid(deelnemer.lid_id)
 
         if not seminar.code or not deelnemer.lid_id:
             overgeslagen += 1
@@ -271,7 +294,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
         _, is_nieuw = Inschrijving.objects.update_or_create(
             id=registratie.oid,
             evenement=evenement,
-            lid=deelnemer.lid_id,
+            lid=lid,
             defaults={
                 "deelnemertype": deelnemertype,
                 "tijdstip": registratie.tijdstip,
