@@ -11,4 +11,5 @@ from migratie.views.evenementen_views import (
 from migratie.views.deelnemers_views import (
     deelnemers_lijst,
     deelnemers_detail,
+    deelnemers_inschrijvingen,
 )

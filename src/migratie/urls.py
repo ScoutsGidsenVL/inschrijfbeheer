@@ -10,5 +10,6 @@ urlpatterns = [
     path("evenementen/<str:id>/vragen/", views.evenement_vragen, name="evenement_vragen"),
     path("evenementen/<str:evenement_id>/vragen/<str:vraag_id>/antwoorden/", views.evenement_vraag_antwoorden, name="evenement_vraag_antwoorden"),
     path("deelnemers/", views.deelnemers_lijst, name="deelnemers_lijst"),
-    path("deelnemers/<str:id>/", views.deelnemers_detail, name="deelnemers_detail")
+    path("deelnemers/<str:id>/", views.deelnemers_detail, name="deelnemers_detail"),
+    path("deelnemers/<str:id>/inschrijvingen", views.deelnemers_inschrijvingen, name="deelnemers_inschrijvingen"),
 ]

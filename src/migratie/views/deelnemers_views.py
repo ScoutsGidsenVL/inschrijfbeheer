@@ -57,3 +57,18 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     return render(request, "deelnemers/deelnemers_detail.html", {
         "deelnemer": deelnemer
     })
+
+@login_required
+def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
+    aanwezig_filter = request.GET.get("aanwezig", '')
+
+    inschrijvingen = Inschrijving.objects.filter(lid=id)
+
+    if aanwezig_filter == '1':
+        inschrijvingen = inschrijvingen.filter(annulatie__isnull=True)
+    elif aanwezig_filter == '0':
+        inschrijvingen = inschrijvingen.exclude(annulatie__isnull=True)
+
+    return render(request, "deelnemers/deelnemers_inschrijvingen.html", {
+        "inschrijvingen": inschrijvingen
+    })
