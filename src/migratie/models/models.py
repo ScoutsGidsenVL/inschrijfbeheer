@@ -124,7 +124,7 @@ class Inschrijving(models.Model):
     """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
-    lid = models.CharField()
+    lid = models.ForeignKey(Lid, db_column="lid", on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField()
