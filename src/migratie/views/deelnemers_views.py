@@ -21,6 +21,8 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
     """View voor het oplijsten van alle deelnemers in de databank.
     Deze view wordt gebruikt voor `/deelnemers/`.
 
+    De pagina laat filtering toe op basis van het id, de naam of het mailadres van de deelnemer.
+
     Args:
         request (HttpRequest): HTTP request voor de pagina
 
@@ -62,6 +64,18 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
 
 @login_required
 def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
+    """View die alle inschrijvingen voor een deelnemer oplijst.
+    Deze view wordt gebruikt voor /deelnemers/<id>/inschrijvingen.
+
+    De pagina laat filtering toe op basis van de naam of het id van een evenement en de aanwezigheid van de deelnemer.
+
+    Args:
+        request (HttpRequest): HTTP request voor de pagina
+        id (str): id van de deelnemer, wordt bepaald door de URL
+
+    Returns:
+        HttpResponse: HTML document dat de pagina voorstelt
+    """
     deelnemer = Lid.objects.get(id=id)
     zoekterm = request.GET.get('q', '')
     aanwezig_filter = request.GET.get("aanwezig", '')
