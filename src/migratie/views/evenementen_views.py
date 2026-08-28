@@ -82,7 +82,7 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
     })
 
-
+@login_required
 def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, inschrijving_id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=evenement_id)
 
@@ -93,6 +93,7 @@ def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, insch
         "evenement": evenement
     })
 
+@login_required
 def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 
@@ -102,6 +103,7 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
+@login_required
 def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=evenement_id)
     vraag = get_object_or_404(EvenementVraag, id=vraag_id)
