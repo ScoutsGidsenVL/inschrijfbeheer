@@ -94,7 +94,6 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "kolommen": kolommen,
         "inschrijvingen": inschrijvingen,
         "evenement": evenement,
-        "aanwezig_filter": aanwezig_filter,
     })
 
 @login_required
