@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from migratie.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from migratie.utils.soap import haal_lidnaam
 
@@ -24,12 +25,15 @@ STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "starttijd"]
 
 @login_required
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
-    sleutelwoord: str = request.GET.get('q', '')
+    zoekterm: str = request.GET.get('q', '').strip()
     gekozen_kolommen = [k for k in request.GET.getlist("kolom") if k in KOLOMMEN]
     if not gekozen_kolommen:
         gekozen_kolommen = STANDAARD_KOLOMMEN
 
-    evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(titel__contains=sleutelwoord.strip())
+    evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(
+        Q(titel__icontains=zoekterm)
+        | Q(id__icontains=zoekterm)
+    )
 
     rijen = [
         (evenement.id, [getattr(evenement, kolom) for kolom in gekozen_kolommen])
