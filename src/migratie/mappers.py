@@ -343,7 +343,7 @@ def laad_evenement_vragen(limiet: None | int = None) -> QueryInfoType:
             overgeslagen += 1
             continue
 
-        _ = EvenementVraag.objects.create(
+        _, is_nieuw = EvenementVraag.objects.get_or_create(
             id=vraag.oid,
             type=type,
             vraag=vraag.question,
@@ -353,7 +353,10 @@ def laad_evenement_vragen(limiet: None | int = None) -> QueryInfoType:
             volgorde=vraag.sortorder
         )
 
-        aangemaakt += 1
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen
 
@@ -381,12 +384,16 @@ def laad_inschrijving_vraagantwoorden(limiet: None | int = None) -> QueryInfoTyp
             overgeslagen += 1
             continue
 
-        _ = InschrijvingVraagAntwoord.objects.create(
+        _, is_nieuw = InschrijvingVraagAntwoord.objects.get_or_create(
+            id=antwoord.oid,
             vraag=vraag,
             antwoord=antwoord.answer,
             inschrijving=inschrijving,
         )
 
-        aangemaakt += 1
+        if is_nieuw:
+            aangemaakt += 1
+        else:
+            bijgewerkt += 1
 
     return aangemaakt, bijgewerkt, overgeslagen

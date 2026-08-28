@@ -156,7 +156,7 @@ class InschrijvingVraagAntwoord(models.Model):
         antwoord (str): antwoord op de vraag. Nullable
         inschrijving (Inschrijving): verwijst naar de inschrijving. Nullable
     """
-    id = models.AutoField(primary_key=True)
+    id = models.CharField(primary_key=True)
     vraag = models.ForeignKey(EvenementVraag, models.CASCADE)
     antwoord = models.TextField(blank=True, null=True)
     inschrijving = models.ForeignKey(Inschrijving, models.CASCADE)
