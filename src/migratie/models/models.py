@@ -90,14 +90,24 @@ class DeelnemerType(models.Model):
         return self.naam
 
 class Inschrijving(models.Model):
+    """Model voor een inschrijving
+
+    Attributes:
+        id (str): id van de inschrijving
+        evenement (Evenement): evenement waarvoor werd ingeschreven
+        lid (str): lid id uit de groepsadmin voor identificatie lid
+        deelnemertype (DeelnemerType): type van de deelnemer. Nullable
+        prijs (float): bedrag betaald door deelnemer. Nullable
+        tijdstip (datetime): tijdstip van inschrijving
+        annulatie (datetime): tijdstip van annulatie. Nullable, null als niet geannuleerd
+    """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
-    deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.RESTRICT)
+    deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
+    prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField()
-    is_betaald = models.BooleanField()
-    is_geannuleerd = models.BooleanField()
-    is_terugbetaald = models.BooleanField()
+    annulatie = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
@@ -156,7 +166,7 @@ class InschrijvingVraagAntwoord(models.Model):
         antwoord (str): antwoord op de vraag. Nullable
         inschrijving (Inschrijving): verwijst naar de inschrijving. Nullable
     """
-    id = models.AutoField(primary_key=True)
+    id = models.CharField(primary_key=True)
     vraag = models.ForeignKey(EvenementVraag, models.CASCADE)
     antwoord = models.TextField(blank=True, null=True)
     inschrijving = models.ForeignKey(Inschrijving, models.CASCADE)
@@ -259,17 +269,31 @@ class IntegreatSeminar(models.Model):
         managed = False
 
 class IntegreatRegistration(models.Model):
-    oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
-    seminar = models.ForeignKey(IntegreatSeminar, db_column="Seminar", on_delete=models.RESTRICT)
-    deelnemers_type = models.ForeignKey(IntegreatParticipantType, db_column="ParticipantType", on_delete=models.RESTRICT)
-    deelnemer = models.ForeignKey(IntegreatParticipant, db_column="Participant", on_delete=models.RESTRICT)
-    tijdstip = models.DateTimeField(db_column="CreatedOn")
-    annulatie = models.DateTimeField(db_column="CanceledDate", null=True)
+    """Integreat model voor een inschrijving
+
+    Attributes:
+        oid (int): object identifiers
+        seminar (IntegreatSeminar): verwijst naar seminar waarvoor werd ingeschreven
+        price (float): prijs die deelnemer betaalde. Nullable
+        annulatie (datetime): datum waarop deelnemer annuleerde, annulatie is afleidbaar. Nullable
+        deelnemers_type (IntegreatParticipantType): type van de deelnemer. Nullable
+        tijdstip (datetime): moment van inschrijving. Nullable
+    """
+    oid = models.BigIntegerField(db_column='OID', primary_key=True)
+    seminar = models.ForeignKey(IntegreatSeminar, models.DO_NOTHING, db_column='Seminar', blank=True, null=True)
+    deelnemer = models.ForeignKey('IntegreatParticipant', models.DO_NOTHING, db_column='Participant', blank=True, null=True)
+    price = models.DecimalField(db_column='Price', max_digits=18, decimal_places=2, blank=True, null=True) 
+    annulatie = models.DateTimeField(db_column='CanceledDate', blank=True, null=True)
+    # status = models.ForeignKey('IntegreatRegistrationstatus', models.DO_NOTHING, db_column='Status', blank=True, null=True)
+    deelnemers_type = models.ForeignKey(IntegreatParticipantType, models.DO_NOTHING, db_column='ParticipantType', blank=True, null=True)
+    tijdstip = models.DateTimeField(db_column='RegistrationDate', blank=True, null=True)
+    # organizationunitsite = models.ForeignKey('IntegreatOrganizationunitsite', models.DO_NOTHING, db_column='OrganizationUnitSite', blank=True, null=True)
 
     class Meta:
         app_label = "migratie"
-        db_table = "Integreat_Registration"
         managed = False
+        db_table = 'Integreat_Registration'
+        unique_together = (('deelnemer', 'seminar'),)
 
 class IntegreatSeminarFreeFieldType(models.Model):
     """Integreat model voor het type van vrije vragen.

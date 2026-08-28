@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from migratie.utils.soap import haal_lidnaam
 
 KOLOMMEN = {
+    "id": "ID",
     "titel": "Titel",
     "beschrijving": "Beschrijving",
     "status": "Status",
@@ -18,7 +19,7 @@ KOLOMMEN = {
     "categorie": "Categorie",
 }
 
-STANDAARD_KOLOMMEN = ["titel", "status", "locatie", "starttijd"]
+STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "starttijd"]
 
 
 @login_required
@@ -54,7 +55,7 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
  
-    kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Is betaald", "Is geannuleerd", "Is terugbetaald"]
+    kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie",]
     namen_per_lid_id = {}
  
     inschrijvingen = []
@@ -72,9 +73,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
                 namen_per_lid_id[lid_id],
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
-                instantie.is_betaald,
-                instantie.is_geannuleerd,
-                instantie.is_terugbetaald,
+                instantie.prijs,
+                instantie.annulatie,
             ],
         })
  
@@ -82,17 +82,20 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
     })
 
-
+@login_required
 def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, inschrijving_id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=evenement_id)
+    inschrijving = get_object_or_404(Inschrijving, id=inschrijving_id)
 
 
     vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
     return render(request, "evenementen/inschrijvingen/inschrijvingen_detail.html", {
         "vraag_antwoorden" : vraag_antwoorden,
-        "evenement": evenement
+        "evenement": evenement,
+        "inschrijving": inschrijving,
     })
 
+@login_required
 def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 
@@ -102,6 +105,7 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
+@login_required
 def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=evenement_id)
     vraag = get_object_or_404(EvenementVraag, id=vraag_id)
