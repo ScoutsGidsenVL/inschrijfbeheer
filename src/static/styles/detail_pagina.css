@@ -1,17 +1,17 @@
-.evenement-attribuut-container {
+.detail-attribuut-container {
     display: flex;
     align-items: baseline;
     gap: 8px;
     margin-bottom: 6px;
 }
 
-.evenement-attribuut-label {
+.detail-attribuut-label {
     font-weight: bold;
     width: 260px;
     flex-shrink: 0;
 }
 
-.evenement-attribuut-waarde {
+.detail-attribuut-waarde {
     border: solid 1px;
     border-color: black;
     padding: 4px 8px;
@@ -20,6 +20,6 @@
     cursor: not-allowed;
 }
 
-.evenement-attribuut-waarde.bewerkbaar {
+.detail-attribuut-waarde.bewerkbaar {
     cursor: text;
 }

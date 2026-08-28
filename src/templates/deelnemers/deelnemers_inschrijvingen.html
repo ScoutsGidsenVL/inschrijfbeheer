@@ -1,0 +1,40 @@
+{% extends "deelnemers/deelnemers_base.html" %}
+
+{% block deelnemers_content %}
+
+<form method="get" class="inschrijving-filter">
+    <label>
+        Zoek evenement
+        <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek evenement">
+    </label>
+    <label>Aanwezigheid
+        <select name="aanwezig" id="aanwezig">
+            <option value="" {% if not request.GET.aanwezig %}selected{% endif %}>Alle</option>
+            <option value="1" {% if request.GET.aanwezig == "1" %}selected{% endif %}>Aanwezig</option>
+            <option value="0" {% if request.GET.aanwezig == "0" %}selected{% endif %}>Afwezig</option>
+        </select>
+    </label>
+    <button type="submit">Filter</button>
+</form>
+
+<table class="inschrijving-tabel">
+    <thead>
+        <tr>
+            <th>Evenement</th>
+            <th>Deelnemertype</th>
+            <th>Betaald</th>
+            <th>Aanwezig</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inschrijving in inschrijvingen %}
+            <tr class="inschrijving-rij" onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=inschrijving.id %}'">
+                <td>{{ inschrijving.evenement }}</td>
+                <td>{{ inschrijving.deelnemertype }}</td>
+                <td>{{ inschrijving.prijs|default:"" }}</td>
+                <td><input type="checkbox" disabled {% if inschrijving.annulatie == None %}checked{% endif %}></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock deelnemers_content %}

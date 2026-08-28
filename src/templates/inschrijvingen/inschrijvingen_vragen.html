@@ -1,17 +1,7 @@
-{% extends "evenementen/evenementen_base.html" %}
+{% extends "inschrijvingen/inschrijvingen_base.html" %}
 
-{% block evenement_content %}
-<h1>{{ inschrijving.id }}</h1>
-<h2>Algemene informatie</h2>
+{% block inschrijvingen_content %}
 
-<div class="inschrijving-attribuut-container">
-    <div class="inschrijving-attribuut-label">Prijs</div>
-    <div class="inschrijving-attribuut-waarde">
-        {{ inschrijving.prijs }}
-    </div>
-</div>
-
-<h2>Antwoorden op de vragen</h2>
 {% if vraag_antwoorden %}
 <table class="table">
     <thead>
@@ -34,4 +24,5 @@
 {% else %}
 <p>Voor deze inschrijving zijn geen antwoorden op vragen geregistreerd.</p>
 {% endif %}
-{% endblock evenement_content %}
+
+{% endblock inschrijvingen_content %}

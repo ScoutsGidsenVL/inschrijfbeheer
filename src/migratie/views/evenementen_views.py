@@ -68,13 +68,21 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
 @login_required
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
+    zoekterm = request.GET.get('q', '')
  
     kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
     namen_per_lid_id = {}
 
-    aanwezig_filter = request.GET.get("aanwezig", "")
+    queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
+    if zoekterm:
+        queryset = queryset.filter(
+            Q(lid__id__icontains=zoekterm)
+            | Q(lid__voornaam__icontains=zoekterm)
+            | Q(lid__achternaam__icontains=zoekterm)
+            | Q(lid__mailadres__icontains=zoekterm)
+        )
 
-    queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement")
+    aanwezig_filter = request.GET.get("aanwezig", "")
     if aanwezig_filter == "1":
         queryset = queryset.filter(annulatie__isnull=True)
     elif aanwezig_filter == "0":
@@ -99,19 +107,6 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "kolommen": kolommen,
         "inschrijvingen": inschrijvingen,
         "evenement": evenement,
-    })
-
-@login_required
-def evenement_inschrijving_detail(request: HttpRequest, evenement_id: str, inschrijving_id: str) -> HttpResponse:
-    evenement = get_object_or_404(Evenement, id=evenement_id)
-    inschrijving = get_object_or_404(Inschrijving, id=inschrijving_id)
-
-
-    vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
-    return render(request, "evenementen/inschrijvingen/inschrijvingen_detail.html", {
-        "vraag_antwoorden" : vraag_antwoorden,
-        "evenement": evenement,
-        "inschrijving": inschrijving,
     })
 
 @login_required

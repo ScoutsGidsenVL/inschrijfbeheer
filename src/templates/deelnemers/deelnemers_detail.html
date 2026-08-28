@@ -1,34 +1,59 @@
-{% extends "base.html" %}
+{% extends "deelnemers/deelnemers_base.html" %}
+{% load static %}
 
-{% block content %}
-<h1>{{ deelnemer.volledige_naam }}</h1>
+{% block extra_deelnemers_headers %}
+    <link rel="stylesheet" href="{% static "styles/detail_pagina.css" %}">
+{% endblock extra_deelnemers_headers %}
 
-<dl>
-    <dt>Lidnummer</dt>
-    <dd>{{ deelnemer.lidnummer }}</dd>
+{% block deelnemers_content %}
+<h1>{{ gegevens.volledige_naam }}</h1>
 
-    <dt>Klantnummer</dt>
-    <dd>{{ deelnemer.klantnummer }}</dd>
-
-    <dt>Geboortedatum</dt>
-    <dd>{{ deelnemer.geboortedatum }}</dd>
-
-    <dt>Geslacht</dt>
-    <dd>{{ deelnemer.geslacht }}</dd>
-
-    <dt>E-mailadres</dt>
-    <dd>{{ deelnemer.emailadres }}</dd>
-
-    <dt>Gsm-nummer</dt>
-    <dd>{{ deelnemer.gsmnummer }}</dd>
-
-    <dt>Gebruikersnaam</dt>
-    <dd>{{ deelnemer.gebruikersnaam }}</dd>
-</dl>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Lidnummer</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.lidnummer }}
+    </div>
+</div>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Klantnummer</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.klantnummer }}
+    </div>
+</div>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Geboortedatum</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.geboortedatum }}
+    </div>
+</div>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Geslacht</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.geslacht }}
+    </div>
+</div>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">E-mailadres</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.emailadres }}
+    </div>
+</div>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Gsm-nummer</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.gsmnummer }}
+    </div>
+</div>
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Gebruikersnaam</div>
+    <div class="detail-attribuut-waarde">
+        {{ gegevens.gebruikersnaam }}
+    </div>
+</div>
 
 <h2>Groepen en functies</h2>
 
-{% for groep in deelnemer.groepen %}
+{% for groep in gegevens.groepen %}
     <h3>{{ groep.naam }} ({{ groep.groepsnummer }})</h3>
 
     {% if groep.functies %}
@@ -43,4 +68,4 @@
 {% empty %}
     <p>Geen groepen gevonden voor dit lid.</p>
 {% endfor %}
-{% endblock content %}
+{% endblock deelnemers_content %}

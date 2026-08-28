@@ -1,0 +1,38 @@
+{% extends "inschrijvingen/inschrijvingen_base.html" %}
+{% load static %}
+
+{% block extra_inschrijvingen_headers %}
+    <link rel="stylesheet" href="{% static "styles/detail_pagina.css" %}">
+{% endblock extra_inschrijvingen_headers %}
+
+{% block inschrijvingen_content %}
+<h2>Algemene informatie</h2>
+
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Evenement</div>
+    <div class="detail-attribuut-waarde">
+        {{ inschrijving.evenement }}
+    </div>
+</div>
+
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Deelnemertype</div>
+    <div class="detail-attribuut-waarde">
+        {{ inschrijving.deelnemertype|default:"-" }}
+    </div>
+</div>
+
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Prijs</div>
+    <div class="detail-attribuut-waarde">
+        {{ inschrijving.prijs|default:"-" }}
+    </div>
+</div>
+
+<div class="detail-attribuut-container">
+    <div class="detail-attribuut-label">Aanwezig</div>
+    <div class="detail-attribuut-waarde">
+        <input type="checkbox" disabled {% if inschrijving.annulatie == None %}checked{% endif %}>
+    </div>
+</div>
+{% endblock inschrijvingen_content %}
