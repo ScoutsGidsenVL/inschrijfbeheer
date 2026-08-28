@@ -90,14 +90,24 @@ class DeelnemerType(models.Model):
         return self.naam
 
 class Inschrijving(models.Model):
+    """Model voor een inschrijving
+
+    Attributes:
+        id (str): id van de inschrijving
+        evenement (Evenement): evenement waarvoor werd ingeschreven
+        lid (str): lid id uit de groepsadmin voor identificatie lid
+        deelnemertype (DeelnemerType): type van de deelnemer. Nullable
+        prijs (float): bedrag betaald door deelnemer. Nullable
+        tijdstip (datetime): tijdstip van inschrijving
+        annulatie (datetime): tijdstip van annulatie. Nullable, null als niet geannuleerd
+    """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
-    deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.RESTRICT)
+    deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
+    prijs = models.DecimalField(null=True, blank=True)
     tijdstip = models.DateTimeField()
-    is_betaald = models.BooleanField()
-    is_geannuleerd = models.BooleanField()
-    is_terugbetaald = models.BooleanField()
+    annulatie = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
