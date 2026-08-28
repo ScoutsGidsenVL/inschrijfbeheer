@@ -105,7 +105,7 @@ class Inschrijving(models.Model):
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.CharField()
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
-    prijs = models.DecimalField(null=True, blank=True)
+    prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField()
     annulatie = models.DateTimeField(null=True, blank=True)
 
