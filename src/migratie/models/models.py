@@ -5,6 +5,26 @@ from django.db import models
 Modellen voor de nieuwe databank die Integreat zal vervangen, momenteel redelijk compact
 """
 
+class Lid(models.Model):
+    """Model voor een lid.
+    Dit model is niet strikt nodig, als enkel het lid id wordt bijgehouden in Inschrijving, 
+    moet de UI steeds SOAP calls maken naar de GA wat lange wachttijden tot gevolg heeft
+
+    Attributes:
+        id (str): id van het lid uit de GA. maximale lengte van 32
+        voornaam (str): voornaam van het lid
+        achternaam (str): achternaam van het lid
+        mailadres (str): mailadres van het lid
+    """
+    id = models.CharField(primary_key=True, max_length=32)
+    voornaam = models.CharField(null=False)
+    achternaam = models.CharField(null=False)
+    mailadres = models.CharField(null=False)
+
+    class Meta:
+        app_label = "migratie"
+        db_table = "lid" # geeft naam van de tabel in de nieuwe databank aan
+
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
     naam = models.CharField(null=True)
