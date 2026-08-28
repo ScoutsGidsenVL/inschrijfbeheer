@@ -17,4 +17,9 @@
     padding: 4px 8px;
     flex-grow: 1;
     background-color: white;
+    cursor: not-allowed;
+}
+
+.evenement-attribuut-waarde.bewerkbaar {
+    cursor: text;
 }

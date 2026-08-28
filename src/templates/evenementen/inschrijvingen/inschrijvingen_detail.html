@@ -1,8 +1,17 @@
 {% extends "evenementen/evenementen_base.html" %}
 
 {% block evenement_content %}
-<h1>Antwoorden op vragen</h1>
+<h1>{{ inschrijving.id }}</h1>
+<h2>Algemene informatie</h2>
 
+<div class="inschrijving-attribuut-container">
+    <div class="inschrijving-attribuut-label">Prijs</div>
+    <div class="inschrijving-attribuut-waarde">
+        {{ inschrijving.prijs }}
+    </div>
+</div>
+
+<h2>Antwoorden op de vragen</h2>
 {% if vraag_antwoorden %}
 <table class="table">
     <thead>
