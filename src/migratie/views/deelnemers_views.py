@@ -5,6 +5,7 @@ De views in deze module worden gebruikt voor het pad `/deelnemers/*`
 ## Functies:
     **deelnemers_lijst:** Geeft een view voor het oplijsten van alle deelnemers
     **deelnemers_detail:** Geeft een view voor het tonen van details over een deelnemer
+    **deelnemers_inschrijvingen:** Geeft een view voor het tonen van de inschrijvingen van een deelnemer
 """
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
