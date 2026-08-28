@@ -4,12 +4,17 @@
 {% block evenementen_content %}
 
 <form method="get" class="inschrijving-filter">
-    <label for="aanwezig">Aanwezigheid</label>
-    <select name="aanwezig" id="aanwezig">
-        <option value="" {% if not request.GET.aanwezig %}selected{% endif %}>Alle</option>
-        <option value="1" {% if request.GET.aanwezig == "1" %}selected{% endif %}>Aanwezig</option>
-        <option value="0" {% if request.GET.aanwezig == "0" %}selected{% endif %}>Afwezig</option>
-    </select>
+    <label>
+        Zoek deelnemer
+        <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek deelnemer">
+    </label>
+    <label>Aanwezigheid
+        <select name="aanwezig" id="aanwezig">
+            <option value="" {% if not request.GET.aanwezig %}selected{% endif %}>Alle</option>
+            <option value="1" {% if request.GET.aanwezig == "1" %}selected{% endif %}>Aanwezig</option>
+            <option value="0" {% if request.GET.aanwezig == "0" %}selected{% endif %}>Afwezig</option>
+        </select>
+    </label>
     <button type="submit">Filter</button>
 </form>
 

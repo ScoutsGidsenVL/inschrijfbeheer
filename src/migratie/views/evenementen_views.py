@@ -68,13 +68,21 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
 @login_required
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
+    zoekterm = request.GET.get('q', '')
  
     kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
     namen_per_lid_id = {}
 
-    aanwezig_filter = request.GET.get("aanwezig", "")
+    queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
+    if zoekterm:
+        queryset = queryset.filter(
+            Q(lid__id__icontains=zoekterm)
+            | Q(lid__voornaam__icontains=zoekterm)
+            | Q(lid__achternaam__icontains=zoekterm)
+            | Q(lid__mailadres__icontains=zoekterm)
+        )
 
-    queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement")
+    aanwezig_filter = request.GET.get("aanwezig", "")
     if aanwezig_filter == "1":
         queryset = queryset.filter(annulatie__isnull=True)
     elif aanwezig_filter == "0":

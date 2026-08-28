@@ -3,6 +3,7 @@
 {% block content %}
 <form method="get" class="kolom-keuze">
     <label>
+        Zoek evenement
         <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek evenement">
     </label>
     {% for kolom, label in alle_kolommen.items %}
