@@ -63,9 +63,16 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
 @login_required
 def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     deelnemer = Lid.objects.get(id=id)
+    zoekterm = request.GET.get('q', '')
     aanwezig_filter = request.GET.get("aanwezig", '')
 
-    inschrijvingen = Inschrijving.objects.filter(lid=id)
+    inschrijvingen = Inschrijving.objects.filter(lid=id).select_related("evenement")
+
+    if zoekterm:
+        inschrijvingen = inschrijvingen.filter(
+            Q(evenement__id__icontains=zoekterm)
+            | Q(evenement__titel__icontains=zoekterm)
+        )
 
     if aanwezig_filter == '1':
         inschrijvingen = inschrijvingen.filter(annulatie__isnull=True)
