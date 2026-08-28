@@ -22,7 +22,7 @@ class Lid(models.Model):
     mailadres = models.CharField(null=False)
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "lid" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -45,7 +45,7 @@ class Locatie(models.Model):
     )
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -58,7 +58,7 @@ class EvenementStatus(models.Model):
     beschrijving = models.CharField()
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "evenement_status" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -70,7 +70,7 @@ class Categorie(models.Model):
     alt_naam = models.CharField()
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "categorie" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -91,7 +91,7 @@ class Evenement(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "evenement" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -106,7 +106,7 @@ class DeelnemerType(models.Model):
     eindtijd_inschrijvingen = models.DateTimeField()
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "deelnemertype" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -136,7 +136,7 @@ class Inschrijving(models.Model):
 
     class Meta:
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
@@ -156,7 +156,7 @@ class EvenementVraagType(models.Model):
     items_toegestaan = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = 'evenement_vraagtype'
 
 class EvenementVraag(models.Model):
@@ -179,7 +179,7 @@ class EvenementVraag(models.Model):
     vereist = models.BooleanField(blank=True, null=True)
     volgorde = models.IntegerField(blank=True, null=True)
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = 'evenement_vraag'
 
 class InschrijvingVraagAntwoord(models.Model):
@@ -197,7 +197,7 @@ class InschrijvingVraagAntwoord(models.Model):
     inschrijving = models.ForeignKey(Inschrijving, models.CASCADE)
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = 'inschrijving_vraagantwoord'
 
 
@@ -210,7 +210,7 @@ class IntegreatParticipantType(models.Model):
     naam = models.CharField(db_column='Name')
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_ParticipantType"
         managed = False
 
@@ -221,7 +221,7 @@ class IntegreatParticipant(models.Model):
 
     # Niet geïnteresseerd in andere velden -> worden genegeerd
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_Participant" # geeft naam van de tabel in de nieuwe databank aan
         managed = False
 
@@ -231,7 +231,7 @@ class IntegreatSeminarStatus(models.Model):
     beschrijving = models.CharField(db_column='Description')
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_SeminarStatus" 
         managed = False
 
@@ -241,7 +241,7 @@ class IntegreatSeminarType(models.Model):
     naam = models.CharField(db_column='Name')
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_SeminarType" 
         managed = False
 
@@ -251,7 +251,7 @@ class IntegreatCity(models.Model):
     naam = models.CharField(db_column='Name')
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_City" 
         managed = False
 
@@ -260,7 +260,7 @@ class IntegreatOrganisationUnit(models.Model):
     code = models.CharField(db_column='')
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_OrganizationUnit" 
         managed = False
 
@@ -269,7 +269,7 @@ class IntegreatOrganisationUnitSite(models.Model):
     organisatie = models.ForeignKey(IntegreatOrganisationUnit, db_column='OrganizationUnit', on_delete=models.DO_NOTHING)
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_OrganizationUnitLocation" 
         managed = False
 
@@ -289,7 +289,7 @@ class IntegreatSeminar(models.Model):
     locatie_stad = models.ForeignKey(IntegreatCity, db_column='LocationCity', on_delete=models.DO_NOTHING, null=True)
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         db_table = "Integreat_Seminar"
         managed = False
 
@@ -317,7 +317,7 @@ class IntegreatRegistration(models.Model):
     # organizationunitsite = models.ForeignKey('IntegreatOrganizationunitsite', models.DO_NOTHING, db_column='OrganizationUnitSite', blank=True, null=True)
 
     class Meta:
-        app_label = "migratie"
+        app_label = "inschrijfbeheer"
         managed = False
         db_table = 'Integreat_Registration'
         unique_together = (('deelnemer', 'seminar'),)

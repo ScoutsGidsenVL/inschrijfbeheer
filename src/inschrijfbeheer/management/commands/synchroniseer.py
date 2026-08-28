@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from migratie.mappers import (
+from inschrijfbeheer.mappers import (
     laad_evenementen,
     laad_deelnemertypes,
     laad_inschrijvingen,

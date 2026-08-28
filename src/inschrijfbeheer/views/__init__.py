@@ -1,4 +1,4 @@
-from migratie.views.evenementen_views import (
+from inschrijfbeheer.views.evenementen_views import (
     evenement_lijst, 
     evenement_detail, 
     evenement_inschrijvingen,
@@ -7,13 +7,13 @@ from migratie.views.evenementen_views import (
 
 )
 
-from migratie.views.deelnemers_views import (
+from inschrijfbeheer.views.deelnemers_views import (
     deelnemers_lijst,
     deelnemers_detail,
     deelnemers_inschrijvingen,
 )
 
-from migratie.views.inschrijvingen_views import (
+from inschrijfbeheer.views.inschrijvingen_views import (
     inschrijvingen_detail,
     inschrijvingen_vragen,
 )

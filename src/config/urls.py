@@ -25,5 +25,5 @@ urlpatterns = [
     path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
     path("docs/", serve, {"document_root": settings.BASE_DIR / '..' / 'docs', "path": "README.md"}),
     path("docs/<path:path>", serve, {"document_root": settings.BASE_DIR / '..' / 'docs'}),
-    path("", include("migratie.urls")),
+    path("", include("inschrijfbeheer.urls")),
 ]
