@@ -275,9 +275,8 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
             defaults={
                 "deelnemertype": deelnemertype,
                 "tijdstip": registratie.tijdstip,
-                "is_betaald": False,
-                "is_geannuleerd": registratie.annulatie is not None,
-                "is_terugbetaald": False,
+                "prijs": registratie.price,
+                "annulatie": registratie.annulatie,
             },
         )
 
