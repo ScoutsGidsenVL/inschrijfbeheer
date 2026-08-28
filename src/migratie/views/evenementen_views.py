@@ -3,7 +3,6 @@ from django.http import HttpRequest, HttpResponse
 from migratie.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from migratie.utils.soap import haal_lidnaam
 
 KOLOMMEN = {
     "id": "ID",
@@ -82,17 +81,12 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         queryset = queryset.exclude(annulatie__isnull=True)
 
     inschrijvingen = []
-    for instantie in queryset:
-        lid_id = instantie.lid
- 
-        if lid_id not in namen_per_lid_id:
-            namen_per_lid_id[lid_id] = haal_lidnaam(lid_id)
- 
+    for instantie in queryset: 
         inschrijvingen.append({
             "instantie": instantie,
             "waarden": [
                 instantie.id,
-                namen_per_lid_id[lid_id],
+                instantie.lid,
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
                 instantie.prijs,

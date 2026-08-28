@@ -25,6 +25,9 @@ class Lid(models.Model):
         app_label = "migratie"
         db_table = "lid" # geeft naam van de tabel in de nieuwe databank aan
 
+    def __str__(self):
+        return f"{self.voornaam} {self.achternaam}"
+
 class Locatie(models.Model):
     id = models.AutoField(primary_key=True)
     naam = models.CharField(null=True)
