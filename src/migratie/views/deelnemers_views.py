@@ -52,14 +52,17 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     Returns:
         HttpResponse: HTML document dat de pagina voorstelt
     """
-    deelnemer = haal_lidgegevens(id)
+    deelnemer = Lid.objects.get(id=id)
+    gegevens = haal_lidgegevens(id)
 
     return render(request, "deelnemers/deelnemers_detail.html", {
-        "deelnemer": deelnemer
+        "deelnemer": deelnemer,
+        "gegevens": gegevens,
     })
 
 @login_required
 def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
+    deelnemer = Lid.objects.get(id=id)
     aanwezig_filter = request.GET.get("aanwezig", '')
 
     inschrijvingen = Inschrijving.objects.filter(lid=id)
@@ -70,5 +73,6 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
         inschrijvingen = inschrijvingen.exclude(annulatie__isnull=True)
 
     return render(request, "deelnemers/deelnemers_inschrijvingen.html", {
-        "inschrijvingen": inschrijvingen
+        "inschrijvingen": inschrijvingen,
+        "deelnemer": deelnemer,
     })
