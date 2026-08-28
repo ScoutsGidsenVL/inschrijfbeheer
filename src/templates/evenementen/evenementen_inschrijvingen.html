@@ -3,6 +3,16 @@
 
 {% block evenement_content %}
 
+<form method="get" class="inschrijving-filter">
+    <label for="aanwezig">Aanwezigheid</label>
+    <select name="aanwezig" id="aanwezig">
+        <option value="" {% if not aanwezig_filter %}selected{% endif %}>Alle</option>
+        <option value="1" {% if aanwezig_filter == "1" %}selected{% endif %}>Aanwezig</option>
+        <option value="0" {% if aanwezig_filter == "0" %}selected{% endif %}>Afwezig</option>
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
 <table class="inschrijving-tabel">
     <thead>
         <tr>

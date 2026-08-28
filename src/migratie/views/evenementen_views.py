@@ -55,11 +55,19 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
  
-    kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie",]
+    kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
     namen_per_lid_id = {}
- 
+
+    aanwezig_filter = request.GET.get("aanwezig", "")
+
+    queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement")
+    if aanwezig_filter == "1":
+        queryset = queryset.filter(annulatie__isnull=True)
+    elif aanwezig_filter == "0":
+        queryset = queryset.exclude(annulatie__isnull=True)
+
     inschrijvingen = []
-    for instantie in Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement"):
+    for instantie in queryset:
         lid_id = instantie.lid
  
         if lid_id not in namen_per_lid_id:
@@ -69,17 +77,20 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
             "instantie": instantie,
             "waarden": [
                 instantie.id,
-                str(instantie.evenement),
                 namen_per_lid_id[lid_id],
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
                 instantie.prijs,
                 instantie.annulatie,
+                instantie.annulatie is None,
             ],
         })
  
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
-        "kolommen": kolommen, "inschrijvingen": inschrijvingen, "evenement": evenement
+        "kolommen": kolommen,
+        "inschrijvingen": inschrijvingen,
+        "evenement": evenement,
+        "aanwezig_filter": aanwezig_filter,
     })
 
 @login_required
