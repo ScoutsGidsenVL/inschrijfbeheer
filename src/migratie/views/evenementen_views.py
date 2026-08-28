@@ -54,7 +54,7 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
  
-    kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Is betaald", "Is geannuleerd", "Is terugbetaald"]
+    kolommen = ["ID", "Evenement", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie",]
     namen_per_lid_id = {}
  
     inschrijvingen = []
@@ -72,9 +72,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
                 namen_per_lid_id[lid_id],
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
-                instantie.is_betaald,
-                instantie.is_geannuleerd,
-                instantie.is_terugbetaald,
+                instantie.prijs,
+                instantie.annulatie,
             ],
         })
  

@@ -18,6 +18,7 @@
                     <td>
                         {% if waarde|is_boolean %}
                             <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
+                        {% elif waarde|is_none %}
                         {% else %}
                             {{ waarde }}
                         {% endif %}
