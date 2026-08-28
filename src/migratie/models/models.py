@@ -261,7 +261,7 @@ class IntegreatSeminar(models.Model):
 class IntegreatRegistration(models.Model):
     """Integreat model voor een inschrijving
 
-    Args:
+    Attributes:
         oid (int): object identifiers
         seminar (IntegreatSeminar): verwijst naar seminar waarvoor werd ingeschreven
         price (float): prijs die deelnemer betaalde. Nullable
