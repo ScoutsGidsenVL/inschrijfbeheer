@@ -100,6 +100,7 @@ class Inschrijving(models.Model):
         prijs (float): bedrag betaald door deelnemer. Nullable
         tijdstip (datetime): tijdstip van inschrijving
         annulatie (datetime): tijdstip van annulatie. Nullable, null als niet geannuleerd
+        annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
     """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
@@ -108,6 +109,7 @@ class Inschrijving(models.Model):
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField()
     annulatie = models.DateTimeField(null=True, blank=True)
+    annulatie_reden = models.TextField(null=True, blank=True)
 
     class Meta:
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
@@ -276,6 +278,7 @@ class IntegreatRegistration(models.Model):
         seminar (IntegreatSeminar): verwijst naar seminar waarvoor werd ingeschreven
         price (float): prijs die deelnemer betaalde. Nullable
         annulatie (datetime): datum waarop deelnemer annuleerde, annulatie is afleidbaar. Nullable
+        canceledmotivation (str): reden voor annulatie. Nullable
         deelnemers_type (IntegreatParticipantType): type van de deelnemer. Nullable
         tijdstip (datetime): moment van inschrijving. Nullable
     """
@@ -284,6 +287,7 @@ class IntegreatRegistration(models.Model):
     deelnemer = models.ForeignKey('IntegreatParticipant', models.DO_NOTHING, db_column='Participant', blank=True, null=True)
     price = models.DecimalField(db_column='Price', max_digits=18, decimal_places=2, blank=True, null=True) 
     annulatie = models.DateTimeField(db_column='CanceledDate', blank=True, null=True)
+    canceledmotivation = models.TextField(db_column='CanceledMotivation', blank=True, null=True)
     # status = models.ForeignKey('IntegreatRegistrationstatus', models.DO_NOTHING, db_column='Status', blank=True, null=True)
     deelnemers_type = models.ForeignKey(IntegreatParticipantType, models.DO_NOTHING, db_column='ParticipantType', blank=True, null=True)
     tijdstip = models.DateTimeField(db_column='RegistrationDate', blank=True, null=True)

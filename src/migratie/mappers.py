@@ -277,6 +277,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
                 "tijdstip": registratie.tijdstip,
                 "prijs": registratie.price,
                 "annulatie": registratie.annulatie,
+                "annulatie_reden": registratie.canceledmotivation,
             },
         )
 
