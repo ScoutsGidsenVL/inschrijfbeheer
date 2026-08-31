@@ -34,12 +34,10 @@ EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
 def _parse_datetime(waarde):
     if not waarde:
         return None
-
     try:
         tijdstip = datetime.strptime(waarde, "%Y-%m-%d %H:%M:%S")
     except ValueError:
         return None
-
     return timezone.make_aware(tijdstip, EVENT_TIJDZONE)
 
 
@@ -57,6 +55,19 @@ def _split_adres(adres: str | None) -> tuple[str | None, str | None]:
     huisnummer, straat = match.groups()
     return huisnummer, straat
 
+def haal_of_maak_categorie(categorie_data: dict) -> Categorie:
+    if categorie_data.get("id") is not None:
+        categorie, _ = Categorie.objects.get_or_create(
+            id=str(categorie_data["id"]),
+            defaults={
+                "naam": categorie_data.get("name", ""),
+                "alt_naam": categorie_data.get("name", ""),
+                "is_weez": True,
+            },
+        )
+        return categorie
+    return None
+
 
 def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
     """Zet de respons van de detail-route om naar Evenement, inclusief
@@ -64,17 +75,9 @@ def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
     gemapt wordt en waarom."""
     event = payload["events"]
 
-    categorie = None
-    cat_data = event.get("category") or {}
-    if cat_data.get("id") is not None:
-        categorie, _ = Categorie.objects.update_or_create(
-            id=str(cat_data["id"]),
-            defaults={
-                "naam": cat_data.get("name", ""),
-                "alt_naam": cat_data.get("name", ""),
-                "is_weez": True,
-            },
-        )
+    categorie_data = event.get("category") or {}
+    categorie = haal_of_maak_categorie()
+
 
     locatie = None
     venue = event.get("venue") or {}
@@ -206,17 +209,7 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     return aangemaakt, bijgewerkt, overgeslagen
 
 def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryInfoType:
-    """Haalt alle Weezevent-evenementen op en zet ze om naar Evenement-records.
-
-    Stap 1: GET {BASE_URL}/event geeft de lijst van evenementen met hun id's.
-    Stap 2: voor elk id een GET naar {BASE_URL}/event/<id> voor de volledige
-            details.
-    Stap 3: elk detail-antwoord wordt via map_evenement_detail() weggeschreven.
-
-    Als een enkele detail-aanroep faalt, wordt dat gelogd en gaat de functie
-    verder met de overige id's, in plaats van de volledige import te laten
-    mislukken. Let op: als /event gepagineerd is, haalt deze functie enkel de
-    eerste pagina op, breid uit met paginering indien nodig.
+    """Haalt alle Weez evenementen op en zet ze om naar Evenement modellen.
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
