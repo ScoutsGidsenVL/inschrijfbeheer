@@ -46,6 +46,7 @@ class Locatie(models.Model):
     huisnummer = models.CharField(null=True)
     postcode = models.CharField(null=True)
     stad = models.CharField(null=True)
+    is_weez = models.BooleanField(default=False, blank=True)
 
     models.CheckConstraint(
         condition=(
@@ -79,6 +80,7 @@ class Categorie(models.Model):
     id = models.CharField(primary_key=True)
     naam = models.CharField()
     alt_naam = models.CharField()
+    is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
@@ -93,13 +95,14 @@ class Evenement(models.Model):
     beschrijving = models.CharField()
     status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL, null=True, db_column="status")
     locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT, null=True, db_column="locatie")
-    starttijd = models.DateTimeField()
-    eindtijd = models.DateTimeField()
+    starttijd = models.DateTimeField(null=True)
+    eindtijd = models.DateTimeField(null=True)
     min_deelnemers = models.PositiveIntegerField()
     max_deelnemers = models.PositiveIntegerField()
     aantal_zelfde_groep = models.PositiveIntegerField()
     min_leeftijd = models.PositiveIntegerField()
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
+    is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
