@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .log-niveau {
+        display: inline-block;
+        padding: 0.1em 0.6em;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    .log-niveau-debug    { background-color: #e0e0e0; color: #424242; }
+    .log-niveau-info     { background-color: #d3e8fd; color: #0b4a8f; }
+    .log-niveau-warning  { background-color: #ffedb3; color: #7a5600; }
+    .log-niveau-error    { background-color: #fbd6d3; color: #9c1c14; }
+    .log-niveau-critical { background-color: #9c1c14; color: white; }
+</style>
+
+<h1>Logs</h1>
+
+<form method="get" class="log-filter">
+    <label>
+        Logger
+        <input type="text" name="logger_name" value="{{ filters.logger_name }}">
+    </label>
+    <label>
+        Bericht
+        <input type="text" name="message" value="{{ filters.message }}">
+    </label>
+    <label>
+        Module
+        <input type="text" name="module" value="{{ filters.module }}">
+    </label>
+    <label>
+        Functie
+        <input type="text" name="function" value="{{ filters.function }}">
+    </label>
+    <label>
+        Gebruiker
+        <input type="text" name="user_identifier" value="{{ filters.user_identifier }}">
+    </label>
+    <label>
+        Trace
+        <input type="text" name="trace" value="{{ filters.trace }}">
+    </label>
+    <label>
+        Niveau
+        <select name="level">
+            <option value="" {% if not filters.level %}selected{% endif %}>Alle</option>
+            {% for waarde, label in levels %}
+                <option value="{{ waarde }}" {% if filters.level == waarde|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>
+        Van
+        <input type="date" name="van" value="{{ filters.van }}">
+    </label>
+    <label>
+        Tot
+        <input type="date" name="tot" value="{{ filters.tot }}">
+    </label>
+    <button type="submit">Filter</button>
+</form>
+
+<table class="log-tabel">
+    <thead>
+        <tr>
+            <th>Tijdstip</th>
+            <th>Niveau</th>
+            <th>Logger</th>
+            <th>Bericht</th>
+            <th>Module</th>
+            <th>Functie</th>
+            <th>Regel</th>
+            <th>Gebruiker</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in pagina %}
+            <tr>
+                <td>{{ log.created_at }}</td>
+                <td><span class="log-niveau log-niveau-{{ log.get_level_display|lower }}">{{ log.get_level_display }}</span></td>
+                <td>{{ log.logger_name }}</td>
+                <td>
+                    {{ log.message }}
+                    {% if log.trace %}
+                        <details>
+                            <summary>Trace</summary>
+                            <pre>{{ log.trace }}</pre>
+                        </details>
+                    {% endif %}
+                    {% if log.extra %}
+                        <details>
+                            <summary>Extra</summary>
+                            <pre>{{ log.extra }}</pre>
+                        </details>
+                    {% endif %}
+                </td>
+                <td>{{ log.module }}</td>
+                <td>{{ log.function }}</td>
+                <td>{{ log.line|default:"-" }}</td>
+                <td>{{ log.user_identifier|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="8">Geen logs gevonden voor deze filters.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="log-paginering">
+    {% if pagina.has_previous %}
+        <a href="?{{ basis_querystring }}&pagina={{ pagina.previous_page_number }}">Vorige</a>
+    {% endif %}
+    Pagina {{ pagina.number }} van {{ pagina.paginator.num_pages }}
+    {% if pagina.has_next %}
+        <a href="?{{ basis_querystring }}&pagina={{ pagina.next_page_number }}">Volgende</a>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger("inschrijfbeheer")
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -22,8 +26,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
-        self.stdout.write(
-            "Synchronisatie opgeroepen" + (" (dry-run)" if dry_run else "")
+        logger.info(
+            "[INIS SYNC] Synchronisatie opgeroepen" + (" (dry-run)" if dry_run else "")
         )
 
         limiet = options["limiet"] if options["limiet"] else None
@@ -40,13 +44,12 @@ class Command(BaseCommand):
         with transaction.atomic():
             for naam, functie in stappen:
                 aangemaakt, bijgewerkt, overgeslagen = functie(limiet=limiet)
-                self.stdout.write(
-                    f"{naam}: aangemaakt={aangemaakt}, bijgewerkt={bijgewerkt}, "
-                    f"overgeslagen={overgeslagen}"
+                logger.info(
+                    f"[INIS SYNC] {naam}: aangemaakt={aangemaakt}, bijgewerkt={bijgewerkt}, overgeslagen={overgeslagen}"
                 )
 
             if dry_run:
                 transaction.set_rollback(True)
-                self.stdout.write(
-                    "Dry-run: alle wijzigingen teruggedraaid, niets opgeslagen."
+                logger.info(
+                    "[INIS SYNC] Dry-run: alle wijzigingen teruggedraaid, niets opgeslagen."
                 )

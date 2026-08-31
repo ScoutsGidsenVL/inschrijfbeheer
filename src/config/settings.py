@@ -99,7 +99,15 @@ DATABASES = {
             'host_is_server': True,
             'extra_params': 'TDS_Version=7.4;TrustServerCertificate=yes;',
         }
-    }
+    },
+    'logging': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_name'),
+        'HOST': os.getenv("DB_host"),
+        'USER': os.getenv("DB_username"),
+        'PASSWORD': os.getenv('DB_password'),
+        'PORT': '5432',
+    },
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -173,5 +181,27 @@ STATICFILES_DIRS = [
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "db": {
+            "level": "INFO",
+            "class": "inschrijfbeheer.utils.logging.DatabaseLogHandler",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "inschrijfbeheer": {
+            "handlers": ["db", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }

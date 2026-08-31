@@ -9,6 +9,7 @@ QueryInfoType terug: (aangemaakt, bijgewerkt, overgeslagen).
 """
 
 import re
+import logging
 from django.utils import timezone
 
 from inschrijfbeheer.models import (
@@ -32,6 +33,8 @@ from inschrijfbeheer.models import (
     Lid
 )
 from inschrijfbeheer.utils.soap import haal_lidgegevens, LidGegevens
+
+logger = logging.getLogger("inschrijfbeheer")
 
 QueryInfoType = tuple[int, int, int]
 
@@ -178,7 +181,7 @@ def laad_evenementen(limiet: None | int = None) -> QueryInfoType:
         try:
             gegevens = map_evenement(seminar)
         except Exception as fout:
-            print(f"Seminar {seminar.oid} ({seminar.code}) overgeslagen: {fout}")
+            logger.warning(f"Seminar {seminar.oid} ({seminar.code}) overgeslagen: {fout}")
             overgeslagen += 1
             continue
 
@@ -287,7 +290,7 @@ def laad_inschrijvingen(limiet: None | int = None) -> QueryInfoType:
             evenement = Evenement.objects.get(id=seminar.code.strip())
             deelnemertype = DeelnemerType.objects.get(id=str(registratie.deelnemers_type.oid))
         except (Evenement.DoesNotExist, DeelnemerType.DoesNotExist) as fout:
-            print(f"Inschrijving {registratie.oid} overgeslagen: {fout}")
+            logger.warning(f"Inschrijving {registratie.oid} overgeslagen: {fout}")
             overgeslagen += 1
             continue
 
