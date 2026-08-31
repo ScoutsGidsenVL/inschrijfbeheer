@@ -57,3 +57,9 @@
     font-weight: bold;
     border-bottom-color: #333;
 }
+
+.evenement-icoon {
+    height: 1.5rem;
+    width: auto;
+    flex-shrink: 0;
+}
