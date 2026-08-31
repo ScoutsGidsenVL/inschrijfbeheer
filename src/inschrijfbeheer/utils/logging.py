@@ -12,7 +12,7 @@ class DatabaseLogHandler(logging.Handler):
         from inschrijfbeheer.models import LogEntry
 
         try:
-            LogEntry.objects.create(
+            LogEntry.objects.using("logging").create(
                 level=record.levelno,
                 logger_name=record.name,
                 message=self.format(record),
