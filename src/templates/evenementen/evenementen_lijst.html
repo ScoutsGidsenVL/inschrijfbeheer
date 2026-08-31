@@ -14,12 +14,23 @@
             {{ label }}
         </label>
     {% endfor %}
-    <select name="categorie" id="categorie">
-        <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
-        {% for categorie in categorieen %}
-            <option value="{{categorie.naam}}" {% if request.GET.categorie == categorie.naam %}selected{% endif %}>{{ categorie.naam }}</option>
-        {% endfor %}
-    </select>
+    <label>
+        Filter categorie
+        <select name="categorie" id="categorie">
+            <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
+            {% for categorie in categorieen %}
+                <option value="{{categorie.naam}}" {% if request.GET.categorie == categorie.naam %}selected{% endif %}>{{ categorie.naam }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>
+        Filter Weez
+        <select name="weez">
+            <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
+            <option value="1" {% if request.GET.categorie == "1" %}selected{% endif %}>Weez</option>
+            <option value="0" {% if request.GET.categorie == "0" %}selected{% endif %}>INIS/KV</option>
+        </select>
+    </label>
     <button type="submit">Filter</button>
 </form>
 
