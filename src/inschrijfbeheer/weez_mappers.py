@@ -144,7 +144,7 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
 
     weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
         "id_event[]": evenement.id,
-        # "include_deleted": "1",
+        "include_deleted": "1",
         "full": "1",
     })
     weez_deelnemers_respons.raise_for_status()
@@ -221,7 +221,7 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryIn
     aangemaakt = bijgewerkt = overgeslagen = 0
 
     overzicht_resp = doe_weez_get(sessie, "events", parameters={
-        # "include_closed": "1", 
+        "include_closed": "1", 
         "include_without_sales": "1",
     })
     overzicht_resp.raise_for_status()
