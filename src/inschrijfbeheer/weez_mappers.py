@@ -11,8 +11,6 @@ from dotenv import load_dotenv
 
 from requests import Session
 
-from django.db import transaction
-
 from inschrijfbeheer.models import (
     Categorie,
     Evenement,
