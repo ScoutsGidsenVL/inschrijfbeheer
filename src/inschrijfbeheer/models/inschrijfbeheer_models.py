@@ -104,6 +104,7 @@ class Evenement(models.Model):
     min_leeftijd = models.PositiveIntegerField()
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
     is_weez = models.BooleanField(default=False, blank=True)
+    laatste_sync = models.DateTimeField(auto_now=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
