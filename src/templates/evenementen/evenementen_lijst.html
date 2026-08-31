@@ -37,8 +37,11 @@
 <table class="evenement-tabel">
     <thead>
         <tr>
-            {% for label in gekozen_labels %}
-                <th>{{ label }}</th>
+            {% for kolom, label in gekozen_labels %}
+                <th>
+                    <a href="{% sorteer_url kolom %}">{{ label }}</a>
+                    {% sorteer_icoon kolom %}
+                </th>
             {% endfor %}
         </tr>
     </thead>

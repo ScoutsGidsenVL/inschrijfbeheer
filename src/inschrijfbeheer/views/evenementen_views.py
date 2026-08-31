@@ -28,6 +28,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     zoekterm: str = request.GET.get('q', '').strip()
     categorie_naam: str = request.GET.get('categorie', '').strip()
     weez_filter: str = request.GET.get("weez", '')
+    sorteer: str = request.GET.get("sorteer", '').strip()
     gekozen_kolommen = [k for k in request.GET.getlist("kolom") if k in KOLOMMEN]
     if not gekozen_kolommen:
         gekozen_kolommen = STANDAARD_KOLOMMEN
@@ -49,6 +50,9 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
         else:
             evenementen = evenementen.exclude(is_weez=True)
 
+    if sorteer.lstrip("-") in KOLOMMEN:
+        evenementen = evenementen.order_by(sorteer)
+
     rijen = [
         (evenement.id, [getattr(evenement, kolom) for kolom in gekozen_kolommen])
         for evenement in evenementen
@@ -59,7 +63,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     return render(request, "evenementen/evenementen_lijst.html", {
         "alle_kolommen": KOLOMMEN,
         "gekozen_kolommen": gekozen_kolommen,
-        "gekozen_labels": [KOLOMMEN[k] for k in gekozen_kolommen],
+        "gekozen_labels": [(k, KOLOMMEN[k]) for k in gekozen_kolommen],
         "rijen": rijen,
         "categorieen": categorieen,
     })
