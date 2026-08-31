@@ -91,6 +91,24 @@ class Categorie(models.Model):
         return self.naam
 
 class Evenement(models.Model):
+    """Model voor een evenement
+
+    Attributes:
+        id (str): id van het evenement
+        titel (str): titel/naam van het evenement
+        beschrijving (str): beschrijving van het evenement
+        status (EvenementStatus): status van het evenement. Nullable
+        locatie (Locatie): locatie van het evenement. Nullable
+        starttijd (datetime): starttijd van het evenement. Nullable
+        eindtijd (datetime): eindtijd van het evenement. Nullable
+        min_deelnemers (int): minimaal aantal deelnemers
+        max_deelnemers (int): maximaal aantal deelnemers
+        aantal_zelfde_groep (int): maximaal aantal deelnemers uit éénzelfde groep
+        min_leeftijd (int): minimale leeftijd voor een deelnemer
+        categorie (Categorie): categorie van het evenement
+        is_weez (bool): geeft aan of het evenement afkomstig is van Weezevent
+        laatste_sync (datetime): wanneer laatste synchronisatie was met Weez
+    """
     id = models.CharField(primary_key=True)
     titel = models.CharField()
     beschrijving = models.CharField()
