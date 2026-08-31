@@ -28,8 +28,11 @@ class Mapper:
 
     logger = logging.getLogger("inschrijfbeheer")
 
+    def __init__(self):
+        self.info = SynchronisatieInfo(False, {})
+
     def synchroniseer(self) -> SynchronisatieInfo:
         raise NotImplementedError("Deze methode dient geïmplemnteerd door een subklasse")
 
     def log_info(self) -> None:
-        pass
+        self.logger.info(msg=self.info.formatteer)
