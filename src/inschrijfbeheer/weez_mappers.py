@@ -121,7 +121,10 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Ev
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    overzicht_resp = doe_weez_get(sessie, f"events")
+    overzicht_resp = doe_weez_get(sessie, "events", parameters={
+        "include_closed": "true", 
+        "include_without_sales": "true",
+    })
     overzicht_resp.raise_for_status()
     overzicht = overzicht_resp.json()
 
