@@ -138,6 +138,7 @@ class Inschrijving(models.Model):
         tijdstip (datetime): tijdstip van inschrijving
         annulatie (datetime): tijdstip van annulatie. Nullable, null als niet geannuleerd
         annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
+        is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
     """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
@@ -147,6 +148,7 @@ class Inschrijving(models.Model):
     tijdstip = models.DateTimeField()
     annulatie = models.DateTimeField(null=True, blank=True)
     annulatie_reden = models.TextField(null=True, blank=True)
+    is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
         unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
