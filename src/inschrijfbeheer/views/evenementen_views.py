@@ -17,15 +17,18 @@ KOLOMMEN = {
     "aantal_zelfde_groep": "Aantal uit dezelfde groep",
     "min_leeftijd": "Min. leeftijd",
     "categorie": "Categorie",
+    "is_weez": "Weezevent"
 }
 
-STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "starttijd"]
+STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "is_weez"]
 
 
 @login_required
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
     zoekterm: str = request.GET.get('q', '').strip()
     categorie_naam: str = request.GET.get('categorie', '').strip()
+    weez_filter: str = request.GET.get("weez", '')
+    sorteer: str = request.GET.get("sorteer", '').strip()
     gekozen_kolommen = [k for k in request.GET.getlist("kolom") if k in KOLOMMEN]
     if not gekozen_kolommen:
         gekozen_kolommen = STANDAARD_KOLOMMEN
@@ -36,11 +39,19 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     )
 
     if categorie_naam:
-        print(categorie_naam)
         categorie = Categorie.objects.get(naam=categorie_naam)
         evenementen = evenementen.filter(
             categorie=categorie.id
         )
+
+    if weez_filter:
+        if weez_filter == '1':
+            evenementen = evenementen.filter(is_weez=True)
+        else:
+            evenementen = evenementen.exclude(is_weez=True)
+
+    if sorteer.lstrip("-") in KOLOMMEN:
+        evenementen = evenementen.order_by(sorteer)
 
     rijen = [
         (evenement.id, [getattr(evenement, kolom) for kolom in gekozen_kolommen])
@@ -52,7 +63,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     return render(request, "evenementen/evenementen_lijst.html", {
         "alle_kolommen": KOLOMMEN,
         "gekozen_kolommen": gekozen_kolommen,
-        "gekozen_labels": [KOLOMMEN[k] for k in gekozen_kolommen],
+        "gekozen_labels": [(k, KOLOMMEN[k]) for k in gekozen_kolommen],
         "rijen": rijen,
         "categorieen": categorieen,
     })

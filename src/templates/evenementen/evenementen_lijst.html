@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load type_filters %}
 
 {% block content %}
 <form method="get" class="kolom-keuze">
@@ -13,20 +14,34 @@
             {{ label }}
         </label>
     {% endfor %}
-    <select name="categorie" id="categorie">
-        <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
-        {% for categorie in categorieen %}
-            <option value="{{categorie.naam}}" {% if request.GET.categorie == categorie.naam %}selected{% endif %}>{{ categorie.naam }}</option>
-        {% endfor %}
-    </select>
+    <label>
+        Filter categorie
+        <select name="categorie" id="categorie">
+            <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
+            {% for categorie in categorieen %}
+                <option value="{{categorie.naam}}" {% if request.GET.categorie == categorie.naam %}selected{% endif %}>{{ categorie.naam }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>
+        Filter Weez
+        <select name="weez">
+            <option value="" {% if not request.GET.weez %}selected{% endif %}>Alle</option>
+            <option value="1" {% if request.GET.weez == "1" %}selected{% endif %}>Weez</option>
+            <option value="0" {% if request.GET.weez == "0" %}selected{% endif %}>INIS/KV</option>
+        </select>
+    </label>
     <button type="submit">Filter</button>
 </form>
 
 <table class="evenement-tabel">
     <thead>
         <tr>
-            {% for label in gekozen_labels %}
-                <th>{{ label }}</th>
+            {% for kolom, label in gekozen_labels %}
+                <th>
+                    <a href="{% sorteer_url kolom %}">{{ label }}</a>
+                    {% sorteer_icoon kolom %}
+                </th>
             {% endfor %}
         </tr>
     </thead>
@@ -34,7 +49,14 @@
         {% for evenement_id, waarden in rijen %}
             <tr class="evenement-rij" onclick="window.location.href='{% url "evenement_detail" id=evenement_id %}'">
                 {% for waarde in waarden %}
-                    <td>{{ waarde }}</td>
+                    <td>
+                        {% if waarde|is_boolean %}
+                                <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
+                        {% elif waarde|is_none %}
+                        {% else %}
+                            {{ waarde }}
+                        {% endif %}
+                    </td>
                 {% endfor %}
             </tr>
         {% endfor %}
