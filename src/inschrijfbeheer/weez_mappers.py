@@ -120,22 +120,29 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    weez_deelnemers_respons = doe_weez_get(sessie, f"v3/evenement/{evenement.id}/participants", parameters={
-
+    weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
+        "id_event[]": evenement.id,
+        "include_deleted": "1",
+        "full": "1",
     })
     weez_deelnemers_respons.raise_for_status()
     weez_deelnemers = weez_deelnemers_respons.json()
 
+    weez_deelnemers = weez_deelnemers.get("participants", [])
+
     for deelnemer in weez_deelnemers:
-        inschrijving_id = deelnemer.get("id_billet")
+        inschrijving_id = deelnemer.get("id_ticket")
         if not inschrijving_id:
             raise ValueError("Geen ID gevonden voor een inschrijving van Weez")
     
-        _, is_nieuw = Inschrijving.objects.get_or_create(
+        _, is_nieuw = Inschrijving.objects.update_or_create(
             id=inschrijving_id,
-            evenement=evenement,
-            lid=TEST_LID,
-            is_weez=True,
+            defaults={
+                "evenement":evenement,
+                "lid":TEST_LID,
+                "tijdstip":_parse_datetime(deelnemer.get('create_date')),
+                "is_weez":True,
+            },
         )
     
     return aangemaakt, bijgewerkt, overgeslagen
@@ -156,8 +163,8 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryIn
     aangemaakt = bijgewerkt = overgeslagen = 0
 
     overzicht_resp = doe_weez_get(sessie, "events", parameters={
-        "include_closed": "true", 
-        "include_without_sales": "true",
+        "include_closed": "1", 
+        "include_without_sales": "1",
     })
     overzicht_resp.raise_for_status()
     overzicht = overzicht_resp.json()
