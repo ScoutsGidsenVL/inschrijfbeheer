@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load type_filters %}
 
 {% block content %}
 <form method="get" class="kolom-keuze">
@@ -34,7 +35,14 @@
         {% for evenement_id, waarden in rijen %}
             <tr class="evenement-rij" onclick="window.location.href='{% url "evenement_detail" id=evenement_id %}'">
                 {% for waarde in waarden %}
-                    <td>{{ waarde }}</td>
+                    <td>
+                        {% if waarde|is_boolean %}
+                                <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
+                        {% elif waarde|is_none %}
+                        {% else %}
+                            {{ waarde }}
+                        {% endif %}
+                    </td>
                 {% endfor %}
             </tr>
         {% endfor %}

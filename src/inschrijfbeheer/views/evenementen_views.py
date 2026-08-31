@@ -17,9 +17,10 @@ KOLOMMEN = {
     "aantal_zelfde_groep": "Aantal uit dezelfde groep",
     "min_leeftijd": "Min. leeftijd",
     "categorie": "Categorie",
+    "is_weez": "Weezevent"
 }
 
-STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "starttijd"]
+STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "is_weez"]
 
 
 @login_required
