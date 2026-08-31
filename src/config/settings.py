@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mozilla_django_oidc',
-    'migratie',
+    'inschrijfbeheer',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'inschrijfbeheer.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -72,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'inschrijfbeheer.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
@@ -103,7 +103,7 @@ DATABASES = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    "inschrijfbeheer.oidc.KeycloakOIDCBackend",
+    "config.oidc.KeycloakOIDCBackend",
     "django.contrib.auth.backends.ModelBackend",
 )
 

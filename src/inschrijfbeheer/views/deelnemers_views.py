@@ -12,9 +12,9 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-from migratie.models import Inschrijving, Lid
+from inschrijfbeheer.models import Inschrijving, Lid
 
-from migratie.utils.soap import haal_lidgegevens
+from inschrijfbeheer.utils.soap import haal_lidgegevens
 
 
 @login_required

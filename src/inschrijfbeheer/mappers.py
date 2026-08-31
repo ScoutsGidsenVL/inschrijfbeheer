@@ -11,7 +11,7 @@ QueryInfoType terug: (aangemaakt, bijgewerkt, overgeslagen).
 import re
 from django.utils import timezone
 
-from migratie.models import (
+from inschrijfbeheer.models import (
     Categorie,
     Inschrijving,
     DeelnemerType,
@@ -31,7 +31,7 @@ from migratie.models import (
     InschrijvingVraagAntwoord,
     Lid
 )
-from migratie.utils.soap import haal_lidgegevens, LidGegevens
+from inschrijfbeheer.utils.soap import haal_lidgegevens, LidGegevens
 
 QueryInfoType = tuple[int, int, int]
 

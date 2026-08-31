@@ -23,7 +23,9 @@ from django.conf import settings
 urlpatterns = [
     path("oidc/", include("mozilla_django_oidc.urls")),
     path("", login_required(TemplateView.as_view(template_name="home.html")), name="home"),
-    path("docs/", serve, {"document_root": settings.BASE_DIR / '..' / 'docs', "path": "README.md"}),
-    path("docs/<path:path>", serve, {"document_root": settings.BASE_DIR / '..' / 'docs'}),
-    path("", include("migratie.urls")),
+    path("docs/", serve, {"document_root": settings.BASE_DIR / '..' / 'docs', "path": "README.md"}), # README te vinden via docs/
+    path("docs/<path:path>", serve, {"document_root": settings.BASE_DIR / '..' / 'docs'}), # technische documentatie terug te vinden via /docs/<naam>
+    path("evenementen/", include("inschrijfbeheer.urls.evenementen_urls")),
+    path("deelnemers/", include("inschrijfbeheer.urls.deelnemers_urls")),
+    path("inschrijvingen/", include("inschrijfbeheer.urls.inschrijvingen_urls")),
 ]

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from migratie.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
+from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
