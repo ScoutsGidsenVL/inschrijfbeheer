@@ -10,17 +10,26 @@ from datetime import datetime
 
 from requests import Session
 
-from inschrijfbeheer.models import Categorie, Evenement, Locatie
+from inschrijfbeheer.models import (
+    Categorie,
+    Evenement,
+    Locatie,
+    Inschrijving,
+    Lid,
+    EvenementVraag,
+    InschrijvingVraagAntwoord
+)
 from inschrijfbeheer.utils.weez_api import doe_weez_get
+from inschrijfbeheer.utils.soap import haal_lidgegevens
 
 
 from zoneinfo import ZoneInfo
 from django.utils import timezone
 
+QueryInfoType = tuple[int, int, int]
 logger = logging.getLogger("inschrijfbeheer")
 
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
-
 
 def _parse_datetime(waarde):
     if not waarde:
@@ -49,7 +58,7 @@ def _split_adres(adres: str | None) -> tuple[str | None, str | None]:
     return huisnummer, straat
 
 
-def map_evenement_detail(payload: dict) -> Evenement:
+def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
     """Zet de respons van de detail-route om naar Evenement, inclusief
     Locatie en Categorie. Zie de moduledocstring voor wat (nog) niet
     gemapt wordt en waarom."""
@@ -101,11 +110,102 @@ def map_evenement_detail(payload: dict) -> Evenement:
         },
     )
 
-    return aangemaakt
+    return evenement, aangemaakt
 
+def bepaal_lidnummer(json: str) -> str:
+    for vraag_json in json:
+        if vraag_json.get("label") == "Lidnummer":
+            lidnummer = vraag_json.get("value")
+            if lidnummer:
+                return lidnummer
+    raise ValueError(f"Geen lidnummer gevonden in de vragen: {json}")
 
+def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType:
+    """Synchroniseert alle deelnemers voor een bepaald evenement van Weez.
 
-def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Evenement]:
+    Args:
+        sessie (Session): sessie voor het uitvoeren van de requests
+        event_id (int): id van het evenement in Weez
+
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    evenement_prijzen_respons = doe_weez_get(sessie, f"tickets", parameters={
+        "id_event[]": evenement.id
+    })
+    evenement_prijzen_respons.raise_for_status()
+    evenement_prijzen_respons = evenement_prijzen_respons.json()
+
+    evenement_prijzen = {}
+    for prijs_json in evenement_prijzen_respons.get("events")[0].get("tickets"):
+        evenement_prijzen[prijs_json.get("id")] = prijs_json.get("price")
+
+    weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
+        "id_event[]": evenement.id,
+        "include_deleted": "1",
+        "full": "1",
+    })
+    weez_deelnemers_respons.raise_for_status()
+    weez_deelnemers = weez_deelnemers_respons.json()
+
+    weez_deelnemers = weez_deelnemers.get("participants", [])
+
+    for deelnemer in weez_deelnemers:
+        inschrijving_id = str(deelnemer.get("id_participant")) + str(deelnemer.get("id_event"))
+        tarief_id = deelnemer.get("id_ticket")
+        vragen = deelnemer.get("answers")
+
+        lid = haal_lidgegevens(bepaal_lidnummer(vragen))
+        lid_obj, _ = Lid.objects.get_or_create(id=lid.id, defaults={
+            "voornaam": lid.voornaam,
+            "achternaam": lid.naam,
+            "mailadres": lid.emailadres,
+        })
+    
+        inschrijving, is_nieuw = Inschrijving.objects.update_or_create(
+            evenement=evenement,
+            lid=lid_obj,
+            defaults={
+                "id":inschrijving_id,
+                "tijdstip":_parse_datetime(deelnemer.get('create_date')),
+                "is_weez":True,
+                "prijs": evenement_prijzen[tarief_id],
+            },
+        )
+
+        if vragen:
+            for index, vraag_json in enumerate(vragen):
+                vraag, vraag_is_nieuw = EvenementVraag.objects.get_or_create(
+                    evenement=evenement,
+                    vraag=vraag_json.get("label"),
+                    defaults={
+                        "volgorde": index,
+                    },
+                )
+
+                _, _ = InschrijvingVraagAntwoord.objects.get_or_create(
+                    vraag=vraag,
+                    inschrijving=inschrijving,
+                    defaults={
+                        "antwoord":vraag_json.get("value"),
+                    },
+                )
+
+                if vraag_is_nieuw:
+                    aangemaakt += 2
+                else:
+                    bijgewerkt += 2
+        
+        if is_nieuw:
+            aangemaakt +=1
+        else:
+            bijgewerkt += 1
+    
+    return aangemaakt, bijgewerkt, overgeslagen
+
+def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryInfoType:
     """Haalt alle Weezevent-evenementen op en zet ze om naar Evenement-records.
 
     Stap 1: GET {BASE_URL}/event geeft de lijst van evenementen met hun id's.
@@ -121,8 +221,8 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Ev
     aangemaakt = bijgewerkt = overgeslagen = 0
 
     overzicht_resp = doe_weez_get(sessie, "events", parameters={
-        "include_closed": "true", 
-        "include_without_sales": "true",
+        "include_closed": "1", 
+        "include_without_sales": "1",
     })
     overzicht_resp.raise_for_status()
     overzicht = overzicht_resp.json()
@@ -138,7 +238,13 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Ev
             detail_resp = doe_weez_get(sessie, f"event/{event_id}/details")
             detail_resp.raise_for_status()
             detail_payload = detail_resp.json()
-            is_nieuw = map_evenement_detail(detail_payload)
+            evenement, is_nieuw = map_evenement_detail(detail_payload)
+
+            nieuwe_deelnemers, bijgewerkte_deelnemers, overgeslagen_deelnemers = haal_weez_deelnemers(sessie, evenement)
+
+            aangemaakt += nieuwe_deelnemers
+            bijgewerkt += bijgewerkte_deelnemers
+            overgeslagen += overgeslagen_deelnemers
 
             if is_nieuw:
                 aangemaakt += 1

@@ -8,8 +8,13 @@
 
 {% block content %}
 <div class="evenement-hoofding">
-    <button class="evenement-terug-knop" onclick="history.back()">Back</button>
-    <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
+    <div class="evenement-titelrij">
+        <button class="evenement-terug-knop" onclick="history.back()">Back</button>
+        {% if evenement.is_weez %}
+            <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="evenement-icoon">
+        {% endif %}
+        <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
+    </div>
     <nav class="evenement-nav">
         <a href="/evenementen/{{ evenement.id }}" class="geselecteerd">Algemeen</a>
         <a href="/evenementen/{{ evenement.id }}/inschrijvingen">Inschrijvingen</a>
