@@ -175,3 +175,25 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "db": {
+            "level": "INFO",
+            "class": "inschrijfbeheer.utils.logging.DatabaseLogHandler",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "inschrijfbeheer": {
+            "handlers": ["db", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
