@@ -23,6 +23,7 @@ from inschrijfbeheer.models import (
     InschrijvingVraagAntwoord
 )
 from inschrijfbeheer.utils.weez_api import doe_weez_get
+from inschrijfbeheer.utils.soap import haal_lidgegevens
 
 
 from zoneinfo import ZoneInfo
@@ -31,9 +32,6 @@ from django.utils import timezone
 QueryInfoType = tuple[int, int, int]
 
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
-
-
-TEST_LID = Lid.objects.get(id="test")
 
 def _parse_datetime(waarde):
     if not waarde:
@@ -116,6 +114,14 @@ def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
 
     return evenement, aangemaakt
 
+def bepaal_lidnummer(json: str) -> str:
+    for vraag_json in json:
+        if vraag_json.get("label") == "Lidnummer":
+            lidnummer = vraag_json.get("value")
+            if lidnummer:
+                return lidnummer
+    raise ValueError(f"Geen lidnummer gevonden in de vragen: {json}")
+
 def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType:
     """Synchroniseert alle deelnemers voor een bepaald evenement van Weez.
 
@@ -140,7 +146,7 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
 
     weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
         "id_event[]": evenement.id,
-        "include_deleted": "1",
+        # "include_deleted": "1",
         "full": "1",
     })
     weez_deelnemers_respons.raise_for_status()
@@ -151,10 +157,18 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     for deelnemer in weez_deelnemers:
         inschrijving_id = str(deelnemer.get("id_participant")) + str(deelnemer.get("id_event"))
         tarief_id = deelnemer.get("id_ticket")
+        vragen = deelnemer.get("answers")
+
+        lid = haal_lidgegevens(bepaal_lidnummer(vragen))
+        lid_obj, _ = Lid.objects.get_or_create(id=lid.id, defaults={
+            "voornaam": lid.voornaam,
+            "achternaam": lid.naam,
+            "mailadres": lid.emailadres,
+        })
     
         inschrijving, is_nieuw = Inschrijving.objects.update_or_create(
             evenement=evenement,
-            lid=TEST_LID,
+            lid=lid_obj,
             defaults={
                 "id":inschrijving_id,
                 "tijdstip":_parse_datetime(deelnemer.get('create_date')),
@@ -163,7 +177,6 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
             },
         )
 
-        vragen = deelnemer.get("answers")
         if vragen:
             for index, vraag_json in enumerate(vragen):
                 vraag, vraag_is_nieuw = EvenementVraag.objects.get_or_create(
@@ -210,7 +223,7 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryIn
     aangemaakt = bijgewerkt = overgeslagen = 0
 
     overzicht_resp = doe_weez_get(sessie, "events", parameters={
-        "include_closed": "1", 
+        # "include_closed": "1", 
         "include_without_sales": "1",
     })
     overzicht_resp.raise_for_status()
