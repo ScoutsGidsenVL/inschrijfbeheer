@@ -5,7 +5,7 @@ logger = logging.getLogger("inschrijfbeheer")
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from inschrijfbeheer.mappers import (
+from inschrijfbeheer.mapping.mappers import (
     laad_evenementen,
     laad_deelnemertypes,
     laad_inschrijvingen,

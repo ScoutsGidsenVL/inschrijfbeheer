@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from inschrijfbeheer.utils.weez_api import maak_sessie
-from inschrijfbeheer.weez_mappers import haal_weez_evenementen
+from inschrijfbeheer.mapping.weez_mappers import haal_weez_evenementen
 from django.db import transaction
 import logging
 
