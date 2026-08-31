@@ -13,15 +13,19 @@ from requests import Session
 
 from django.db import transaction
 
-from inschrijfbeheer.models import Categorie, Evenement, Locatie
+from inschrijfbeheer.models import Categorie, Evenement, Locatie, Inschrijving, Lid
 from inschrijfbeheer.utils.weez_api import doe_weez_get
 
 
 from zoneinfo import ZoneInfo
 from django.utils import timezone
 
+QueryInfoType = tuple[int, int, int]
+
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
 
+
+TEST_LID = Lid.objects.get(id="test")
 
 def _parse_datetime(waarde):
     if not waarde:
@@ -50,7 +54,7 @@ def _split_adres(adres: str | None) -> tuple[str | None, str | None]:
     return huisnummer, straat
 
 
-def map_evenement_detail(payload: dict) -> Evenement:
+def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
     """Zet de respons van de detail-route om naar Evenement, inclusief
     Locatie en Categorie. Zie de moduledocstring voor wat (nog) niet
     gemapt wordt en waarom."""
@@ -102,11 +106,41 @@ def map_evenement_detail(payload: dict) -> Evenement:
         },
     )
 
-    return aangemaakt
+    return evenement, aangemaakt
 
+def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType:
+    """Synchroniseert alle deelnemers voor een bepaald evenement van Weez.
 
+    Args:
+        sessie (Session): sessie voor het uitvoeren van de requests
+        event_id (int): id van het evenement in Weez
 
-def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Evenement]:
+    Returns:
+        QueryInfoType: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+    """
+    aangemaakt = bijgewerkt = overgeslagen = 0
+
+    weez_deelnemers_respons = doe_weez_get(sessie, f"v3/evenement/{evenement.id}/participants", parameters={
+
+    })
+    weez_deelnemers_respons.raise_for_status()
+    weez_deelnemers = weez_deelnemers_respons.json()
+
+    for deelnemer in weez_deelnemers:
+        inschrijving_id = deelnemer.get("id_billet")
+        if not inschrijving_id:
+            raise ValueError("Geen ID gevonden voor een inschrijving van Weez")
+    
+        _, is_nieuw = Inschrijving.objects.get_or_create(
+            id=inschrijving_id,
+            evenement=evenement,
+            lid=TEST_LID,
+            is_weez=True,
+        )
+    
+    return aangemaakt, bijgewerkt, overgeslagen
+
+def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryInfoType:
     """Haalt alle Weezevent-evenementen op en zet ze om naar Evenement-records.
 
     Stap 1: GET {BASE_URL}/event geeft de lijst van evenementen met hun id's.
@@ -139,7 +173,13 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Ev
             detail_resp = doe_weez_get(sessie, f"event/{event_id}/details")
             detail_resp.raise_for_status()
             detail_payload = detail_resp.json()
-            is_nieuw = map_evenement_detail(detail_payload)
+            evenement, is_nieuw = map_evenement_detail(detail_payload)
+
+            nieuwe_deelnemers, bijgewerkte_deelnemers, overgeslagen_deelnemers = haal_weez_deelnemers(sessie, evenement)
+
+            aangemaakt += nieuwe_deelnemers
+            bijgewerkt += bijgewerkte_deelnemers
+            overgeslagen += overgeslagen_deelnemers
 
             if is_nieuw:
                 aangemaakt += 1
