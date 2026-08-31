@@ -128,6 +128,16 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
+    evenement_prijzen_respons = doe_weez_get(sessie, f"tickets", parameters={
+        "id_event[]": evenement.id
+    })
+    evenement_prijzen_respons.raise_for_status()
+    evenement_prijzen_respons = evenement_prijzen_respons.json()
+
+    evenement_prijzen = {}
+    for prijs_json in evenement_prijzen_respons.get("events")[0].get("tickets"):
+        evenement_prijzen[prijs_json.get("id")] = prijs_json.get("price")
+
     weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
         "id_event[]": evenement.id,
         "include_deleted": "1",
@@ -139,17 +149,17 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     weez_deelnemers = weez_deelnemers.get("participants", [])
 
     for deelnemer in weez_deelnemers:
-        inschrijving_id = deelnemer.get("id_ticket")
-        if not inschrijving_id:
-            raise ValueError("Geen ID gevonden voor een inschrijving van Weez")
+        inschrijving_id = str(deelnemer.get("id_participant")) + str(deelnemer.get("id_event"))
+        tarief_id = deelnemer.get("id_ticket")
     
         inschrijving, is_nieuw = Inschrijving.objects.update_or_create(
-            id=inschrijving_id,
+            evenement=evenement,
+            lid=TEST_LID,
             defaults={
-                "evenement":evenement,
-                "lid":TEST_LID,
+                "id":inschrijving_id,
                 "tijdstip":_parse_datetime(deelnemer.get('create_date')),
                 "is_weez":True,
+                "prijs": evenement_prijzen[tarief_id],
             },
         )
 
