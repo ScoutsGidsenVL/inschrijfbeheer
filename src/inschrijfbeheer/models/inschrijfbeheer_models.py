@@ -132,7 +132,7 @@ class Inschrijving(models.Model):
     Attributes:
         id (str): id van de inschrijving
         evenement (Evenement): evenement waarvoor werd ingeschreven
-        lid (str): lid id uit de groepsadmin voor identificatie lid
+        lid (Lid): Lid object dat koppelt naar GA
         deelnemertype (DeelnemerType): type van de deelnemer. Nullable
         prijs (float): bedrag betaald door deelnemer. Nullable
         tijdstip (datetime): tijdstip van inschrijving
@@ -145,7 +145,7 @@ class Inschrijving(models.Model):
     lid = models.ForeignKey(Lid, db_column="lid", on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
-    tijdstip = models.DateTimeField()
+    tijdstip = models.DateTimeField(null=True, blank=True)
     annulatie = models.DateTimeField(null=True, blank=True)
     annulatie_reden = models.TextField(null=True, blank=True)
     is_weez = models.BooleanField(default=False, blank=True)
