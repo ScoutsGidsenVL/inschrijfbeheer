@@ -13,7 +13,15 @@ from requests import Session
 
 from django.db import transaction
 
-from inschrijfbeheer.models import Categorie, Evenement, Locatie, Inschrijving, Lid
+from inschrijfbeheer.models import (
+    Categorie,
+    Evenement,
+    Locatie,
+    Inschrijving,
+    Lid,
+    EvenementVraag,
+    InschrijvingVraagAntwoord
+)
 from inschrijfbeheer.utils.weez_api import doe_weez_get
 
 
@@ -135,7 +143,7 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
         if not inschrijving_id:
             raise ValueError("Geen ID gevonden voor een inschrijving van Weez")
     
-        _, is_nieuw = Inschrijving.objects.update_or_create(
+        inschrijving, is_nieuw = Inschrijving.objects.update_or_create(
             id=inschrijving_id,
             defaults={
                 "evenement":evenement,
@@ -144,6 +152,35 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
                 "is_weez":True,
             },
         )
+
+        vragen = deelnemer.get("answers")
+        if vragen:
+            for index, vraag_json in enumerate(vragen):
+                vraag, vraag_is_nieuw = EvenementVraag.objects.get_or_create(
+                    evenement=evenement,
+                    vraag=vraag_json.get("label"),
+                    defaults={
+                        "volgorde": index,
+                    },
+                )
+
+                _, _ = InschrijvingVraagAntwoord.objects.get_or_create(
+                    vraag=vraag,
+                    inschrijving=inschrijving,
+                    defaults={
+                        "antwoord":vraag_json.get("value"),
+                    },
+                )
+
+                if vraag_is_nieuw:
+                    aangemaakt += 2
+                else:
+                    bijgewerkt += 2
+        
+        if is_nieuw:
+            aangemaakt +=1
+        else:
+            bijgewerkt += 1
     
     return aangemaakt, bijgewerkt, overgeslagen
 

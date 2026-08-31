@@ -13,7 +13,8 @@
     **InschrijvingVraagAntwoord:** antwoorden van de deelnemers op de vragen
 """
 
-from django.db import models
+from django.db import models, connection
+
 
 
 class Lid(models.Model):
@@ -175,11 +176,23 @@ class EvenementVraagType(models.Model):
         app_label = "inschrijfbeheer"
         db_table = 'evenement_vraagtype'
 
+
+def volgend_evenement_vraag_id():
+    """Functie die een uniek ID genereert voor een EvenementVraag.
+    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor vragen, dus deze moeten ingevuld worden.
+
+    Returns:
+        str: een uniek ID
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('evenement_vraag_id_seq')")
+        return str(cursor.fetchone()[0])
+
 class EvenementVraag(models.Model):
     """Model voor vrije vragen bij een evenement
 
     Attributes:
-        id (int): automatisch id voor in de databank
+        id (str): id. Defaults to volgende nummer in een sequentie voor Weezevent
         type (EvenementVraagType): type van de vraag. Nullable
         vraag (str): vraag.
         items (str): mogelijke antwoorden op de vraag (bij meerdere opties gescheiden door ';'). Nullable
@@ -187,7 +200,7 @@ class EvenementVraag(models.Model):
         vereist (bool): geeft aan of de vraag vereist is. Nullable
         volgorde (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
     """
-    id = models.CharField(primary_key=True)
+    id = models.CharField(primary_key=True, default=volgend_evenement_vraag_id)
     type = models.ForeignKey(EvenementVraagType, models.DO_NOTHING, blank=True, null=True)
     vraag = models.TextField()
     items = models.TextField(blank=True, null=True)
@@ -198,16 +211,27 @@ class EvenementVraag(models.Model):
         app_label = "inschrijfbeheer"
         db_table = 'evenement_vraag'
 
+def volgend_inschrijving_vraagantwoord_id() -> str:
+    """Functie die een uniek ID genereert voor een InschrijvingVraagAntwoord.
+    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor vragen, dus deze moeten ingevuld worden.
+
+    Returns:
+        str: een uniek ID
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('inschrijving_vraagantwoord_id_seq')")
+        return str(cursor.fetchone()[0])
+
 class InschrijvingVraagAntwoord(models.Model):
     """Model voor een antwoord op een vrije vraag bij een evenement
 
     Attributes:
-        id (int): automatisch id voor in de databank
+        id (int): id. Defaults to volgende nummer in een sequentie voor Weezevent
         vraag (EvenementVraag): verwijst naar de beantwoorde vraag. Nullable
         antwoord (str): antwoord op de vraag. Nullable
         inschrijving (Inschrijving): verwijst naar de inschrijving. Nullable
     """
-    id = models.CharField(primary_key=True)
+    id = models.CharField(primary_key=True, default=volgend_inschrijving_vraagantwoord_id)
     vraag = models.ForeignKey(EvenementVraag, models.CASCADE)
     antwoord = models.TextField(blank=True, null=True)
     inschrijving = models.ForeignKey(Inschrijving, models.CASCADE)
