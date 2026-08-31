@@ -26,9 +26,9 @@
     <label>
         Filter Weez
         <select name="weez">
-            <option value="" {% if not request.GET.categorie %}selected{% endif %}>Alle</option>
-            <option value="1" {% if request.GET.categorie == "1" %}selected{% endif %}>Weez</option>
-            <option value="0" {% if request.GET.categorie == "0" %}selected{% endif %}>INIS/KV</option>
+            <option value="" {% if not request.GET.weez %}selected{% endif %}>Alle</option>
+            <option value="1" {% if request.GET.weez == "1" %}selected{% endif %}>Weez</option>
+            <option value="0" {% if request.GET.weez == "0" %}selected{% endif %}>INIS/KV</option>
         </select>
     </label>
     <button type="submit">Filter</button>
