@@ -4,14 +4,11 @@ EvenementStatus, Categorie en Locatie, plus haal_weez_evenementen() om alles
 op te halen.
 """
 
-import os
+import logging
 import re
 from datetime import datetime
-from dotenv import load_dotenv
 
 from requests import Session
-
-from django.db import transaction
 
 from inschrijfbeheer.models import Categorie, Evenement, Locatie
 from inschrijfbeheer.utils.weez_api import doe_weez_get
@@ -19,6 +16,8 @@ from inschrijfbeheer.utils.weez_api import doe_weez_get
 
 from zoneinfo import ZoneInfo
 from django.utils import timezone
+
+logger = logging.getLogger("inschrijfbeheer")
 
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
 
@@ -146,7 +145,7 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> list[Ev
             else:
                 bijgewerkt += 1
         except (KeyError, ValueError) as e:
-            print("Onverwachte respons voor evenement %s: %s", event_id, str(e))
+            logger.warning("Onverwachte respons voor evenement %s: %s", event_id, str(e))
             overgeslagen += 1
             continue
 
