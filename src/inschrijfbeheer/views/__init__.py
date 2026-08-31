@@ -17,3 +17,7 @@ from inschrijfbeheer.views.inschrijvingen_views import (
     inschrijvingen_detail,
     inschrijvingen_vragen,
 )
+
+from inschrijfbeheer.views.logging_views import (
+    log_lijst
+)
