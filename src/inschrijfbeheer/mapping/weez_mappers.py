@@ -19,8 +19,9 @@ from inschrijfbeheer.models import (
     EvenementVraag,
     InschrijvingVraagAntwoord
 )
-from inschrijfbeheer.utils.weez_api import doe_weez_get
+from inschrijfbeheer.utils.weez_api import doe_weez_get, maak_sessie
 from inschrijfbeheer.utils.soap import haal_lidgegevens
+from inschrijfbeheer.mapping.mapper import Mapper, SynchronisatieInfo
 
 
 from zoneinfo import ZoneInfo
@@ -140,6 +141,7 @@ def haal_evenement_tarieven(sessie: Session, evenement: Evenement) -> dict[str, 
         "id_event[]": evenement.id
     })
 
+
     evenement_prijzen = {}
     for prijs_json in evenement_prijzen_respons.get("events")[0].get("tickets"):
         evenement_prijzen[prijs_json.get("id")] = prijs_json.get("price")
@@ -223,19 +225,22 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     
     return aangemaakt, bijgewerkt, overgeslagen
 
-def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryInfoType:
-    """Haalt alle Weez evenementen op en zet ze om naar Evenement modellen.
-    """
-    aangemaakt = bijgewerkt = overgeslagen = 0
+class WeezSyncer(Mapper):
+
+    def synchroniseer(self) -> SynchronisatieInfo:
+        """Haalt alle Weez evenementen op en zet ze om naar Evenement modellen.
+        """
+        sessie = maak_sessie()
+        aangemaakt = bijgewerkt = overgeslagen = 0
 
         overzicht = doe_weez_get(sessie, "events", parameters={
             "include_closed": "1", 
             "include_without_sales": "1",
         })
 
-    weez_event_lijst = overzicht.get("events", [])
-    if limiet is not None:
-        weez_event_lijst = weez_event_lijst[:limiet]
+        weez_event_lijst = overzicht.get("events", [])
+        if self.config.limiet is not None:
+            weez_event_lijst = weez_event_lijst[:self.config.limiet]
 
         evenementen: list[Evenement] = []
         for event in weez_event_lijst:
@@ -244,19 +249,20 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryIn
                 detail_payload = doe_weez_get(sessie, f"event/{event_id}/details")
                 evenement, is_nieuw = map_evenement_detail(detail_payload)
 
-            nieuwe_deelnemers, bijgewerkte_deelnemers, overgeslagen_deelnemers = haal_weez_deelnemers(sessie, evenement)
+                nieuwe_deelnemers, bijgewerkte_deelnemers, overgeslagen_deelnemers = haal_weez_deelnemers(sessie, evenement)
 
-            aangemaakt += nieuwe_deelnemers
-            bijgewerkt += bijgewerkte_deelnemers
-            overgeslagen += overgeslagen_deelnemers
+                aangemaakt += nieuwe_deelnemers
+                bijgewerkt += bijgewerkte_deelnemers
+                overgeslagen += overgeslagen_deelnemers
 
-            if is_nieuw:
-                aangemaakt += 1
-            else:
-                bijgewerkt += 1
-        except (KeyError, ValueError) as e:
-            logger.warning("Onverwachte respons voor evenement %s: %s", event_id, str(e))
-            overgeslagen += 1
-            continue
+                if is_nieuw:
+                    aangemaakt += 1
+                else:
+                    bijgewerkt += 1
+            except (KeyError, ValueError) as e:
+                logger.warning("Onverwachte respons voor evenement %s: %s", event_id, str(e))
+                overgeslagen += 1
+                continue
 
-    return aangemaakt, bijgewerkt, overgeslagen
+        sessie.close()
+        return aangemaakt, bijgewerkt, overgeslagen
