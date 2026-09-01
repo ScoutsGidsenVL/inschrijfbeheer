@@ -68,6 +68,19 @@ def haal_of_maak_categorie(categorie_data: dict) -> Categorie:
         return categorie
     return None
 
+def haal_of_maak_locatie(locatie_data: dict) -> Locatie:
+    if locatie_data.get("name") or locatie_data.get("address"):
+        huisnummer, straat = _split_adres(locatie_data.get("address"))
+        locatie, _ = Locatie.objects.get_or_create(
+            naam=locatie_data.get("name") or None,
+            straat=straat,
+            huisnummer=huisnummer,
+            postcode=locatie_data.get("zip_code") or None,
+            stad=locatie_data.get("city") or None,
+            is_weez=True,
+        )
+        return locatie
+    return None
 
 def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
     """Zet de respons van de detail-route om naar Evenement, inclusief
@@ -76,21 +89,11 @@ def map_evenement_detail(payload: dict) -> tuple[Evenement, bool]:
     event = payload["events"]
 
     categorie_data = event.get("category") or {}
-    categorie = haal_of_maak_categorie()
+    categorie = haal_of_maak_categorie(categorie_data)
 
+    locatie_data = event.get("venue") or {}
+    locatie = haal_of_maak_locatie(locatie_data)
 
-    locatie = None
-    venue = event.get("venue") or {}
-    if venue.get("name") or venue.get("address"):
-        huisnummer, straat = _split_adres(venue.get("address"))
-        locatie, _ = Locatie.objects.get_or_create(
-            naam=venue.get("name") or None,
-            straat=straat,
-            huisnummer=huisnummer,
-            postcode=venue.get("zip_code") or None,
-            stad=venue.get("city") or None,
-            is_weez=True,
-        )
 
     periode = event.get("period") or {}
     starttijd = _parse_datetime(periode.get("start"))
