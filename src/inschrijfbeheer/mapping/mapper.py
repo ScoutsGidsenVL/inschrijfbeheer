@@ -44,7 +44,7 @@ class Mapper:
     def synchroniseer(self) -> SynchronisatieInfo:
         raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
 
-    def synchroniseer_evenement(self, evenement: Evenement) -> SynchronisatieInfo:
+    def synchroniseer_evenement(self, evenement_id: str) -> SynchronisatieInfo:
         raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
 
     def log_info(self) -> None:
