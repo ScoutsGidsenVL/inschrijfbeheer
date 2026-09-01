@@ -56,8 +56,12 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
         HttpResponse: HTML document dat de pagina voorstelt
     """
     deelnemer = Deelnemer.objects.get(id=id)
+    if deelnemer.foutboodschap is not None:
+        return render(request, "deelnemers/deelnemers_ongeldig.html", {
+            "deelnemer": deelnemer,
+        })
+    
     gegevens = haal_lidgegevens(id)
-
     return render(request, "deelnemers/deelnemers_detail.html", {
         "deelnemer": deelnemer,
         "gegevens": gegevens,

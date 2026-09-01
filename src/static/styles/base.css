@@ -62,3 +62,7 @@ table {
 th {
     text-align: left;
 }
+
+.foutboodschap {
+    color: red;
+}
