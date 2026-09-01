@@ -6,22 +6,11 @@ from django.contrib.auth.decorators import login_required
 
 KOLOMMEN = {
     "id": "ID",
+    "is_weez": "Weezevent",
     "titel": "Titel",
-    "beschrijving": "Beschrijving",
-    "status": "Status",
-    "locatie": "Locatie",
-    "starttijd": "Starttijd",
-    "eindtijd": "Eindtijd",
-    "min_deelnemers": "Min. deelnemers",
-    "max_deelnemers": "Max. deelnemers",
-    "aantal_zelfde_groep": "Aantal uit dezelfde groep",
-    "min_leeftijd": "Min. leeftijd",
     "categorie": "Categorie",
-    "is_weez": "Weezevent"
+    "status": "Status",
 }
-
-STANDAARD_KOLOMMEN = ["id", "titel", "status", "locatie", "is_weez"]
-
 
 @login_required
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
@@ -29,9 +18,6 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     categorie_naam: str = request.GET.get('categorie', '').strip()
     weez_filter: str = request.GET.get("weez", '')
     sorteer: str = request.GET.get("sorteer", '').strip()
-    gekozen_kolommen = [k for k in request.GET.getlist("kolom") if k in KOLOMMEN]
-    if not gekozen_kolommen:
-        gekozen_kolommen = STANDAARD_KOLOMMEN
 
     evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(
         Q(titel__icontains=zoekterm)
@@ -53,18 +39,10 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     if sorteer.lstrip("-") in KOLOMMEN:
         evenementen = evenementen.order_by(sorteer)
 
-    rijen = [
-        (evenement.id, [getattr(evenement, kolom) for kolom in gekozen_kolommen])
-        for evenement in evenementen
-    ]
-
     categorieen = Categorie.objects.all()
 
     return render(request, "evenementen/evenementen_lijst.html", {
-        "alle_kolommen": KOLOMMEN,
-        "gekozen_kolommen": gekozen_kolommen,
-        "gekozen_labels": [(k, KOLOMMEN[k]) for k in gekozen_kolommen],
-        "rijen": rijen,
+        "evenementen": evenementen,
         "categorieen": categorieen,
     })
 

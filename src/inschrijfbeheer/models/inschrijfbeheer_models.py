@@ -1,7 +1,7 @@
 """Module die alle nieuwe datamodellen voor **Inschrijfbeheer** bevat
 
 ## Classes:
-    **Lid:** gebruikt voor snellere zoekmethoden
+    **Deelnemer:** deelnemer, gebruikt voor snellere zoekmethoden
     **Locatie:** beschrijft een locatie
     **EvenementStatus:** beschrijft de status van een evenement
     **Categorie:** beschrijft de categorie van een evenement
@@ -16,8 +16,19 @@
 from django.db import models, connection
 
 
+def volgende_deelnemer_id():
+    """Functie die een uniek ID genereert voor een Deelnemer.
+    Dit wordt gebruikt omdat een deelnemer foutieve gegevens kan geven.
 
-class Lid(models.Model):
+    Returns:
+        str: een uniek ID
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('deelnemer_id_seq')")
+        return str(cursor.fetchone()[0])
+
+
+class Deelnemer(models.Model):
     """Model voor een lid.
     Dit model is niet strikt nodig, als enkel het lid id wordt bijgehouden in Inschrijving, 
     moet de UI steeds SOAP calls maken naar de GA wat lange wachttijden tot gevolg heeft
@@ -27,15 +38,17 @@ class Lid(models.Model):
         voornaam (str): voornaam van het lid
         achternaam (str): achternaam van het lid
         mailadres (str): mailadres van het lid
+        foutboodschap (str): boodschap bij het lid als het foutief is. Nullable
     """
-    id = models.CharField(primary_key=True, max_length=32)
+    id = models.CharField(primary_key=True, max_length=32, default=volgende_deelnemer_id)
     voornaam = models.CharField(null=False)
     achternaam = models.CharField(null=False)
     mailadres = models.CharField(null=False)
+    foutboodschap = models.TextField(null=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "lid" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "deelnemer" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
@@ -91,6 +104,25 @@ class Categorie(models.Model):
         return self.naam
 
 class Evenement(models.Model):
+    """Model voor een evenement
+
+    Attributes:
+        id (str): id van het evenement
+        titel (str): titel/naam van het evenement
+        beschrijving (str): beschrijving van het evenement
+        status (EvenementStatus): status van het evenement. Nullable
+        locatie (Locatie): locatie van het evenement. Nullable
+        starttijd (datetime): starttijd van het evenement. Nullable
+        eindtijd (datetime): eindtijd van het evenement. Nullable
+        min_deelnemers (int): minimaal aantal deelnemers
+        max_deelnemers (int): maximaal aantal deelnemers
+        aantal_zelfde_groep (int): maximaal aantal deelnemers uit éénzelfde groep
+        min_leeftijd (int): minimale leeftijd voor een deelnemer
+        categorie (Categorie): categorie van het evenement
+        is_weez (bool): geeft aan of het evenement afkomstig is van Weezevent
+        laatste_sync (datetime): wanneer laatste synchronisatie was met Weez
+        foutboodschap (str): geeft een foutboodschap bij een Evenement aan. Nullable
+    """
     id = models.CharField(primary_key=True)
     titel = models.CharField()
     beschrijving = models.CharField()
@@ -104,6 +136,8 @@ class Evenement(models.Model):
     min_leeftijd = models.PositiveIntegerField()
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
     is_weez = models.BooleanField(default=False, blank=True)
+    laatste_sync = models.DateTimeField(auto_now=True)
+    foutboodschap = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
@@ -127,6 +161,17 @@ class DeelnemerType(models.Model):
     def __str__(self):
         return self.naam
 
+def volgend_inschrijving_id():
+    """Functie die een uniek ID genereert voor een Inschrijving.
+    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor inschrijvingen, dus deze moeten ingevuld worden.
+
+    Returns:
+        str: een uniek ID
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('inschrijving_id_seq')")
+        return str(cursor.fetchone()[0])
+
 class Inschrijving(models.Model):
     """Model voor een inschrijving
 
@@ -141,9 +186,9 @@ class Inschrijving(models.Model):
         annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
         is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
     """
-    id = models.CharField(primary_key=True)
+    id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
-    lid = models.ForeignKey(Lid, db_column="lid", on_delete=models.RESTRICT)
+    lid = models.ForeignKey(Deelnemer, db_column="lid", on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField(null=True, blank=True)

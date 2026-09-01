@@ -15,6 +15,12 @@
         {% endif %}
         <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
     </div>
+    {% if evenement.foutboodschap %}
+    <div class="foutboodschap">
+        <div class="foutboodschap-icoon">!</div>
+        <div class="foutboodschap-tekst">{{evenement.foutboodschap}}</div>
+    </div>
+    {% endif %}
     <nav class="evenement-nav">
         <a href="/evenementen/{{ evenement.id }}" class="geselecteerd">Algemeen</a>
         <a href="/evenementen/{{ evenement.id }}/inschrijvingen">Inschrijvingen</a>

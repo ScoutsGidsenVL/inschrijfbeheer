@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from inschrijfbeheer.utils.weez_api import maak_sessie
-from inschrijfbeheer.weez_mappers import haal_weez_evenementen
+from inschrijfbeheer.mapping.weez_mappers import WeezSyncer
+from inschrijfbeheer.mapping.mapper import SynchronisatieConfig
 from django.db import transaction
 import logging
 
@@ -22,21 +23,14 @@ class Command(BaseCommand):
         )
 
         limiet = options["limiet"] if options["limiet"] else None
+        syncer = WeezSyncer(SynchronisatieConfig(limiet=limiet))
 
-        stappen = [
-            ("evenementen", haal_weez_evenementen),
-        ]
+        with transaction.atomic():
+            syncer.synchroniseer()
+            logger.info(syncer.info.formatteer())
 
-        with maak_sessie() as sessie:
-            with transaction.atomic():
-                for naam, functie in stappen:
-                    aangemaakt, bijgewerkt, overgeslagen = functie(sessie=sessie, limiet=limiet)
-                    logger.info(
-                        f"[WEEZ SYNC] {naam}: aangemaakt={aangemaakt}, bijgewerkt={bijgewerkt}, overgeslagen={overgeslagen}"
-                    )
-
-                if dry_run:
-                    transaction.set_rollback(True)
-                    logger.info(
-                        "[WEEZ SYNC] Dry-run: alle wijzigingen teruggedraaid, niets opgeslagen."
-                    )
+            if dry_run:
+                transaction.set_rollback(True)
+                logger.info(
+                    "[WEEZ SYNC] Dry-run: alle wijzigingen teruggedraaid, niets opgeslagen."
+                )

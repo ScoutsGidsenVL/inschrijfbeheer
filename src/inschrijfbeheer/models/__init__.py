@@ -1,5 +1,5 @@
 from inschrijfbeheer.models.inschrijfbeheer_models import (
-    Lid,
+    Deelnemer,
     Locatie,
     EvenementStatus,
     Categorie,
@@ -28,5 +28,6 @@ from inschrijfbeheer.models.integreat_models import (
 
 from inschrijfbeheer.models.logging_models import (
     LogEntry,
-    LogLevel
+    LogLevel,
+    WeezSynchronisatie
 )
