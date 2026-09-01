@@ -1,7 +1,7 @@
 """Module die alle nieuwe datamodellen voor **Inschrijfbeheer** bevat
 
 ## Classes:
-    **Lid:** gebruikt voor snellere zoekmethoden
+    **Deelnemer:** deelnemer, gebruikt voor snellere zoekmethoden
     **Locatie:** beschrijft een locatie
     **EvenementStatus:** beschrijft de status van een evenement
     **Categorie:** beschrijft de categorie van een evenement
@@ -17,7 +17,7 @@ from django.db import models, connection
 
 
 
-class Lid(models.Model):
+class Deelnemer(models.Model):
     """Model voor een lid.
     Dit model is niet strikt nodig, als enkel het lid id wordt bijgehouden in Inschrijving, 
     moet de UI steeds SOAP calls maken naar de GA wat lange wachttijden tot gevolg heeft
@@ -27,11 +27,13 @@ class Lid(models.Model):
         voornaam (str): voornaam van het lid
         achternaam (str): achternaam van het lid
         mailadres (str): mailadres van het lid
+        ongeldig (str): boodschap bij het lid als het foutief is. Nullable
     """
     id = models.CharField(primary_key=True, max_length=32)
     voornaam = models.CharField(null=False)
     achternaam = models.CharField(null=False)
     mailadres = models.CharField(null=False)
+    ongeldig = models.TextField(null=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
@@ -162,7 +164,7 @@ class Inschrijving(models.Model):
     """
     id = models.CharField(primary_key=True)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
-    lid = models.ForeignKey(Lid, db_column="lid", on_delete=models.RESTRICT)
+    lid = models.ForeignKey(Deelnemer, db_column="lid", on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField(null=True, blank=True)
