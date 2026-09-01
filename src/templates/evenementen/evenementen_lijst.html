@@ -2,18 +2,11 @@
 {% load type_filters %}
 
 {% block content %}
-<form method="get" class="kolom-keuze">
+<form method="get" class="evenement-filter">
     <label>
         Zoek evenement
         <input type="textfield" name="q" value="{{ request.GET.q }}" placeholder="Zoek evenement">
     </label>
-    {% for kolom, label in alle_kolommen.items %}
-        <label>
-            <input type="checkbox" name="kolom" value="{{ kolom }}"
-                {% if kolom in gekozen_kolommen %}checked{% endif %}>
-            {{ label }}
-        </label>
-    {% endfor %}
     <label>
         Filter categorie
         <select name="categorie" id="categorie">
@@ -37,27 +30,22 @@
 <table class="evenement-tabel">
     <thead>
         <tr>
-            {% for kolom, label in gekozen_labels %}
-                <th>
-                    <a href="{% sorteer_url kolom %}">{{ label }}</a>
-                    {% sorteer_icoon kolom %}
-                </th>
-            {% endfor %}
+            <th><a href="{% sorteer_url 'id' %}">ID</a> {% sorteer_icoon 'id' %}</th>
+            <th><a href="{% sorteer_url 'is_weez' %}">Weezevent</a> {% sorteer_icoon 'is_weez' %}</th>
+            <th><a href="{% sorteer_url 'titel' %}">Titel</a> {% sorteer_icoon 'titel' %}</th>
+            <th><a href="{% sorteer_url 'categorie' %}">Categorie</a> {% sorteer_icoon 'categorie' %}</th>
+            <th><a href="{% sorteer_url 'status' %}">Status</a> {% sorteer_icoon 'status' %}</th>
         </tr>
     </thead>
     <tbody>
-        {% for evenement_id, waarden in rijen %}
-            <tr class="evenement-rij" onclick="window.location.href='{% url "evenement_detail" id=evenement_id %}'">
-                {% for waarde in waarden %}
-                    <td>
-                        {% if waarde|is_boolean %}
-                                <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
-                        {% elif waarde|is_none %}
-                        {% else %}
-                            {{ waarde }}
-                        {% endif %}
-                    </td>
-                {% endfor %}
+        {% for evenement in evenementen %}
+            <tr class="evenement-rij {% if evenement.foutboodschap %}foutboodschap{% endif %}" onclick="window.location.href='{% url "evenement_detail" id=evenement.id %}'"
+                {% if evenement.foutboodschap %}title="{{evenement.foutboodschap}}"{% endif %}>
+                <td>{{ evenement.id }}</td>
+                <td><input type="checkbox" disabled {% if evenement.is_weez %}checked{% endif %}></td>
+                <td>{{ evenement.titel }}</td>
+                <td>{{ evenement.categorie }}</td>
+                <td>{{ evenement.status }}</td>
             </tr>
         {% endfor %}
     </tbody>
