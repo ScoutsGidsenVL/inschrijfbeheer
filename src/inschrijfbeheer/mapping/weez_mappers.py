@@ -139,7 +139,6 @@ def haal_evenement_tarieven(sessie: Session, evenement: Evenement) -> dict[str, 
     evenement_prijzen_respons = doe_weez_get(sessie, f"tickets", parameters={
         "id_event[]": evenement.id
     })
-    evenement_prijzen_respons.raise_for_status()
     evenement_prijzen_respons = evenement_prijzen_respons.json()
 
     evenement_prijzen = {}
@@ -195,7 +194,6 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
         "include_deleted": "1",
         "full": "1",
     })
-    weez_deelnemers_respons.raise_for_status()
     weez_deelnemers = weez_deelnemers_respons.json()
 
     weez_deelnemers = weez_deelnemers.get("participants", [])
@@ -243,14 +241,13 @@ def haal_weez_evenementen(sessie: Session, limiet: None | int = None) -> QueryIn
     if limiet is not None:
         weez_event_lijst = weez_event_lijst[:limiet]
 
-    evenementen: list[Evenement] = []
-    for event in weez_event_lijst:
-        event_id = event["id"]
-        try:
-            detail_resp = doe_weez_get(sessie, f"event/{event_id}/details")
-            detail_resp.raise_for_status()
-            detail_payload = detail_resp.json()
-            evenement, is_nieuw = map_evenement_detail(detail_payload)
+        evenementen: list[Evenement] = []
+        for event in weez_event_lijst:
+            event_id = event["id"]
+            try:
+                detail_resp = doe_weez_get(sessie, f"event/{event_id}/details")
+                detail_payload = detail_resp.json()
+                evenement, is_nieuw = map_evenement_detail(detail_payload)
 
             nieuwe_deelnemers, bijgewerkte_deelnemers, overgeslagen_deelnemers = haal_weez_deelnemers(sessie, evenement)
 

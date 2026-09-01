@@ -25,10 +25,17 @@ def doe_weez_get(sessie: Session, url: str, parameters: dict = {}) -> Response:
 
     Returns:
         Response: respons van de API
+
+    Raises:
+        HTTPError: indien de request een foutstatus ontvangt
     """
     extra_parameters = ''.join([f"&{param}={waarde}" for param, waarde in parameters.items()])
 
-    return get(
+    response = get(
         f"{BASE_URL}{url}?api_key={WEEZ_API_KEY}&access_token={WEEZ_ACCESS_TOKEN}{extra_parameters}",
         timeout=10
     )
+
+    response.raise_for_status()
+
+    return response
