@@ -126,6 +126,56 @@ def bepaal_lidnummer(json: str) -> str:
                 return lidnummer
     raise ValueError(f"Geen lidnummer gevonden in de vragen: {json}")
 
+def haal_evenement_tarieven(sessie: Session, evenement: Evenement) -> dict[str, int]:
+    """Bepaalt de mogelijke prijzen voor een evenement en steekt deze in een dict
+
+    Args:
+        sessie (Session): sessie die de requests maakt
+        evenement (Evenement): het evenement waarvoor de prijzen bepaald worden
+    
+    Returns:
+        dict[str, int]: een mapping van een tarief id naar de prijs
+    """
+    evenement_prijzen_respons = doe_weez_get(sessie, f"tickets", parameters={
+        "id_event[]": evenement.id
+    })
+    evenement_prijzen_respons.raise_for_status()
+    evenement_prijzen_respons = evenement_prijzen_respons.json()
+
+    evenement_prijzen = {}
+    for prijs_json in evenement_prijzen_respons.get("events")[0].get("tickets"):
+        evenement_prijzen[prijs_json.get("id")] = prijs_json.get("price")
+
+    return evenement_prijzen
+
+def haal_of_maak_lid(lidnummer: str) -> Lid:
+        lid = haal_lidgegevens(lidnummer)
+        lid_obj, _ = Lid.objects.get_or_create(id=lid.id, defaults={
+            "voornaam": lid.voornaam,
+            "achternaam": lid.naam,
+            "mailadres": lid.emailadres,
+        })
+
+def verwerk_vragen(vragen, evenement: Evenement, inschrijving: Inschrijving):
+    if not vragen:
+        return
+    for index, vraag_json in enumerate(vragen):
+        vraag, _ = EvenementVraag.objects.get_or_create(
+            evenement=evenement,
+            vraag=vraag_json.get("label"),
+            defaults={
+                "volgorde": index,
+            },
+        )
+
+        _, _ = InschrijvingVraagAntwoord.objects.get_or_create(
+            vraag=vraag,
+            inschrijving=inschrijving,
+            defaults={
+                "antwoord":vraag_json.get("value"),
+            },
+        )
+
 def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType:
     """Synchroniseert alle deelnemers voor een bepaald evenement van Weez.
 
@@ -138,15 +188,7 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
     """
     aangemaakt = bijgewerkt = overgeslagen = 0
 
-    evenement_prijzen_respons = doe_weez_get(sessie, f"tickets", parameters={
-        "id_event[]": evenement.id
-    })
-    evenement_prijzen_respons.raise_for_status()
-    evenement_prijzen_respons = evenement_prijzen_respons.json()
-
-    evenement_prijzen = {}
-    for prijs_json in evenement_prijzen_respons.get("events")[0].get("tickets"):
-        evenement_prijzen[prijs_json.get("id")] = prijs_json.get("price")
+    evenement_prijzen = haal_evenement_tarieven(sessie, evenement)
 
     weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
         "id_event[]": evenement.id,
@@ -162,13 +204,8 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
         inschrijving_id = str(deelnemer.get("id_participant")) + str(deelnemer.get("id_event"))
         tarief_id = deelnemer.get("id_ticket")
         vragen = deelnemer.get("answers")
-
-        lid = haal_lidgegevens(bepaal_lidnummer(vragen))
-        lid_obj, _ = Lid.objects.get_or_create(id=lid.id, defaults={
-            "voornaam": lid.voornaam,
-            "achternaam": lid.naam,
-            "mailadres": lid.emailadres,
-        })
+        lidnummer = bepaal_lidnummer(vragen)
+        lid_obj = haal_of_maak_lid(lidnummer)
     
         inschrijving, is_nieuw = Inschrijving.objects.update_or_create(
             evenement=evenement,
@@ -181,28 +218,7 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
             },
         )
 
-        if vragen:
-            for index, vraag_json in enumerate(vragen):
-                vraag, vraag_is_nieuw = EvenementVraag.objects.get_or_create(
-                    evenement=evenement,
-                    vraag=vraag_json.get("label"),
-                    defaults={
-                        "volgorde": index,
-                    },
-                )
-
-                _, _ = InschrijvingVraagAntwoord.objects.get_or_create(
-                    vraag=vraag,
-                    inschrijving=inschrijving,
-                    defaults={
-                        "antwoord":vraag_json.get("value"),
-                    },
-                )
-
-                if vraag_is_nieuw:
-                    aangemaakt += 2
-                else:
-                    bijgewerkt += 2
+        verwerk_vragen(vragen=vragen, evenement=evenement, inschrijving=inschrijving)
         
         if is_nieuw:
             aangemaakt +=1
