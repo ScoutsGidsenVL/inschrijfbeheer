@@ -6,8 +6,10 @@ op te halen.
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from dataclasses import dataclass
+import os
+from dotenv import load_dotenv
 
 from inschrijfbeheer.models import (
     Categorie,
@@ -16,7 +18,8 @@ from inschrijfbeheer.models import (
     Inschrijving,
     Deelnemer,
     EvenementVraag,
-    InschrijvingVraagAntwoord
+    InschrijvingVraagAntwoord,
+    WeezSynchronisatie
 )
 from inschrijfbeheer.utils.weez_api import doe_weez_get, maak_sessie
 from inschrijfbeheer.utils.soap import haal_lidgegevens
@@ -31,8 +34,8 @@ from inschrijfbeheer.mapping.mapper import (
 from zoneinfo import ZoneInfo
 from django.utils import timezone
 
-QueryInfoType = tuple[int, int, int]
 logger = logging.getLogger("inschrijfbeheer")
+load_dotenv()
 
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
 
@@ -118,6 +121,10 @@ class WeezSyncer(Mapper):
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez evenementen op en zet ze om naar Evenement modellen.
         """
+        laatste_sync = WeezSynchronisatie.objects.order_by("-tijdstip").first()
+        self.tijdslimiet = (laatste_sync.tijdstip - timedelta(hours=int(os.getenv("WEEZ_SCRAPE_OVERLAP")))).strftime("%Y-%m-%d %H:%M:%S")
+        WeezSynchronisatie.objects.create() # log dat een synchronisatie is gestart
+
         self.info.status(SynchronisatieStatus.BEZIG)
         self.sessie = maak_sessie()
 
@@ -203,6 +210,7 @@ class WeezSyncer(Mapper):
         weez_deelnemers = doe_weez_get(self.sessie, f"participant/list", parameters={
             "id_event[]": evenement.id,
             "full": "1",
+            "last_update": self.tijdslimiet
         })
 
         weez_deelnemers = weez_deelnemers.get("participants", [])

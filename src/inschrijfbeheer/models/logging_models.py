@@ -34,3 +34,16 @@ class LogEntry(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class WeezSynchronisatie(models.Model):
+    """Model om bij te houden wanneer laatste synchronisatie met Weez gebeurde
+
+    Attributes:
+        tijdstip (datetime): tijdstip van synchronisatie
+    """
+    tijdstip = models.DateTimeField(primary_key=True, auto_now=True)
+
+    class Meta:
+        app_label = "inschrijfbeheer"
+        db_table = 'weez_sync'
