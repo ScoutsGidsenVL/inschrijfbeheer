@@ -93,4 +93,5 @@ th {
 .foutrij {
     color: #b3261e;
     background-color: rgba(179, 38, 30, 0.1) !important;
+    cursor: help;
 }
