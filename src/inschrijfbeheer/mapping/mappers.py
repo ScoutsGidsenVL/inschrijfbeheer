@@ -75,13 +75,12 @@ def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
 
     if stad is None:
         if naam == '':
-            raise ValueError("Geen locatie gegeven voor seminar")
+            return None
         postcode = None
         stad = None
     else:
         postcode = stad.postcode
         stad = stad.naam
-
     locatie, _ = Locatie.objects.get_or_create(
         naam=naam,
         straat=straat,
