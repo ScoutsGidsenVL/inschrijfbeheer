@@ -38,4 +38,4 @@ def doe_weez_get(sessie: Session, url: str, parameters: dict = {}) -> Response:
 
     response.raise_for_status()
 
-    return response
+    return response.json()
