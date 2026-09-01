@@ -52,7 +52,7 @@ class SynchronisatieInfo:
         self._status = status
 
     def formatteer(self) -> str:
-        weergave = f"Status van de synchronisatie {str(self.status)}:\n"
+        weergave = f"Status van de synchronisatie {str(self._status)}:\n"
         for model, resultaat in self.resultaten.items():
             weergave += (
                 f"{model.__name__} model maakte {resultaat.aangemaakt} nieuwe objecten aan, "
