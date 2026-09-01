@@ -16,6 +16,17 @@
 from django.db import models, connection
 
 
+def volgende_deelnemer_id():
+    """Functie die een uniek ID genereert voor een Deelnemer.
+    Dit wordt gebruikt omdat een deelnemer foutieve gegevens kan geven.
+
+    Returns:
+        str: een uniek ID
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('deelnemer_id_seq')")
+        return str(cursor.fetchone()[0])
+
 
 class Deelnemer(models.Model):
     """Model voor een lid.
@@ -27,13 +38,13 @@ class Deelnemer(models.Model):
         voornaam (str): voornaam van het lid
         achternaam (str): achternaam van het lid
         mailadres (str): mailadres van het lid
-        ongeldig (str): boodschap bij het lid als het foutief is. Nullable
+        foutboodschap (str): boodschap bij het lid als het foutief is. Nullable
     """
-    id = models.CharField(primary_key=True, max_length=32)
+    id = models.CharField(primary_key=True, max_length=32, default=volgende_deelnemer_id)
     voornaam = models.CharField(null=False)
     achternaam = models.CharField(null=False)
     mailadres = models.CharField(null=False)
-    ongeldig = models.TextField(null=True)
+    foutboodschap = models.TextField(null=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
@@ -110,6 +121,7 @@ class Evenement(models.Model):
         categorie (Categorie): categorie van het evenement
         is_weez (bool): geeft aan of het evenement afkomstig is van Weezevent
         laatste_sync (datetime): wanneer laatste synchronisatie was met Weez
+        foutboodschap (str): geeft een foutboodschap bij een Evenement aan. Nullable
     """
     id = models.CharField(primary_key=True)
     titel = models.CharField()
@@ -125,6 +137,7 @@ class Evenement(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
     is_weez = models.BooleanField(default=False, blank=True)
     laatste_sync = models.DateTimeField(auto_now=True)
+    foutboodschap = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = "inschrijfbeheer"

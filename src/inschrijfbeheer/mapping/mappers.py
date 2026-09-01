@@ -30,7 +30,7 @@ from inschrijfbeheer.models import (
     EvenementVraag,
     IntegreatRegistrationfreefield,
     InschrijvingVraagAntwoord,
-    Lid
+    Deelnemer
 )
 from inschrijfbeheer.utils.soap import haal_lidgegevens, LidGegevens
 
@@ -236,7 +236,7 @@ def laad_deelnemertypes(limiet: None | int = None) -> QueryInfoType:
 
     return aangemaakt, bijgewerkt, overgeslagen
 
-def haal_of_maak_lid(id: str) -> Lid:
+def haal_of_maak_lid(id: str) -> Deelnemer:
     """Maakt een nieuw lid object aan of haalt een match uit de databank
 
     Args:
@@ -247,7 +247,7 @@ def haal_of_maak_lid(id: str) -> Lid:
     """
     gegevens = haal_lidgegevens(gebruikersnaam=id)
 
-    lid, _ = Lid.objects.get_or_create(
+    lid, _ = Deelnemer.objects.get_or_create(
         id=id,
         voornaam=gegevens.voornaam,
         achternaam=gegevens.naam,

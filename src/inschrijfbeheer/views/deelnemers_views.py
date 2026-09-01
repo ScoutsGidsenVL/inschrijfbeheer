@@ -12,7 +12,7 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-from inschrijfbeheer.models import Inschrijving, Lid
+from inschrijfbeheer.models import Inschrijving, Deelnemer
 
 from inschrijfbeheer.utils.soap import haal_lidgegevens
 
@@ -31,7 +31,7 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
         HttpResponse: HTML document dat de pagina voorstelt
     """
     zoekterm = request.GET.get("q", '')
-    deelnemers = Lid.objects.filter(
+    deelnemers = Deelnemer.objects.filter(
         Q(id__icontains=zoekterm)
         | Q(voornaam__icontains=zoekterm)
         | Q(achternaam__icontains=zoekterm)
@@ -55,7 +55,7 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     Returns:
         HttpResponse: HTML document dat de pagina voorstelt
     """
-    deelnemer = Lid.objects.get(id=id)
+    deelnemer = Deelnemer.objects.get(id=id)
     gegevens = haal_lidgegevens(id)
 
     return render(request, "deelnemers/deelnemers_detail.html", {
@@ -77,7 +77,7 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     Returns:
         HttpResponse: HTML document dat de pagina voorstelt
     """
-    deelnemer = Lid.objects.get(id=id)
+    deelnemer = Deelnemer.objects.get(id=id)
     zoekterm = request.GET.get('q', '')
     aanwezig_filter = request.GET.get("aanwezig", '')
 
