@@ -3,6 +3,8 @@
 from dataclasses import dataclass
 import logging
 
+from inschrijfbeheer.models import Evenement
+
 ObjectCreatie = tuple[int, int, int]
 
 @dataclass
@@ -40,7 +42,10 @@ class Mapper:
         self.config = sync_config
 
     def synchroniseer(self) -> SynchronisatieInfo:
-        raise NotImplementedError("Deze methode dient geïmplemnteerd door een subklasse")
+        raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
+
+    def synchroniseer_evenement(self, evenement: Evenement) -> SynchronisatieInfo:
+        raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
 
     def log_info(self) -> None:
         self.logger.info(msg=self.info.formatteer)
