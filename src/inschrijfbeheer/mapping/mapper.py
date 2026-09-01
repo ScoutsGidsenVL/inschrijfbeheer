@@ -28,11 +28,17 @@ class ModelResultaat:
             case SynchronisatieActie.OVERGESLAGEN:
                 self.overgeslagen += 1
 
+class SynchronisatieStatus(Enum):
+    GESLAAGD = auto()
+    FOUTIEF = auto()
+    BEZIG = auto()
+    WACHTEND = auto()
+
 
 @dataclass
 class SynchronisatieInfo:
     """Klasse die de resultaten van een synchronisatie bijhoudt."""
-    succes: bool = False
+    _status: SynchronisatieStatus = SynchronisatieStatus.WACHTEND
     resultaten: dict[type, ModelResultaat] = field(
         default_factory=lambda: defaultdict(ModelResultaat)
     )
@@ -40,8 +46,11 @@ class SynchronisatieInfo:
     def registreer(self, model: type, actie: SynchronisatieActie) -> None:
         self.resultaten[model].registreer(actie)
 
+    def status(self, status: SynchronisatieStatus):
+        self._status = status
+
     def formatteer(self) -> str:
-        weergave = f"Synchronisatie {'succesvol' if self.succes else 'gefaald'}:\n"
+        weergave = f"Status van de synchronisatie {str(self.status)}:\n"
         for model, resultaat in self.resultaten.items():
             weergave += (
                 f"{model.__name__} model maakte {resultaat.aangemaakt} nieuwe objecten aan, "
