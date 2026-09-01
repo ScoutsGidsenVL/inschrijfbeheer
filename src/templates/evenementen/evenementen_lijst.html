@@ -39,7 +39,7 @@
     </thead>
     <tbody>
         {% for evenement in evenementen %}
-            <tr class="evenement-rij {% if evenement.foutboodschap %}foutboodschap-tekst{% endif %}" onclick="window.location.href='{% url "evenement_detail" id=evenement.id %}'"
+            <tr class="evenement-rij {% if evenement.foutboodschap %}foutrij{% endif %}" onclick="window.location.href='{% url "evenement_detail" id=evenement.id %}'"
                 {% if evenement.foutboodschap %}title="{{evenement.foutboodschap}}"{% endif %}>
                 <td>{{ evenement.id }}</td>
                 <td><input type="checkbox" disabled {% if evenement.is_weez %}checked{% endif %}></td>

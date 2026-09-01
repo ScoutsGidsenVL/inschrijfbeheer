@@ -18,7 +18,7 @@
     </thead>
     <tbody>
         {% for deelnemer in deelnemers %}
-            <tr class="deelnemer-rij {% if deelnemer.foutboodschap %}foutboodschap-tekst{% endif %}"
+            <tr class="deelnemer-rij {% if deelnemer.foutboodschap %}foutrij{% endif %}"
                 onclick="window.location.href='{% url "deelnemers_detail" id=deelnemer.id %}'" 
                 {% if deelnemer.foutboodschap %}title="{{deelnemer.foutboodschap}}"{% endif %}>
                 <td>{{ deelnemer.id }}</td>

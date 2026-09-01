@@ -89,3 +89,8 @@ th {
 .foutboodschap-tekst {
     flex: 1;
 }
+
+.foutrij {
+    color: #b3261e;
+    background-color: rgba(179, 38, 30, 0.1) !important;
+}
