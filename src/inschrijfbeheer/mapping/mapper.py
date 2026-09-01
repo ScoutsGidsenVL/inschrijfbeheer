@@ -22,14 +22,22 @@ class SynchronisatieInfo:
             weergave += f"{model} model maakte {resultaat[0]} nieuwe objecten aan, werkte {resultaat[1]} objecten bij en sloeg {resultaat[2]} objecten over\n"
         return weergave
 
+@dataclass
+class SynchronisatieConfig:
+    limiet: int | None = None
+
+
 class Mapper:
     """Superklasse voor mappers om een gelijkaardige interface te geven
     """
 
     logger = logging.getLogger("inschrijfbeheer")
 
-    def __init__(self):
+    def __init__(self, sync_config: SynchronisatieConfig | None = None):
         self.info = SynchronisatieInfo(False, {})
+        if sync_config is None:
+            sync_config = SynchronisatieConfig()
+        self.config = sync_config
 
     def synchroniseer(self) -> SynchronisatieInfo:
         raise NotImplementedError("Deze methode dient geïmplemnteerd door een subklasse")
