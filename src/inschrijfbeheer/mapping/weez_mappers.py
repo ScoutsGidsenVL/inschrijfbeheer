@@ -332,25 +332,31 @@ class WeezSyncer(Mapper):
         if not valideer_lidnummer(gegevens.lidnummer):
             self.info.registreer(Deelnemer, SynchronisatieActie.AANGEMAAKT)
             
-            return Deelnemer.objects.create(
+            deelnemer, _ =  Deelnemer.objects.update_or_create(
                 voornaam=gegevens.voornaam,
                 achternaam=gegevens.achternaam,
                 mailadres=gegevens.mailadres,
-                foutboodschap=f"Ongeldig lidnummer ingegeven: {gegevens.lidnummer}"
+                defaults={
+                    "foutboodschap":f"Ongeldig lidnummer ingegeven: {gegevens.lidnummer}"
+                }
             )
+            return deelnemer
         try:
             lidgegevens = haal_lidgegevens(gegevens.lidnummer)
-            if (lidgegevens.voornaam == gegevens.voornaam
+            if not (lidgegevens.voornaam == gegevens.voornaam
                  or lidgegevens.naam == gegevens.achternaam
                 ):
                 self.info.registreer(Deelnemer, SynchronisatieActie.AANGEMAAKT)
                  
-                return Deelnemer.objects.create(
+                deelnemer, _ = Deelnemer.objects.update_or_create(
                     voornaam=gegevens.voornaam,
                     achternaam=gegevens.achternaam,
                     mailadres=gegevens.mailadres,
-                    foutboodschap=f"Onvoldoende matchende velden in inschrijving: {gegevens.lidnummer}"
+                    defaults={
+                        "foutboodschap":f"Onvoldoende matchende velden in inschrijving: {gegevens.lidnummer}"
+                    }
                 )
+                return deelnemer
         except Exception as fout:
             return None
 
