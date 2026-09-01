@@ -188,13 +188,12 @@ def haal_weez_deelnemers(sessie: Session, evenement: Evenement) -> QueryInfoType
 
     evenement_prijzen = haal_evenement_tarieven(sessie, evenement)
 
-    weez_deelnemers_respons = doe_weez_get(sessie, f"participant/list", parameters={
+    weez_deelnemers = doe_weez_get(sessie, f"participant/list", parameters={
         "id_event[]": evenement.id,
         "include_deleted": "1",
         "full": "1",
     })
-    weez_deelnemers = weez_deelnemers_respons.json()
-
+    
     weez_deelnemers = weez_deelnemers.get("participants", [])
 
     for deelnemer in weez_deelnemers:
