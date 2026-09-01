@@ -27,6 +27,7 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             syncer.synchroniseer()
+            logger.info(syncer.info.formatteer())
 
             if dry_run:
                 transaction.set_rollback(True)
