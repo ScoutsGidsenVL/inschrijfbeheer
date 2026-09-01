@@ -17,11 +17,13 @@
         </tr>
     </thead>
     <tbody>
-        {% for lid in deelnemers %}
-            <tr class="deelnemer-rij" onclick="window.location.href='{% url "deelnemers_detail" id=lid.id %}'">
-                <td>{{ lid.id }}</td>
-                <td>{{ lid.voornaam }}</td>
-                <td>{{ lid.achternaam }}</td>
+        {% for deelnemer in deelnemers %}
+            <tr class="deelnemer-rij {% if deelnemer.foutboodschap %}foutboodschap{% endif %}"
+                onclick="window.location.href='{% url "deelnemers_detail" id=deelnemer.id %}'" 
+                {% if deelnemer.foutboodschap %}title="{{deelnemer.foutboodschap}}"{% endif %}>
+                <td>{{ deelnemer.id }}</td>
+                <td>{{ deelnemer.voornaam }}</td>
+                <td>{{ deelnemer.achternaam }}</td>
             </tr>
         {% endfor %}
     </tbody>
