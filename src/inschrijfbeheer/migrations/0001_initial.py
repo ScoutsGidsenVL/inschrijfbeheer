@@ -18,4 +18,8 @@ class Migration(migrations.Migration):
             "CREATE SEQUENCE IF NOT EXISTS deelnemer_id_seq;",
             "DROP SEQUENCE IF EXISTS deelnemer_id_seq;",
         ),
+        migrations.RunSQL(
+            "CREATE SEQUENCE IF NOT EXISTS inschrijving_id_seq;",
+            "DROP SEQUENCE IF EXISTS inschrijving_id_seq;",
+        ),
     ]

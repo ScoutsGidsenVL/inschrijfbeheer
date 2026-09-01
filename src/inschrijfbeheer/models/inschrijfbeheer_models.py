@@ -161,6 +161,17 @@ class DeelnemerType(models.Model):
     def __str__(self):
         return self.naam
 
+def volgend_inschrijving_id():
+    """Functie die een uniek ID genereert voor een Inschrijving.
+    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor inschrijvingen, dus deze moeten ingevuld worden.
+
+    Returns:
+        str: een uniek ID
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('inschrijving_id_seq')")
+        return str(cursor.fetchone()[0])
+
 class Inschrijving(models.Model):
     """Model voor een inschrijving
 
@@ -175,7 +186,7 @@ class Inschrijving(models.Model):
         annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
         is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
     """
-    id = models.CharField(primary_key=True)
+    id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.ForeignKey(Deelnemer, db_column="lid", on_delete=models.RESTRICT)
     deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
