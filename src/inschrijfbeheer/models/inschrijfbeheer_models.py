@@ -48,7 +48,7 @@ class Deelnemer(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "lid" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "deelnemer" # geeft naam van de tabel in de nieuwe databank aan
 
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
