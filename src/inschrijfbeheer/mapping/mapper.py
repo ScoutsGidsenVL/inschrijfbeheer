@@ -5,6 +5,8 @@ from collections import defaultdict
 from enum import Enum, auto
 import logging
 
+from inschrijfbeheer.models import Evenement, Inschrijving
+
 
 class SynchronisatieActie(Enum):
     AANGEMAAKT = auto()
@@ -80,6 +82,22 @@ class Mapper:
         raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
 
     def synchroniseer_evenement(self, evenement_id: str, sync_inschrijvingen: bool = False) -> SynchronisatieInfo:
+        raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
+
+    def synchroniseer_inschrijvingen(self, evenement: Evenement | None = None) -> SynchronisatieInfo:
+        raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
+
+    def synchroniseer_vragen(self, evenement: Evenement | None = None, inschrijving: Inschrijving | None = None) -> SynchronisatieInfo:
+        """Methode die alle vragen synchroniseert.
+        Indien gegeven doet het dit enkel voor de vragen van een gegeven evenement of een gegeven inschrijving.
+
+        Args:
+            evenement (Evenement | None, optional): evenement waarvoor de vragen moeten gesynchroniseerd worden. Defaults to None.
+            inschrijving (Inschrijving | None, optional): inschrijving waarvoor de vragen gesynchroniseerd worden. Defaults to None.
+
+        Returns:
+            SynchronisatieInfo: info over de huidige synchronisatie
+        """
         raise NotImplementedError("Deze methode dient geïmplementeerd door een subklasse")
 
     def log_info(self) -> None:
