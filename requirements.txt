@@ -24,7 +24,7 @@ requests==2.34.2
 requests-file==3.0.1
 requests-toolbelt==1.0.0
 setuptools==84.0.0
-sqlparse==0.5.5
+sqlparse==0.6.0
 urllib3==2.7.0
 wheel==0.48.0
 zeep==4.3.3
