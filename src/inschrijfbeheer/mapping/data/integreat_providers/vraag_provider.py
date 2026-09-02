@@ -6,7 +6,7 @@ from django.utils import timezone
 from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider, IntegreatFilter
 from inschrijfbeheer.models import IntegreatSeminarFreeField
 
-class EvenementDatabaseProvider(DatabaseDataProvider[IntegreatSeminarFreeField]):
+class IntegreatSeminarFreeFieldProvider(DatabaseDataProvider[IntegreatSeminarFreeField]):
     model = IntegreatSeminarFreeField
     identifier_veld= "oid"
 

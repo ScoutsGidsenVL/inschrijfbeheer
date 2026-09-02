@@ -9,7 +9,7 @@ from inschrijfbeheer.models import (
     IntegreatRegistrationfreefield,
 )
 
-class AntwoordProvider(DatabaseDataProvider[IntegreatRegistrationfreefield]):
+class IntegreatRegistrationfreefieldProvider(DatabaseDataProvider[IntegreatRegistrationfreefield]):
     model = IntegreatRegistrationfreefield
     identifier_veld= "oid"
 

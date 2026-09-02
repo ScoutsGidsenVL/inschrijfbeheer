@@ -6,7 +6,7 @@ from django.utils import timezone
 from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider, IntegreatFilter
 from inschrijfbeheer.models import IntegreatSeminarType
 
-class EvenementDatabaseProvider(DatabaseDataProvider[IntegreatSeminarType]):
+class IntegreatSeminarTypeProvider(DatabaseDataProvider[IntegreatSeminarType]):
     model = IntegreatSeminarType
     identifier_veld= "code" # id van Categorie is gelijk aan 'code'
 
