@@ -52,15 +52,6 @@ class Deelnemer(models.Model):
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
 
-    class Meta:
-        app_label = "inschrijfbeheer"
-        db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
-
-    def __str__(self):
-        if self.naam:
-            return self.naam
-        return f"{self.straat} {self.huisnummer}, {self.postcode} {self.stad}"
-
 class EvenementStatus(models.Model):
     id = models.AutoField(primary_key=True)
     beschrijving = models.CharField()
