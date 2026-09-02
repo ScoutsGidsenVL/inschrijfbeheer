@@ -1,26 +1,65 @@
+"""Basisklassen voor mappers die brondata omzetten naar een Django-model."""
+
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, Iterator, TypeVar
+from dataclasses import dataclass, field
+from typing import Any, Generic, Iterable, Iterator, TypeVar
 
-T = TypeVar("T")
-N = TypeVar("N")
+T = TypeVar("T")  # brondata
+C = TypeVar("C")  # context die niet in de brondata zit
+N = TypeVar("N")  # doelmodel
 
 
-class Mapper(Generic[T, N], ABC):
-    """Basiscontract voor het omzetten van brondata (T) naar een domeinmodel (N).
+class MappingFout(Exception):
+    """De brondata kan niet omgezet worden naar het doelmodel.
+    """
 
-    Elk domeinmodel uit Inschrijfbeheer krijgt zijn eigen Mapper-subklasse per
-    bron, bv. WeezEvenementMapper(Mapper[dict, Evenement]).
+
+@dataclass(frozen=True)
+class Doelgegevens(Generic[N]):
+    """Alles wat nodig is om N te bewaren, klaar voor update_or_create.
+
+    Attributes:
+        sleutels: velden die het object identificeren, de kwargs van
+            update_or_create of get_or_create
+        velden: velden die bij elke synchronisatie overschreven worden, de
+            defaults
+
+    """
+
+    sleutels: dict[str, Any]
+    velden: dict[str, Any] = field(default_factory=dict)
+
+
+class Mapper(Generic[T, C, N], ABC):
+    """Zet brondata (T) plus context (C) om naar de gegevens voor model N.
+
+    De mapper schrijft niet naar de databank en houdt geen tellers bij, zodat
+    hij een zuivere functie blijft die je zonder databank kan testen. Wat niet
+    omgezet kan worden, meldt hij met MappingFout.
+
+    De context bestaat voor alles wat het doelmodel nodig heeft maar niet in
+    de brondata staat: een al bewaarde ouder, een prijzenlijst uit een ander
+    endpoint, de index van een element in een lijst. Mappers die niets extra
+    nodig hebben, gebruiken None als C:
+
+        class WeezCategorieMapper(Mapper[dict, None, Categorie]):
+            ...
     """
 
     @abstractmethod
-    def map(self, bron: T) -> N:
-        """Zet één object van het brontype om naar het doeltype."""
+    def map(self, bron: T, context: C) -> Doelgegevens[N]:
+        """Zet één bronobject om naar de gegevens voor N.
+
+        Raises:
+            MappingFout: als de brondata onbruikbaar is
+        """
         raise NotImplementedError
 
-    def map_alle(self, bronnen: Iterable[T]) -> Iterator[N]:
-        """Past map() toe op elk element van bronnen.
+    def map_alle(self, bronnen: Iterable[T], context: C) -> Iterator[Doelgegevens[N]]:
+        """Past map() toe op elk element met dezelfde context.
 
-        Standaardimplementatie die in de meeste subklassen niet overschreven
-        hoeft te worden.
+        Alleen bruikbaar wanneer de context voor alle elementen gelijk is.
+        Hangt de context af van het element, zoals de volgorde van een vraag,
+        dan roep je map() zelf per element aan.
         """
-        return (self.map(bron) for bron in bronnen)
+        return (self.map(bron, context) for bron in bronnen)
