@@ -40,7 +40,7 @@ class Deelnemer(models.Model):
         mailadres (str): mailadres van het lid
         foutboodschap (str): boodschap bij het lid als het foutief is. Nullable
     """
-    id = models.CharField(primary_key=True, max_length=32, default=volgende_deelnemer_id)
+    id = models.CharField(primary_key=True, max_length=50, default=volgende_deelnemer_id)
     voornaam = models.CharField(null=False)
     achternaam = models.CharField(null=False)
     mailadres = models.CharField(null=False)
