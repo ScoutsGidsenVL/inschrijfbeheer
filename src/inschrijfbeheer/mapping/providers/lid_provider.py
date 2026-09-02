@@ -22,8 +22,5 @@ class LidProvider(ObjectProvider[Any]):
         try:
             return haal_lidgegevens(identifier)
         except Exception as fout:
-            # De SOAP-laag gooit uiteenlopende fouten, van netwerkproblemen
-            # tot een onbekend lidnummer. Voor de synchronisatie is dat
-            # allemaal hetzelfde: geen lid gevonden.
             logger.warning("Ledenopzoeking mislukt voor %s: %s", identifier, fout)
             return None

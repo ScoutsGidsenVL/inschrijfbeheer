@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from django.utils import timezone
 
-from inschrijfbeheer.mapping.data.lid_provider import LidProvider
+from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.models import (
     Categorie,
     Deelnemer,

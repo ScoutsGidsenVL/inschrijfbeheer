@@ -31,7 +31,7 @@ from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
     VraagContext,
     normaliseer_code,
 )
-from inschrijfbeheer.mapping.data.data_provider import LijstProvider, ObjectProvider
+from inschrijfbeheer.mapping.providers.data_provider import LijstProvider
 from inschrijfbeheer.mapping.synchronisatie import (
     Synchronisatie,
     SynchronisatieActie,

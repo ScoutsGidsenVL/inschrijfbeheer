@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from inschrijfbeheer.mapping.data.data_provider import IntegreatFilter
+from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter
 from .integreat_provider import IntegreatProvider
 from inschrijfbeheer.models import (
     IntegreatRegistrationfreefield,

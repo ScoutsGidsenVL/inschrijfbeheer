@@ -6,7 +6,7 @@ from typing import Any, Iterable
 
 from inschrijfbeheer.utils.weez_api import doe_weez_get, maak_sessie
 
-from inschrijfbeheer.mapping.data.data_provider import DataProvider, LijstProvider
+from inschrijfbeheer.mapping.providers.data_provider import DataProvider, LijstProvider
 
 logger = logging.getLogger("inschrijfbeheer")
 
