@@ -10,7 +10,11 @@
 <div class="detail-attribuut-container">
     <div class="detail-attribuut-label">Beschrijving</div>
     <div class="detail-attribuut-waarde">
-        {{ evenement.beschrijving|safe }}
+        {% if evenement.beschrijving %}
+            {{ evenement.beschrijving|safe }}
+        {% else %}
+            <p></p>
+        {% endif %}
     </div>
 </div>
 <div class="detail-attribuut-container">
