@@ -15,6 +15,9 @@
         {% endif %}
         <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
     </div>
+    <div class="synchronisatie">
+        <button class="synchronisatie-knop" onclick="synchroniseer()">Synchroniseer</button>
+    </div>
     {% if evenement.foutboodschap %}
     <div class="foutboodschap">
         <div class="foutboodschap-icoon">!</div>
@@ -27,6 +30,14 @@
         <a href="/evenementen/{{ evenement.id }}/vragen">Vragen</a>
     </nav>
 </div>
+
+<script>
+    function synchroniseer() {
+        const url = new URL(window.location.href);
+        url.searchParams.set("sync", "1");
+        window.location.href = url.toString();
+    }
+</script>
 
 {% block evenementen_content %}
 {% endblock evenementen_content %}
