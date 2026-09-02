@@ -2,7 +2,6 @@
 
 ## Classes:
     **Deelnemer:** deelnemer, gebruikt voor snellere zoekmethoden
-    **Locatie:** beschrijft een locatie
     **EvenementStatus:** beschrijft de status van een evenement
     **Categorie:** beschrijft de categorie van een evenement
     **Evenement:** beschrijft een evenement/vorming
@@ -53,32 +52,6 @@ class Deelnemer(models.Model):
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
 
-class Locatie(models.Model):
-    id = models.AutoField(primary_key=True)
-    naam = models.CharField(null=True)
-    straat = models.CharField(null=True)
-    huisnummer = models.CharField(null=True)
-    postcode = models.CharField(null=True)
-    stad = models.CharField(null=True)
-    is_weez = models.BooleanField(default=False, blank=True)
-
-    models.CheckConstraint(
-        condition=(
-            models.Q(naam__isnull=False) |
-            models.Q(straat__isnull=False, huisnummer__isnull=False, postcode__isnull=False, stad__isnull=False)
-        ),
-        name="locatie_of_adres"
-    )
-
-    class Meta:
-        app_label = "inschrijfbeheer"
-        db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
-
-    def __str__(self):
-        if self.naam:
-            return self.naam
-        return f"{self.straat} {self.huisnummer}, {self.postcode} {self.stad}"
-
 class EvenementStatus(models.Model):
     id = models.AutoField(primary_key=True)
     beschrijving = models.CharField()
@@ -111,13 +84,12 @@ class Evenement(models.Model):
         titel (str): titel/naam van het evenement
         beschrijving (str): beschrijving van het evenement
         status (EvenementStatus): status van het evenement. Nullable
-        locatie (Locatie): locatie van het evenement. Nullable
+        locatie_naam (str): naam van de locatie van het evenement. Nullable
+        locatie_straat (str): straat van de locatie van het evenement. Nullable
+        locatie_stad (str): stad van de locatie van het evenement. Nullable
+        locatie_postcode (str): postcode van de stad van de locatie van het evenement. Nullable
         starttijd (datetime): starttijd van het evenement. Nullable
         eindtijd (datetime): eindtijd van het evenement. Nullable
-        min_deelnemers (int): minimaal aantal deelnemers
-        max_deelnemers (int): maximaal aantal deelnemers
-        aantal_zelfde_groep (int): maximaal aantal deelnemers uit éénzelfde groep
-        min_leeftijd (int): minimale leeftijd voor een deelnemer
         categorie (Categorie): categorie van het evenement
         is_weez (bool): geeft aan of het evenement afkomstig is van Weezevent
         laatste_sync (datetime): wanneer laatste synchronisatie was met Weez
@@ -127,13 +99,12 @@ class Evenement(models.Model):
     titel = models.CharField()
     beschrijving = models.CharField()
     status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL, null=True, db_column="status")
-    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT, null=True, db_column="locatie")
+    locatie_naam = models.CharField(null=True, blank=True)
+    locatie_straat = models.CharField(null=True, blank=True)
+    locatie_stad = models.CharField(null=True, blank=True)
+    locatie_postcode = models.CharField(null=True, blank=True)
     starttijd = models.DateTimeField(null=True)
     eindtijd = models.DateTimeField(null=True)
-    min_deelnemers = models.PositiveIntegerField()
-    max_deelnemers = models.PositiveIntegerField()
-    aantal_zelfde_groep = models.PositiveIntegerField()
-    min_leeftijd = models.PositiveIntegerField()
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
     is_weez = models.BooleanField(default=False, blank=True)
     laatste_sync = models.DateTimeField(auto_now=True)
@@ -149,10 +120,6 @@ class Evenement(models.Model):
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
     naam = models.CharField()
-    prijs = models.PositiveIntegerField()
-    quota = models.PositiveIntegerField()
-    starttijd_inschrijvingen = models.DateTimeField()
-    eindtijd_inschrijvingen = models.DateTimeField()
 
     class Meta:
         app_label = "inschrijfbeheer"
@@ -197,7 +164,6 @@ class Inschrijving(models.Model):
     is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
-        unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
         app_label = "inschrijfbeheer"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
 

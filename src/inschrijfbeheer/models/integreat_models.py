@@ -52,24 +52,6 @@ class IntegreatCity(models.Model):
         db_table = "Integreat_City" 
         managed = False
 
-class IntegreatOrganisationUnit(models.Model):
-    oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
-    code = models.CharField(db_column='')
-
-    class Meta:
-        app_label = "inschrijfbeheer"
-        db_table = "Integreat_OrganizationUnit" 
-        managed = False
-
-class IntegreatOrganisationUnitSite(models.Model):
-    oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
-    organisatie = models.ForeignKey(IntegreatOrganisationUnit, db_column='OrganizationUnit', on_delete=models.DO_NOTHING)
-
-    class Meta:
-        app_label = "inschrijfbeheer"
-        db_table = "Integreat_OrganizationUnitLocation" 
-        managed = False
-
 class IntegreatSeminar(models.Model):
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
     code = models.CharField(db_column='Code')
@@ -80,7 +62,6 @@ class IntegreatSeminar(models.Model):
     eind_inschrijvingen = models.DateTimeField(db_column='EndRegistration')
     status = models.ForeignKey(IntegreatSeminarStatus, db_column='Status', on_delete=models.DO_NOTHING)
     type = models.ForeignKey(IntegreatSeminarType, db_column='Type', on_delete=models.DO_NOTHING)
-    organisator = models.ForeignKey(IntegreatOrganisationUnitSite, db_column='OrganizationUnitSite', on_delete=models.DO_NOTHING)
     locatie_naam = models.CharField(db_column='LocationName', null=True)
     locatie_straat = models.CharField(db_column='LocationStreet', null=True)
     locatie_stad = models.ForeignKey(IntegreatCity, db_column='LocationCity', on_delete=models.DO_NOTHING, null=True)

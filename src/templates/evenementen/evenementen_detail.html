@@ -22,7 +22,13 @@
 <div class="detail-attribuut-container">
     <div class="detail-attribuut-label">Locatie</div>
     <div class="detail-attribuut-waarde">
-        {{ evenement.locatie }}
+        {% if evenement.locatie_naam %}
+            {{ evenement.locatie_naam }}
+        {% elif evenement.locatie_straat %}
+            {{ evenement.locatie_straat}}, {{ evenement.locatie_postcode }} {{ evenement.locatie_stad }}
+        {% else %}
+            Geen locatie gegeven
+        {% endif %}        
     </div>
 </div>
 <div class="detail-attribuut-container">

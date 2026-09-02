@@ -1,6 +1,5 @@
 from inschrijfbeheer.models.inschrijfbeheer_models import (
     Deelnemer,
-    Locatie,
     EvenementStatus,
     Categorie,
     Evenement,
@@ -17,8 +16,6 @@ from inschrijfbeheer.models.integreat_models import (
     IntegreatSeminarStatus,
     IntegreatSeminarType,
     IntegreatCity,
-    IntegreatOrganisationUnit,
-    IntegreatOrganisationUnitSite,
     IntegreatSeminar,
     IntegreatRegistration,
     IntegreatSeminarFreeFieldType,
