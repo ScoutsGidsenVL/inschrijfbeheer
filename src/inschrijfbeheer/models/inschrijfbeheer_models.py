@@ -176,7 +176,6 @@ class Inschrijving(models.Model):
     is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
-        unique_together = (('evenement', 'lid')) # Django 5.1 ondersteund geen composite primary keys
         app_label = "inschrijfbeheer"
         db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
 
