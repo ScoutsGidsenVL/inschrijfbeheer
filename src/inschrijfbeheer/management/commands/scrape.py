@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from inschrijfbeheer.utils.weez_api import maak_sessie
 from inschrijfbeheer.mapping.weez_mappers import WeezSyncer
-from inschrijfbeheer.mapping.mapper import SynchronisatieConfig
+from inschrijfbeheer.mapping.synchronisatie import SynchronisatieConfig
 from django.db import transaction
 import logging
 

@@ -22,7 +22,7 @@ from inschrijfbeheer.models import (
 )
 from inschrijfbeheer.utils.weez_api import doe_weez_get, maak_sessie
 from inschrijfbeheer.utils.soap import haal_lidgegevens
-from inschrijfbeheer.mapping.mapper import (
+from inschrijfbeheer.mapping.synchronisatie import (
     Synchronisatie,
     SynchronisatieInfo,
     SynchronisatieActie,
