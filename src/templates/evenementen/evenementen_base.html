@@ -17,6 +17,7 @@
     </div>
     <div class="synchronisatie">
         <button class="synchronisatie-knop" onclick="synchroniseer()">Synchroniseer</button>
+        <div class="laatste-synchronisatie"> ⟲ {{ evenement.laatste_sync }}</div>
     </div>
     {% if evenement.foutboodschap %}
     <div class="foutboodschap">
