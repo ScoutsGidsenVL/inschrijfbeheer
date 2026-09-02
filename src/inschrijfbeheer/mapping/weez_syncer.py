@@ -56,9 +56,6 @@ from inschrijfbeheer.models import (
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
 
-STANDAARD_OVERLAP_UREN = 24
-
-
 class WeezSyncer(Synchronisatie):
     """Haalt evenementen, inschrijvingen en vragen op bij Weez."""
 
@@ -247,7 +244,7 @@ class WeezSyncer(Synchronisatie):
         if laatste_sync is None:
             return None
 
-        overlap = int(os.getenv("WEEZ_SCRAPE_OVERLAP") or STANDAARD_OVERLAP_UREN)
+        overlap = int(os.getenv("WEEZ_SCRAPE_OVERLAP"))
         return (laatste_sync.tijdstip - timedelta(hours=overlap)).strftime("%Y-%m-%d %H:%M:%S")
 
     def __bewaar_categorie(self, bron: dict) -> Categorie | None:
