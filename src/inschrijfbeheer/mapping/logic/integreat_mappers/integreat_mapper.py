@@ -114,6 +114,7 @@ class IntegreatEvenementMapper(Mapper[IntegreatSeminar, EvenementContext, Evenem
                 "locatie_postcode": locatie_postcode,
                 "starttijd": bron.starttijd,
                 "eindtijd": bron.eindtijd,
+                "laatste_sync": timezone.now(), 
             }
         )
 

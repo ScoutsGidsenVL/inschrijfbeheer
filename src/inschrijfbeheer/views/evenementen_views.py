@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponse
-from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
+
+from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
+from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
 
 KOLOMMEN = {
     "id": "ID",
@@ -48,12 +50,12 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
+    evenement = get_object_or_404(Evenement, id=id)
     synchroniseer = request.GET.get("sync", None)
     if synchroniseer is not None and synchroniseer == '1':
-        # logica voor synchroniseren
+        synchroniseer_evenement(evenement=evenement)
         return redirect('evenement_detail', id=id)
 
-    evenement = get_object_or_404(Evenement, id=id)
 
     return render(request, "evenementen/evenementen_detail.html", {
         "evenement": evenement
