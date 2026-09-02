@@ -189,10 +189,6 @@ class WeezEvenementMapper(Mapper[dict, Categorie | None, Evenement]):
                 "locatie_postcode": locatie.get("zip_code"),
                 "categorie": context,
                 "is_weez": True,
-                "min_deelnemers": 0,
-                "max_deelnemers": 0,
-                "aantal_zelfde_groep": 0,
-                "min_leeftijd": 0,
             },
         )
 
