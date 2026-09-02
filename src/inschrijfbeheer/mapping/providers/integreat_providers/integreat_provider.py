@@ -1,4 +1,4 @@
-from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider, IntegreatFilter
+from inschrijfbeheer.mapping.providers.data_provider import DatabaseDataProvider, IntegreatFilter
 from typing import TypeVar
 
 T = TypeVar("T")

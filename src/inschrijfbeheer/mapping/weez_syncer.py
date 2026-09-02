@@ -27,8 +27,8 @@ from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
-from inschrijfbeheer.mapping.data.lid_provider import LidProvider
-from inschrijfbeheer.mapping.data.weez_providers.weez_provider import (
+from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
+from inschrijfbeheer.mapping.providers import (
     InschrijvingFilter,
     WeezClient,
     WeezEvenementProvider,
@@ -55,9 +55,6 @@ from inschrijfbeheer.models import (
 
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
-
-STANDAARD_OVERLAP_UREN = 24
-
 
 class WeezSyncer(Synchronisatie):
     """Haalt evenementen, inschrijvingen en vragen op bij Weez."""
@@ -247,7 +244,7 @@ class WeezSyncer(Synchronisatie):
         if laatste_sync is None:
             return None
 
-        overlap = int(os.getenv("WEEZ_SCRAPE_OVERLAP") or STANDAARD_OVERLAP_UREN)
+        overlap = int(os.getenv("WEEZ_SCRAPE_OVERLAP"))
         return (laatste_sync.tijdstip - timedelta(hours=overlap)).strftime("%Y-%m-%d %H:%M:%S")
 
     def __bewaar_categorie(self, bron: dict) -> Categorie | None:

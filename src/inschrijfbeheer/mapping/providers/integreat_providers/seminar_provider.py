@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 from .integreat_provider import IntegreatProvider
-from inschrijfbeheer.mapping.data.data_provider import IntegreatFilter
+from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter
 from inschrijfbeheer.models import IntegreatSeminar
 
 class IntegreatSeminarProvider(IntegreatProvider[IntegreatSeminar]):

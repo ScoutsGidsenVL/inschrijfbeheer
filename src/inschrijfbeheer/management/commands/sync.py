@@ -14,8 +14,8 @@ from typing import Callable
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from inschrijfbeheer.mapping.data.data_provider import IntegreatFilter
-from inschrijfbeheer.mapping.data.integreat_providers import (
+from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter
+from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatParticipantTypeProvider,
     IntegreatRegistrationfreefieldProvider,
     IntegreatRegistrationProvider,
@@ -23,7 +23,7 @@ from inschrijfbeheer.mapping.data.integreat_providers import (
     IntegreatSeminarFreeFieldTypeProvider,
     IntegreatSeminarProvider,
 )
-from inschrijfbeheer.mapping.data.lid_provider import LidProvider
+from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.integreat_syncer import IntegreatProviders, IntegreatSyncer
 from inschrijfbeheer.mapping.synchronisatie import Synchronisatie, SynchronisatieConfig
 from inschrijfbeheer.mapping.weez_syncer import WeezSyncer

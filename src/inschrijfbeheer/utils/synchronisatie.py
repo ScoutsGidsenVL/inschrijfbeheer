@@ -21,14 +21,14 @@ import logging
 
 from django.db import transaction
 
-from inschrijfbeheer.mapping.data.data_provider import IntegreatFilter
-from inschrijfbeheer.mapping.data.integreat_providers import (
+from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter
+from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatRegistrationfreefieldProvider,
     IntegreatRegistrationProvider,
     IntegreatSeminarFreeFieldProvider,
     IntegreatSeminarProvider,
 )
-from inschrijfbeheer.mapping.data.lid_provider import LidProvider
+from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, MappingFout
 from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
     AntwoordContext as IntegreatAntwoordContext,
@@ -68,7 +68,7 @@ from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
-from inschrijfbeheer.mapping.data.weez_providers.weez_provider import (
+from inschrijfbeheer.mapping.providers.weez_providers.weez_provider import (
     InschrijvingFilter,
     WeezClient,
     WeezEvenementProvider,

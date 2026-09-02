@@ -8,7 +8,7 @@ from enum import Enum, auto
 import logging
 
 from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
-from inschrijfbeheer.mapping.data.data_provider import LijstProvider, ObjectProvider
+from inschrijfbeheer.mapping.providers.data_provider import LijstProvider, ObjectProvider
 
 
 class SynchronisatieActie(Enum):

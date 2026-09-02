@@ -1,4 +1,4 @@
-from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider
+from inschrijfbeheer.mapping.providers.data_provider import DatabaseDataProvider
 from inschrijfbeheer.models import IntegreatSeminarType
 from .integreat_provider import IntegreatProvider
 
