@@ -9,7 +9,7 @@ from inschrijfbeheer.models import IntegreatSeminar
 
 class IntegreatSeminarProvider(IntegreatProvider[IntegreatSeminar]):
     model = IntegreatSeminar
-    identifier_veld= "oid"
+    identifier_veld= "code"
  
     def pas_filter_toe(
         self,

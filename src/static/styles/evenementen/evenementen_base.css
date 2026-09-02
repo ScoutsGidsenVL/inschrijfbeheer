@@ -63,3 +63,7 @@
     width: auto;
     flex-shrink: 0;
 }
+
+button.synchronisatie-knop {
+    background-color: #14b3db !important;
+}

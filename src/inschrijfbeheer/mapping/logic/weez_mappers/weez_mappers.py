@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
+from django.utils import timezone
 
 from django.utils import timezone
 
@@ -189,6 +190,7 @@ class WeezEvenementMapper(Mapper[dict, Categorie | None, Evenement]):
                 "locatie_postcode": locatie.get("zip_code"),
                 "categorie": context,
                 "is_weez": True,
+                "laatste_sync": timezone.now(), 
             },
         )
 

@@ -10,7 +10,11 @@
 <div class="detail-attribuut-container">
     <div class="detail-attribuut-label">Beschrijving</div>
     <div class="detail-attribuut-waarde">
-        {{ evenement.beschrijving|safe }}
+        {% if evenement.beschrijving %}
+            {{ evenement.beschrijving|safe }}
+        {% else %}
+            <p></p>
+        {% endif %}
     </div>
 </div>
 <div class="detail-attribuut-container">
@@ -41,30 +45,6 @@
     <div class="detail-attribuut-label">Eindtijd</div>
     <div class="detail-attribuut-waarde">
         {{ evenement.eindtijd }}
-    </div>
-</div>
-<div class="detail-attribuut-container">
-    <div class="detail-attribuut-label">Minimum aantal deelnemers</div>
-    <div class="detail-attribuut-waarde">
-        {{ evenement.min_deelnemers }}
-    </div>
-</div>
-<div class="detail-attribuut-container">
-    <div class="detail-attribuut-label">Maximum aantal deelnemers</div>
-    <div class="detail-attribuut-waarde">
-        {{ evenement.max_deelnemers }}
-    </div>
-</div>
-<div class="detail-attribuut-container">
-    <div class="detail-attribuut-label">Aantal deelnemers uit dezelfde groep</div>
-    <div class="detail-attribuut-waarde">
-        {{ evenement.aantal_zelfde_groep }}
-    </div>
-</div>
-<div class="detail-attribuut-container">
-    <div class="detail-attribuut-label">Minimumleeftijd</div>
-    <div class="detail-attribuut-waarde">
-        {{ evenement.min_leeftijd }}
     </div>
 </div>
 <div class="detail-attribuut-container">
