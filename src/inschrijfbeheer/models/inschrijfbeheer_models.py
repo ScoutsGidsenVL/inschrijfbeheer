@@ -90,10 +90,6 @@ class Evenement(models.Model):
         locatie_postcode (str): postcode van de stad van de locatie van het evenement. Nullable
         starttijd (datetime): starttijd van het evenement. Nullable
         eindtijd (datetime): eindtijd van het evenement. Nullable
-        min_deelnemers (int): minimaal aantal deelnemers
-        max_deelnemers (int): maximaal aantal deelnemers
-        aantal_zelfde_groep (int): maximaal aantal deelnemers uit éénzelfde groep
-        min_leeftijd (int): minimale leeftijd voor een deelnemer
         categorie (Categorie): categorie van het evenement
         is_weez (bool): geeft aan of het evenement afkomstig is van Weezevent
         laatste_sync (datetime): wanneer laatste synchronisatie was met Weez
@@ -109,10 +105,6 @@ class Evenement(models.Model):
     locatie_postcode = models.CharField(null=True, blank=True)
     starttijd = models.DateTimeField(null=True)
     eindtijd = models.DateTimeField(null=True)
-    min_deelnemers = models.PositiveIntegerField()
-    max_deelnemers = models.PositiveIntegerField()
-    aantal_zelfde_groep = models.PositiveIntegerField()
-    min_leeftijd = models.PositiveIntegerField()
     categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
     is_weez = models.BooleanField(default=False, blank=True)
     laatste_sync = models.DateTimeField(auto_now=True)
@@ -128,10 +120,6 @@ class Evenement(models.Model):
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
     naam = models.CharField()
-    prijs = models.PositiveIntegerField()
-    quota = models.PositiveIntegerField()
-    starttijd_inschrijvingen = models.DateTimeField()
-    eindtijd_inschrijvingen = models.DateTimeField()
 
     class Meta:
         app_label = "inschrijfbeheer"

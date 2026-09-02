@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Iterable, TypeVar
+from typing import Generic, Iterable, TypeVar
 from dataclasses import dataclass
 
 from django.db.models import Model
@@ -55,12 +55,16 @@ class IntegreatFilter:
  
     sync_alles: bool = False
     terugblik_dagen: int = 30
+    limiet: int | None = None
 
 class DatabaseDataProvider(DataProvider[M, F], ABC):
     """Provider die zijn data uit een databank haalt.
     """
  
     identifier_veld: str = "id"
+    databank: str = "default"
+    selecteer_relaties: tuple[str, ...] = ()
+    prefetch_relaties: tuple[str, ...] = ()
  
     @property
     @abstractmethod
@@ -72,7 +76,15 @@ class DatabaseDataProvider(DataProvider[M, F], ABC):
     def basis_queryset(self) -> QuerySet[M]:
         """Vertrekpunt voor beide ophaalmethodes.
         """
-        return self.model.objects.all()
+        queryset = self.model.objects.all()
+        if self.databank:
+            queryset = queryset.using(self.databank)
+        if self.selecteer_relaties:
+            queryset = queryset.select_related(*self.selecteer_relaties)
+        if self.prefetch_relaties:
+            queryset = queryset.prefetch_related(*self.prefetch_relaties)
+ 
+        return queryset
  
     def pas_filter_toe(self, queryset: QuerySet[M], filter: F) -> QuerySet[M]:
         """Zet het filter om naar een afbakening op de queryset.

@@ -1,6 +1,6 @@
-from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider
 from inschrijfbeheer.models import IntegreatSeminarStatus
+from .integreat_provider import IntegreatProvider
 
-class IntegreatSeminarStatusProvider(DatabaseDataProvider[IntegreatSeminarStatus]):
+class IntegreatSeminarStatusProvider(IntegreatProvider[IntegreatSeminarStatus]):
     model = IntegreatSeminarStatus
     identifier_veld= "beschrijving"

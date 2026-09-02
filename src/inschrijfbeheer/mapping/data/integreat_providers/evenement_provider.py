@@ -3,10 +3,11 @@ from datetime import timedelta
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider, IntegreatFilter
+from .integreat_provider import IntegreatProvider
+from inschrijfbeheer.mapping.data.data_provider import IntegreatFilter
 from inschrijfbeheer.models import IntegreatSeminar
 
-class IntegreatSeminarProvider(DatabaseDataProvider[IntegreatSeminar]):
+class IntegreatSeminarProvider(IntegreatProvider[IntegreatSeminar]):
     model = IntegreatSeminar
     identifier_veld= "oid"
  
@@ -19,4 +20,5 @@ class IntegreatSeminarProvider(DatabaseDataProvider[IntegreatSeminar]):
             return queryset
  
         drempel = timezone.now() - timedelta(days=filter.terugblik_dagen)
-        return queryset.filter(eindtijd__gte=drempel)
+        queryset = queryset.filter(eindtijd__gte=drempel)
+        return super().pas_filter_toe(queryset=queryset, filter=filter)

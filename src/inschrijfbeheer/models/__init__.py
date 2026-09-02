@@ -16,8 +16,6 @@ from inschrijfbeheer.models.integreat_models import (
     IntegreatSeminarStatus,
     IntegreatSeminarType,
     IntegreatCity,
-    IntegreatOrganisationUnit,
-    IntegreatOrganisationUnitSite,
     IntegreatSeminar,
     IntegreatRegistration,
     IntegreatSeminarFreeFieldType,

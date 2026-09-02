@@ -1,6 +1,6 @@
-from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider
+from .integreat_provider import IntegreatProvider
 from inschrijfbeheer.models import IntegreatParticipantType
 
-class IntegreatParticipantTypeProvider(DatabaseDataProvider[IntegreatParticipantType]):
+class IntegreatParticipantTypeProvider(IntegreatProvider[IntegreatParticipantType]):
     model = IntegreatParticipantType
     identifier_veld= "oid"

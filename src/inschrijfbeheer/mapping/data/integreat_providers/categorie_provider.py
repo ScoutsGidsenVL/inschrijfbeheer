@@ -1,12 +1,9 @@
-from datetime import timedelta
- 
 from django.db.models import QuerySet
-from django.utils import timezone
 
-from inschrijfbeheer.mapping.data.data_provider import DatabaseDataProvider, IntegreatFilter
+from .integreat_provider import IntegreatProvider
 from inschrijfbeheer.models import IntegreatSeminarType
 
-class IntegreatSeminarTypeProvider(DatabaseDataProvider[IntegreatSeminarType]):
+class IntegreatSeminarTypeProvider(IntegreatProvider[IntegreatSeminarType]):
     model = IntegreatSeminarType
     identifier_veld= "code" # id van Categorie is gelijk aan 'code'
 
