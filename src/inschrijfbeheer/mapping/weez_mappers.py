@@ -24,7 +24,7 @@ from inschrijfbeheer.models import (
 from inschrijfbeheer.utils.weez_api import doe_weez_get, maak_sessie
 from inschrijfbeheer.utils.soap import haal_lidgegevens
 from inschrijfbeheer.mapping.mapper import (
-    Mapper,
+    Synchronisatie,
     SynchronisatieInfo,
     SynchronisatieActie,
     SynchronisatieStatus
@@ -116,7 +116,7 @@ def check_verplichte_vragen(vragen) -> bool:
     return verplichte_vragen.issubset(found_labels)
 
 
-class WeezSyncer(Mapper):
+class WeezSyncer(Synchronisatie):
 
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez evenementen op en zet ze om naar Evenement modellen.

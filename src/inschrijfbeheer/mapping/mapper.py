@@ -66,7 +66,7 @@ class SynchronisatieConfig:
     limiet: int | None = None
 
 
-class Mapper:
+class Synchronisatie:
     """Superklasse voor mappers om een gelijkaardige interface te geven
     """
 
