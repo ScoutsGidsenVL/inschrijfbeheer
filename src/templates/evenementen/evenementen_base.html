@@ -15,9 +15,10 @@
         {% endif %}
         <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
     </div>
-    <div class="synchronisatie">
+    <div class="info">
+        <div class="info-icoon">💡</div>
         <button class="synchronisatie-knop" onclick="synchroniseer()">Synchroniseer</button>
-        <div class="laatste-synchronisatie"> ⟲ {{ evenement.laatste_sync }}</div>
+        <div class="info-tekst"> ⟲ {{ evenement.laatste_sync }}</div>
     </div>
     {% if evenement.foutboodschap %}
     <div class="foutboodschap">
