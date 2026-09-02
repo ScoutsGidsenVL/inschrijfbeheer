@@ -22,7 +22,6 @@ from inschrijfbeheer.models import (
     IntegreatSeminar,
     IntegreatSeminarStatus,
     IntegreatSeminarType,
-    Locatie,
     IntegreatRegistration,
     IntegreatSeminarFreeFieldType,
     EvenementVraagType,
@@ -37,58 +36,6 @@ from inschrijfbeheer.utils.soap import haal_lidgegevens, LidGegevens
 logger = logging.getLogger("inschrijfbeheer")
 
 QueryInfoType = tuple[int, int, int]
-
-_HUISNUMMER_PATROON = re.compile(r"^(?P<straat>.*\D)\s*(?P<huisnummer>\d+\w*)\s*$")
-
-
-def _splits_straat_en_nummer(adres: str) -> tuple[str, str]:
-    """Splits '<straatnaam> <huisnummer>' in aparte straatnaam en huisnummer
-
-    Args:
-        adres (str): string die straatnaam en huisnummer bevat
-
-    Returns:
-        tuple[str, str]: straatnaam, huisnummer
-    """
-    adres = (adres or "").strip()
-    match = _HUISNUMMER_PATROON.match(adres)
-    if not match:
-        return adres, ""
-    return match.group("straat").strip(), match.group("huisnummer").strip()
-
-
-def haal_of_maak_locatie(seminar: IntegreatSeminar) -> Locatie:
-    """Maakt een nieuwe locatie of geeft een al bestaande match
-
-    Args:
-        seminar (IntegreatSeminar): Seminar uit de Integreat databank
-
-    Raises:
-        ValueError: Gooit een error als geen adres gegeven is
-
-    Returns:
-        Locatie: Nieuwe locatie of al bestaande locatie
-    """
-    straat, huisnummer = _splits_straat_en_nummer(seminar.locatie_straat)
-    stad = seminar.locatie_stad
-    naam = seminar.locatie_naam
-
-    if stad is None:
-        if naam == '':
-            return None
-        postcode = None
-        stad = None
-    else:
-        postcode = stad.postcode
-        stad = stad.naam
-    locatie, _ = Locatie.objects.get_or_create(
-        naam=naam,
-        straat=straat,
-        huisnummer=huisnummer,
-        postcode=postcode,
-        stad=stad,
-    )
-    return locatie
 
 
 def haal_of_maak_status(seminar_status: IntegreatSeminarStatus) -> EvenementStatus:
@@ -138,14 +85,20 @@ def map_evenement(seminar: IntegreatSeminar) -> dict:
         dict: dict met de nodige attributen voor een `Evenement`
     """
     status = haal_of_maak_status(seminar.status)
-    locatie = haal_of_maak_locatie(seminar)
     categorie = haal_of_maak_categorie(seminar.type)
+    if seminar.locatie_stad:
+        locatie_stad, locatie_postcode = seminar.locatie_stad.naam, seminar.locatie_stad.postcode
+    else:
+        locatie_stad, locatie_postcode = None, None
 
     return {
         "titel": (seminar.naam or "").strip(),
         "beschrijving": (seminar.onderwerp or "").strip(),
         "status": status,
-        "locatie": locatie,
+        "locatie_naam": seminar.locatie_naam,
+        "locatie_straat": seminar.locatie_straat,
+        "locatie_stad": locatie_stad,
+        "locatie_postcode": locatie_postcode,
         "starttijd": seminar.starttijd,
         "eindtijd": seminar.eindtijd,
         "categorie": categorie,

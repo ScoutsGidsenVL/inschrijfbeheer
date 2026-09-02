@@ -19,7 +19,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     weez_filter: str = request.GET.get("weez", '')
     sorteer: str = request.GET.get("sorteer", '').strip()
 
-    evenementen = Evenement.objects.select_related("status", "locatie", "categorie").filter(
+    evenementen = Evenement.objects.select_related("status", "categorie").filter(
         Q(titel__icontains=zoekterm)
         | Q(id__icontains=zoekterm)
     )

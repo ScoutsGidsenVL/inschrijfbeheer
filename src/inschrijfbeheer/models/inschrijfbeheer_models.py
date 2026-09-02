@@ -2,7 +2,6 @@
 
 ## Classes:
     **Deelnemer:** deelnemer, gebruikt voor snellere zoekmethoden
-    **Locatie:** beschrijft een locatie
     **EvenementStatus:** beschrijft de status van een evenement
     **Categorie:** beschrijft de categorie van een evenement
     **Evenement:** beschrijft een evenement/vorming
@@ -53,23 +52,6 @@ class Deelnemer(models.Model):
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
 
-class Locatie(models.Model):
-    id = models.AutoField(primary_key=True)
-    naam = models.CharField(null=True)
-    straat = models.CharField(null=True)
-    huisnummer = models.CharField(null=True)
-    postcode = models.CharField(null=True)
-    stad = models.CharField(null=True)
-    is_weez = models.BooleanField(default=False, blank=True)
-
-    models.CheckConstraint(
-        condition=(
-            models.Q(naam__isnull=False) |
-            models.Q(straat__isnull=False, huisnummer__isnull=False, postcode__isnull=False, stad__isnull=False)
-        ),
-        name="locatie_of_adres"
-    )
-
     class Meta:
         app_label = "inschrijfbeheer"
         db_table = "locatie" # geeft naam van de tabel in de nieuwe databank aan
@@ -111,7 +93,10 @@ class Evenement(models.Model):
         titel (str): titel/naam van het evenement
         beschrijving (str): beschrijving van het evenement
         status (EvenementStatus): status van het evenement. Nullable
-        locatie (Locatie): locatie van het evenement. Nullable
+        locatie_naam (str): naam van de locatie van het evenement. Nullable
+        locatie_straat (str): straat van de locatie van het evenement. Nullable
+        locatie_stad (str): stad van de locatie van het evenement. Nullable
+        locatie_postcode (str): postcode van de stad van de locatie van het evenement. Nullable
         starttijd (datetime): starttijd van het evenement. Nullable
         eindtijd (datetime): eindtijd van het evenement. Nullable
         min_deelnemers (int): minimaal aantal deelnemers
@@ -127,7 +112,10 @@ class Evenement(models.Model):
     titel = models.CharField()
     beschrijving = models.CharField()
     status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL, null=True, db_column="status")
-    locatie = models.ForeignKey(Locatie, on_delete=models.RESTRICT, null=True, db_column="locatie")
+    locatie_naam = models.CharField(null=True, blank=True)
+    locatie_straat = models.CharField(null=True, blank=True)
+    locatie_stad = models.CharField(null=True, blank=True)
+    locatie_postcode = models.CharField(null=True, blank=True)
     starttijd = models.DateTimeField(null=True)
     eindtijd = models.DateTimeField(null=True)
     min_deelnemers = models.PositiveIntegerField()

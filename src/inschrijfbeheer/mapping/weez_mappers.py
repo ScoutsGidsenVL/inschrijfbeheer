@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 from inschrijfbeheer.models import (
     Categorie,
     Evenement,
-    Locatie,
     Inschrijving,
     Deelnemer,
     EvenementVraag,
@@ -47,21 +46,6 @@ def _parse_datetime(waarde):
     except ValueError:
         return None
     return timezone.make_aware(tijdstip, EVENT_TIJDZONE)
-
-
-def _split_adres(adres: str | None) -> tuple[str | None, str | None]:
-    """Splitst een adresstring ('110 rue des Poissonniers') in huisnummer en straat.
-
-    Heuristiek: het eerste cijferblok is het huisnummer, de rest is de straat.
-    Werkt niet voor adressen waar het huisnummer na de straatnaam staat.
-    Controleer dit steekproefsgewijs op echte data."""
-    if not adres:
-        return None, None
-    match = re.match(r"^\s*(\d+\w*)\s+(.*)$", adres)
-    if not match:
-        return None, adres
-    huisnummer, straat = match.groups()
-    return huisnummer, straat
 
 @dataclass
 class InschrijvingsGegevens:
@@ -157,8 +141,6 @@ class WeezSyncer(Synchronisatie):
             categorie = self.__haal_of_maak_categorie(categorie_data)
 
             locatie_data = event.get("venue") or {}
-            locatie = self.__haal_of_maak_locatie(locatie_data)
-
 
             periode = event.get("period") or {}
             starttijd = _parse_datetime(periode.get("start"))
@@ -171,7 +153,10 @@ class WeezSyncer(Synchronisatie):
                     "beschrijving": event.get("description", ""),
                     "starttijd": starttijd,
                     "eindtijd": eindtijd,
-                    "locatie": locatie,
+                    "locatie_naam": locatie_data.get("name", None),
+                    "locatie_straat": locatie_data.get("address", None),
+                    "locatie_stad": locatie_data.get("city", None),
+                    "locatie_postcode": locatie_data.get("zip_code", None),
                     "categorie": categorie,
                     "min_deelnemers": 0,
                     "max_deelnemers": 0,
@@ -300,24 +285,6 @@ class WeezSyncer(Synchronisatie):
             evenement_prijzen[prijs_json.get("id")] = prijs_json.get("price")
 
         return evenement_prijzen
-
-    def __haal_of_maak_locatie(self, locatie_data: dict) -> Locatie:
-        if locatie_data.get("name") or locatie_data.get("address"):
-            huisnummer, straat = _split_adres(locatie_data.get("address"))
-            locatie, aangemaakt = Locatie.objects.get_or_create(
-                naam=locatie_data.get("name") or None,
-                straat=straat,
-                huisnummer=huisnummer,
-                postcode=locatie_data.get("zip_code") or None,
-                stad=locatie_data.get("city") or None,
-                is_weez=True,
-            )
-
-            if aangemaakt:
-                self.info.registreer(Locatie, SynchronisatieActie.AANGEMAAKT)
-
-            return locatie
-        return None
 
     def __haal_of_maak_categorie(self, categorie_data: dict) -> Categorie:
         if categorie_data.get("id") is not None:

@@ -1,6 +1,5 @@
 from inschrijfbeheer.models.inschrijfbeheer_models import (
     Deelnemer,
-    Locatie,
     EvenementStatus,
     Categorie,
     Evenement,
