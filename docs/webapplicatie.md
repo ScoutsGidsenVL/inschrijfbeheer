@@ -20,7 +20,7 @@ De applicatie verdeelt de verantwoordelijkheden voor de paden van de URLs onder 
 | /oidc | django-oidc-auth |
 | /docs | wordt rechtstreeks doorverwezen naar de [README](./README.md) of een bestand [docs](./) |
 | /logs | wordt rechtstreeks afgehandeld door log_lijst (slechts één pad) |
-| /evenementen | wordt afgehandeld door [evenmenten_urls.py](../src/inschrijfbeheer/urls/evenementen_urls.py) |
+| /evenementen | wordt afgehandeld door [evenementen_urls.py](../src/inschrijfbeheer/urls/evenementen_urls.py) |
 | /deelnemers | wordt afgehandeld door [deelnemers_urls.py](../src/inschrijfbeheer/urls/deelnemers_urls.py) |
 | /inschrijvingen | wordt afgehandeld door [inschrijvingen_urls.py](../src/inschrijfbeheer/urls/inschrijvingen_urls.py) |
 
