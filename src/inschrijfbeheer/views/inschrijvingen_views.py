@@ -3,8 +3,8 @@
 ## Functies:
     **inschrijvingen_detail:** Geeft een view voor het tonen van alle details van een inschrijving
 """
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse, Http404
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from django.contrib.auth.decorators import login_required
 
@@ -44,8 +44,10 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
 @login_required
 def inschrijvingen_attest(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
-    buffer = genereer_deelname_attest(inschrijving_id)
-
-    response = HttpResponse(buffer, content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
-    return response
+    inschrijving = Inschrijving.objects.get(id=inschrijving_id)
+    if not inschrijving.annulatie:
+        buffer = genereer_deelname_attest(inschrijving_id)
+        response = HttpResponse(buffer, content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
+        return response
+    raise Http404()
