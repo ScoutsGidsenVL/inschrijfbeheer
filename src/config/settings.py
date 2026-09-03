@@ -190,7 +190,7 @@ LOGGING = {
     "handlers": {
         "db": {
             "level": "INFO",
-            "class": "inschrijfbeheer.utils.logging.DatabaseLogHandler",
+            "class": "inschrijfbeheer.utils.database_logger.DatabaseLogHandler",
         },
         "console": {
             "level": "DEBUG",
