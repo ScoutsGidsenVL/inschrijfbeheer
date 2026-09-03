@@ -4,7 +4,7 @@ from inschrijfbeheer.views.evenementen_views import (
     evenement_inschrijvingen,
     evenement_vragen,
     evenement_vraag_antwoorden,
-
+    evenementen_inschrijvingen_attesten,
 )
 
 from inschrijfbeheer.views.deelnemers_views import (

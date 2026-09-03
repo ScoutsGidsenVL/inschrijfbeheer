@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
+from inschrijfbeheer.utils.attesten import genereer_zip_attesten
 
 KOLOMMEN = {
     "id": "ID",
@@ -125,3 +126,13 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
         "vraag": vraag,
         "evenement": evenement
     })
+
+
+@login_required
+def evenementen_inschrijvingen_attesten(request: HttpRequest, evenement_id: str) -> HttpResponse:
+    inschrijvingen = Inschrijving.objects.filter(evenement=evenement_id)
+    buffer = genereer_zip_attesten(inschrijvingen)
+
+    response = HttpResponse(buffer, content_type="application/zip")
+    response["Content-Disposition"] = 'attachment; filename="deelname_attesten.zip"'
+    return response
