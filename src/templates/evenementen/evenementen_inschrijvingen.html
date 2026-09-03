@@ -2,7 +2,10 @@
 {% load type_filters %}
 
 {% block evenementen_content %}
-<button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten" evenement_id=evenement.id %}'">Download attesten voor aanwezige deelnemers</button>
+{% if not evenement.foutboodschap %}
+    <button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten_download" evenement_id=evenement.id %}'">Download attesten voor aanwezige deelnemers</button>
+    <button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten_mail" evenement_id=evenement.id %}'">Mail attesten voor aanwezige deelnemers</button>
+{% endif %}
 <form method="get" class="inschrijving-filter">
     <label>
         Zoek deelnemer
