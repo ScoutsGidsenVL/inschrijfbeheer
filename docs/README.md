@@ -58,7 +58,7 @@ FROM_MAIL_ADRESS=<mailadres waarvan de mails zullen uitgestuurd worden>
 
 Doordat de functionaliteit van Inschrijfbeheer uit meerdere onderdelen bestaat dienen migratie van de gegevens en het uitvoeren van de webapplicatie apart gedaan te worden.
 
-Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer dient het commando [`synchroniseer`](./synchroniseer.md) uitgevoerd te worden.
+Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer dient het commando [`sync`](./synchroniseer.md) uitgevoerd te worden.
 
 ```shell
 > cd src
