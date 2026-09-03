@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 
 from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
+from inschrijfbeheer.utils.attesten import genereer_zip_attesten, genereer_deelname_attest
+from inschrijfbeheer.utils.mailer import stuur_attest_mails
 
 KOLOMMEN = {
     "id": "ID",
@@ -125,3 +127,24 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
         "vraag": vraag,
         "evenement": evenement
     })
+
+
+@login_required
+def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement_id: str) -> HttpResponse:
+    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    buffer = genereer_zip_attesten(inschrijvingen)
+
+    response = HttpResponse(buffer, content_type="application/zip")
+    response["Content-Disposition"] = 'attachment; filename="deelname_attesten.zip"'
+    return response
+
+@login_required
+def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id: str) -> HttpResponse:
+    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+
+    maildata = []
+    for inschrijving in inschrijvingen:
+        maildata.append((genereer_deelname_attest(inschrijving.id), inschrijving.lid))
+
+    stuur_attest_mails(maildata)
+    return redirect("evenement_inschrijvingen", id=evenement_id)

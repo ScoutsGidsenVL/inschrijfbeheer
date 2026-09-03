@@ -180,9 +180,14 @@ STATICFILES_DIRS = [
 
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        "OPTIONS": {
+        }
     },
 }
+
+EMAIL_HOST = os.getenv("MAIL_RELAY_HOST")
+EMAIL_PORT = os.getenv("MAIL_RELAY_PORT")
 
 LOGGING = {
     "version": 1,
@@ -190,7 +195,7 @@ LOGGING = {
     "handlers": {
         "db": {
             "level": "INFO",
-            "class": "inschrijfbeheer.utils.logging.DatabaseLogHandler",
+            "class": "inschrijfbeheer.utils.database_logger.DatabaseLogHandler",
         },
         "console": {
             "level": "DEBUG",

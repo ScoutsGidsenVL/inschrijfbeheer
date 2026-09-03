@@ -1,11 +1,11 @@
 """Module die een handler geeft voor logging.
 De logs worden weggeschreven naar de databank, zodat deze in Inschrijfbeheer zichtbaar zullen zijn.
 """
-import logging
+from logging import Handler
 import traceback
 
 
-class DatabaseLogHandler(logging.Handler):
+class DatabaseLogHandler(Handler):
     """Klasse die logging naar de databank toelaat
     """
     def emit(self, record):
