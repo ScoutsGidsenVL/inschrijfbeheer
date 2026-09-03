@@ -130,7 +130,7 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
 
 @login_required
 def evenementen_inschrijvingen_attesten(request: HttpRequest, evenement_id: str) -> HttpResponse:
-    inschrijvingen = Inschrijving.objects.filter(evenement=evenement_id)
+    inschrijvingen = Inschrijving.objects.filter(evenement=evenement_id, annulatie__isnull=True)
     buffer = genereer_zip_attesten(inschrijvingen)
 
     response = HttpResponse(buffer, content_type="application/zip")
