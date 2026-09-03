@@ -8,14 +8,27 @@
 
 {% block content %}
 <div class="evenement-hoofding">
-    <button class="evenement-terug-knop" onclick="history.back()">Back</button>
-    <h1 class="evenement-titel">{{ inschrijving.evenement }} - {{ inschrijving.lid }}</h1>
+    <div class="evenement-titel-rij">
+        <button class="evenement-terug-knop" onclick="history.back()">Back</button>
+        <h1 class="evenement-titel">{{ inschrijving.evenement }} - {{ inschrijving.lid }}</h1>
+    </div>
+    {% if inschrijving.evenement.foutboodschap %}
+    <div class="foutboodschap">
+        <div class="foutboodschap-icoon">!</div>
+        <div class="foutboodschap-tekst">{{inschrijving.evenement.foutboodschap}}</div>
+    </div>
+    {% endif %}
+    {% if inschrijving.lid.foutboodschap %}
+    <div class="foutboodschap">
+        <div class="foutboodschap-icoon">!</div>
+        <div class="foutboodschap-tekst">{{inschrijving.lid.foutboodschap}}</div>
+    </div>
+    {% endif %}
     <nav class="evenement-nav">
         <a href="/inschrijvingen/{{ inschrijving.id }}" class="geselecteerd">Algemeen</a>
         <a href="/inschrijvingen/{{ inschrijving.id }}/vragen">Vragen</a>
     </nav>
 </div>
-
 {% block inschrijvingen_content %}
 {% endblock inschrijvingen_content %}
 
