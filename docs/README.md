@@ -41,9 +41,15 @@ KEYCLOAK_CLIENT_ID=
 KEYCLOAK_CLIENT_SECRET=
 
 # SOAP configuratie
-WSDL_URL =
-APPLICATIE_NAAM =
-WEB_NAMESPACE =
+WSDL_URL=
+APPLICATIE_NAAM=
+WEB_NAMESPACE=
+
+DEELNAME_ATTEST_PDF=<pad naar template voor attest>
+
+MAIL_RELAY_HOST=
+MAIL_RELAY_PORT=
+FROM_MAIL_ADRESS=<mailadres waarvan de mails zullen uitgestuurd worden>
 ```
 
 ## Uitvoeren
@@ -56,26 +62,54 @@ Voor het uitvoeren van een migratie van de data van Integreat naar de databank v
 
 ```shell
 > cd src
-> python manage.py synchroniseer [--dry-run] [--limiet LIMIET]
-> python manage.py synchroniseer --help # meer info
+> python manage.py sync <weez|integreat> [--dry-run] [--limiet LIMIET] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
+> python manage.py sync --help # meer info
 ```
 
 ### Webapplicatie
 
-Voor het uitvoeren bestaat er een script [runserver](../runserver), dit script maakt een mapping aan naar een andere poort omwille van de huidige configuratie van Keycloak.
+Om de applicatie uit te voeren moet men het onderstaande command uitvoeren
 
 ```shell
-> chmod u+x ./runserver
-> ./runserver
+> cd src/
+> python manage.py runserver 2197
 ```
 
 Dit opent de applicatie op [http://localhost:2197](http://localhost:2197)
 
-Het is ook mogelijk om manueel het programma uit te voeren.
+Meer info over de webapplicatie is te vinden in [webapplicatie.md](./webapplicatie.md)
 
-```shell
-> cd src/
-> python manage.py runserver
+## Structuur
+
 ```
-
-Dit opent de applicatie op [http://localhost:8000](http://localhost:8000)
+├── docs # documentatie
+├── src
+│   ├── config # bevat alle algemene configuratie in settings.py
+│   ├── inschrijfbeheer
+│   │   ├── assets # assets die niet bereikbaar zijn via de webapplicatie
+│   │   ├── management
+│   │   │   └── commands # logica voor admin commands (`sync`)
+│   │   ├── mapping
+│   │   │   ├── logic # alle mappers voor de synchronisatie
+│   │   │   │   ├── integreat_mappers
+│   │   │   │   └── weez_mappers
+│   │   │   ├── providers # alle providers voor de synchronisatie
+│   │   │   │   ├── integreat_providers
+│   │   │   │   └── weez_providers
+│   │   ├── models # alle datamodellen
+│   │   ├── templatetags
+│   │   ├── urls
+│   │   ├── utils
+│   │   └── views
+│   ├── static # statische bestanden die via webapplicatie bereikbaar zijn
+│   │   ├── images
+│   │   └── styles
+│   └── templates # HTML templates
+│       ├── deelnemers
+│       ├── evenementen
+│       │   └── vragen
+│       ├── inschrijvingen
+│       ├── logging
+│       └── mails
+└── tests
+```
