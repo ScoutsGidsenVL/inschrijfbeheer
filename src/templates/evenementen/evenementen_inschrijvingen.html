@@ -28,7 +28,9 @@
     </thead>
     <tbody>
         {% for rij in inschrijvingen %}
-            <tr class="inschrijving-rij" onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=rij.instantie.id %}'">
+            <tr class="inschrijving-rij {% if rij.instantie.lid.foutboodschap %}foutrij{% endif %}" 
+                onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=rij.instantie.id %}'"
+                {% if rij.instantie.lid.foutboodschap %}title="{{rij.instantie.lid.foutboodschap}}"{% endif %}>
                 {% for waarde in rij.waarden %}
                     <td>
                         {% if waarde|is_boolean %}

@@ -67,7 +67,6 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     zoekterm = request.GET.get('q', '')
  
     kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
-    namen_per_lid_id = {}
 
     queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
     if zoekterm:

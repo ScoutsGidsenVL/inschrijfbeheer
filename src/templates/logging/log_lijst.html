@@ -35,10 +35,6 @@
         <input type="text" name="function" value="{{ filters.function }}">
     </label>
     <label>
-        Gebruiker
-        <input type="text" name="user_identifier" value="{{ filters.user_identifier }}">
-    </label>
-    <label>
         Trace
         <input type="text" name="trace" value="{{ filters.trace }}">
     </label>
@@ -72,7 +68,6 @@
             <th>Module</th>
             <th>Functie</th>
             <th>Regel</th>
-            <th>Gebruiker</th>
         </tr>
     </thead>
     <tbody>
@@ -99,7 +94,6 @@
                 <td>{{ log.module }}</td>
                 <td>{{ log.function }}</td>
                 <td>{{ log.line|default:"-" }}</td>
-                <td>{{ log.user_identifier|default:"-" }}</td>
             </tr>
         {% empty %}
             <tr><td colspan="8">Geen logs gevonden voor deze filters.</td></tr>
