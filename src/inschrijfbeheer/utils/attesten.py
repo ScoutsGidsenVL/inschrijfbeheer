@@ -8,6 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 from inschrijfbeheer.models import Inschrijving
+from inschrijfbeheer.utils.soap import haal_lidgegevens
 
 load_dotenv()
 PDF_PAD = os.getenv("DEELNAME_ATTEST_PDF")
@@ -15,6 +16,7 @@ PDF_PAD = os.getenv("DEELNAME_ATTEST_PDF")
 
 def genereer_deelname_attest(inschrijving_id: str):
     inschrijving = Inschrijving.objects.select_related("evenement", "lid").get(id=inschrijving_id)
+    lidgegevens = haal_lidgegevens(inschrijving.lid.id)
 
     achtergrond = PdfReader(PDF_PAD)
     pagina_achtergrond = achtergrond.pages[0]
@@ -24,8 +26,16 @@ def genereer_deelname_attest(inschrijving_id: str):
 
     overlay_buffer = BytesIO()
     pdf = canvas.Canvas(overlay_buffer, pagesize=(breedte, hoogte))
-    pdf.drawString(100, 650, str(inschrijving.lid))
-    pdf.drawString(100, 600, str(inschrijving.evenement))
+
+    pdf.drawString(300, 545, f"{inschrijving.evenement.starttijd.strftime("%d/%m/%Y")} - {inschrijving.evenement.eindtijd.strftime("%d/%m/%Y")}")
+    pdf.drawString(300, 525, inschrijving.evenement.locatie_naam)
+    pdf.drawString(300, 505, f"€ {'{:.2g}'.format(inschrijving.prijs)}")
+    pdf.drawString(300, 455, str(lidgegevens.lidnummer))
+    pdf.drawString(300, 435, lidgegevens.volledige_naam)
+    pdf.drawString(300, 415, "ADRES")
+    pdf.drawString(300, 360, lidgegevens.volledige_naam)
+    pdf.drawString(300, 340, "REKENINGNUMMER")
+
     pdf.save()
     overlay_buffer.seek(0)
 
