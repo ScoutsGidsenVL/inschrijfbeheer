@@ -34,7 +34,7 @@ def genereer_deelname_attest(inschrijving_id: str):
     pdf.drawString(300, 435, lidgegevens.volledige_naam)
     pdf.drawString(300, 415, "ADRES")
     pdf.drawString(300, 360, lidgegevens.volledige_naam)
-    pdf.drawString(300, 340, "REKENINGNUMMER")
+    pdf.drawString(300, 340, lidgegevens.rekeningnummer)
 
     pdf.save()
     overlay_buffer.seek(0)
