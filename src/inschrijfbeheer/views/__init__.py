@@ -16,7 +16,8 @@ from inschrijfbeheer.views.deelnemers_views import (
 from inschrijfbeheer.views.inschrijvingen_views import (
     inschrijvingen_detail,
     inschrijvingen_vragen,
-    inschrijvingen_attest
+    inschrijvingen_attest_download,
+    inschrijvingen_attest_mail
 )
 
 from inschrijfbeheer.views.logging_views import (
