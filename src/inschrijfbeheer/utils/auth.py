@@ -1,15 +1,15 @@
 """Module met extra functies/decorators voor de authenticatie/autorisatie van Inschrijfbeheer
 """
+from dotenv import load_dotenv
+import os
 from functools import wraps
 from django.contrib.auth.decorators import login_required
 
 import requests
 from django.http import Http404
 
-GROEPSADMIN_PROFIEL_URL = (
-    "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/groep"
-)
-
+load_dotenv()
+GA_API = os.getenv("GA_RESTAPI_URL")
 
 def haal_groepen(request):
     """Haalt het profiel van de ingelogde gebruiker op bij Groepsadmin.
@@ -33,7 +33,7 @@ def haal_groepen(request):
     access_token = request.session.get("oidc_access_token")
 
     response = requests.get(
-        GROEPSADMIN_PROFIEL_URL,
+        GA_API + "groep",
         headers={"Authorization": f"Bearer {access_token}"},
         timeout=10,
     )
