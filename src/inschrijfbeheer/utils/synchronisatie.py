@@ -30,16 +30,7 @@ from inschrijfbeheer.mapping.providers.integreat_providers import (
 )
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, MappingFout
-from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
-    AntwoordContext as IntegreatAntwoordContext,
-)
-from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
-    EvenementContext as IntegreatEvenementContext,
-)
-from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
-    InschrijvingContext as IntegreatInschrijvingContext,
-)
-from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
+from inschrijfbeheer.mapping.logic.integreat_mappers import (
     IntegreatAntwoordMapper,
     IntegreatCategorieMapper,
     IntegreatDeelnemerMapper,
@@ -50,8 +41,11 @@ from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
     IntegreatStatusMapper,
     IntegreatVraagTypeMapper,
     normaliseer_code,
+    AntwoordContext as IntegreatAntwoordContext,
+    EvenementContext as IntegreatEvenementContext,
+    InschrijvingContext as IntegreatInschrijvingContext,
 )
-from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import VraagContext as IntegreatVraagContext
+from inschrijfbeheer.mapping.logic.integreat_mappers import VraagContext as IntegreatVraagContext
 from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import AntwoordContext as WeezAntwoordContext
 from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
     InschrijvingContext as WeezInschrijvingContext,

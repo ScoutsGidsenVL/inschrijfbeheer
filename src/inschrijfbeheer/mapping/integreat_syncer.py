@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from inschrijfbeheer.mapping.logic.mapper import MappingFout
-from inschrijfbeheer.mapping.logic.integreat_mappers.integreat_mapper import (
+from inschrijfbeheer.mapping.logic.integreat_mappers import (
     AntwoordContext,
     EvenementContext,
     InschrijvingContext,
