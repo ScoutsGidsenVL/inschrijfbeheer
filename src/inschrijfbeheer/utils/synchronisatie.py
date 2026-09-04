@@ -68,7 +68,7 @@ from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
-from inschrijfbeheer.mapping.providers.weez_providers.weez_provider import (
+from inschrijfbeheer.mapping.providers.weez_providers import (
     InschrijvingFilter,
     WeezClient,
     WeezEvenementProvider,
