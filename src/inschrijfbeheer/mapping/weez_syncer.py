@@ -27,6 +27,7 @@ from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
+from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.providers import (
     InschrijvingFilter,
@@ -51,6 +52,7 @@ from inschrijfbeheer.models import (
     Inschrijving,
     InschrijvingVraagAntwoord,
     WeezSynchronisatie,
+    DeelnemerType
 )
 
 logger = logging.getLogger("inschrijfbeheer")
@@ -96,6 +98,7 @@ class WeezSyncer(Synchronisatie):
         self.antwoorden = SyncOnderdelen(
             model=InschrijvingVraagAntwoord, mapper=WeezAntwoordMapper()
         )
+        self.deelnemertypes = SyncOnderdelen(model=DeelnemerType, mapper=WeezDeelnemerTypeMapper())
 
         self.tijdslimiet: str | None = None
 
@@ -159,6 +162,11 @@ class WeezSyncer(Synchronisatie):
             raise ValueError("synchroniseer_inschrijvingen heeft een evenement nodig")
 
         tarieven = self.tarief_provider.haal_tarieven_op(evenement.id)
+        deelnemertypes = {}
+        for tarief in tarieven:
+            deelnemertype, _ = self.bewaar(self.deelnemertypes, self.deelnemertypes.mapper.map(tarief))
+            deelnemertypes[tarief["id"]] = {"prijs": tarief["prijs"], "type": deelnemertype}
+
         bronnen = self.inschrijving_provider.haal_alle_op(
             InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet)
         )
@@ -187,7 +195,7 @@ class WeezSyncer(Synchronisatie):
 
             try:
                 context = InschrijvingContext(
-                    evenement=evenement, deelnemer=deelnemer, tarieven=tarieven
+                    evenement=evenement, deelnemer=deelnemer, deelnemertypes=deelnemertypes
                 )
                 inschrijving, _ = self.bewaar(
                     self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context)
