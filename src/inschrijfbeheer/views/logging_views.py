@@ -1,15 +1,15 @@
-# views.py
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 from inschrijfbeheer.models import LogEntry, LogLevel
+from inschrijfbeheer.utils.auth import check_rollen
 
 TEKST_VELDEN = ["logger_name", "message", "module", "function", "user_identifier", "trace"]
 
 
-@login_required
+
+@check_rollen
 def log_lijst(request: HttpRequest) -> HttpResponse:
     """View voor het tonen van de logs
     Deze view wordt gebruikt voor `/logs`

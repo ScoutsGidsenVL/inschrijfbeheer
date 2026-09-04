@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponse
 from django.db.models import Q
-from django.contrib.auth.decorators import login_required
 
 from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
+from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_zip_attesten, genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mails
 
@@ -16,7 +16,8 @@ KOLOMMEN = {
     "status": "Status",
 }
 
-@login_required
+
+@check_rollen
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
     """View voor het oplijsten van alle evenementen in de databank.
     Deze view wordt gebruikt voor `/evenementen/`.
@@ -63,7 +64,9 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
         "categorieen": categorieen,
     })
 
-@login_required
+
+
+@check_rollen
 def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     """View voor het tonen van een detailpagina van een evenement.
     Deze view wordt gebruikt voor `/evenementen/<id>`.
@@ -86,7 +89,8 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
-@login_required
+
+@check_rollen
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     """View voor het tonen van de inschrijvingen van een evenement.
     Deze view wordt gebruikt voor `/evenementen/<id>/inschrijvingen`.
@@ -121,7 +125,17 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         queryset = queryset.exclude(annulatie__isnull=True)
 
     inschrijvingen = []
-    for instantie in queryset: 
+    for instantie in queryset:
+
+        annulatie = ""
+        aanwezig = True
+        if instantie.annulatie:
+            annulatie = instantie.annulatie
+            aanwezig = False
+        elif instantie.lid.foutboodschap:
+            annulatie = instantie.lid.foutboodschap
+            aanwezig = False
+
         inschrijvingen.append({
             "instantie": instantie,
             "waarden": [
@@ -130,8 +144,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
                 instantie.prijs,
-                instantie.annulatie,
-                instantie.annulatie is None,
+                annulatie,
+                aanwezig,
             ],
         })
  
@@ -141,7 +155,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "evenement": evenement,
     })
 
-@login_required
+
+@check_rollen
 def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     """View voor het tonen van de vragen van een evenement.
     Deze view wordt gebruikt voor `/evenementen/<id>/vragen`.
@@ -161,7 +176,8 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
-@login_required
+
+@check_rollen
 def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id: str) -> HttpResponse:
     """View voor het tonen van de antwoorden op vragen van een evenement.
     Deze view wordt gebruikt voor `/evenementen/<id>/vragen/<vraag_id>/antwoorden`.
@@ -185,7 +201,7 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
     })
 
 
-@login_required
+@check_rollen
 def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement_id: str) -> HttpResponse:
     """Functie voor het downloaden van de attesten van alle aanwezige deelnemers.
     Controleert voor alle inschrijvingen of een deelnemer geldig is en aanwezig was op basis van annulatie.
@@ -206,7 +222,7 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
     response["Content-Disposition"] = 'attachment; filename="deelname_attesten.zip"'
     return response
 
-@login_required
+@check_rollen
 def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id: str) -> HttpResponse:
     """Functie voor het mailen van de attesten van alle aanwezige deelnemers.
     Controleert voor alle inschrijvingen of een deelnemer geldig is en aanwezig was op basis van annulatie.

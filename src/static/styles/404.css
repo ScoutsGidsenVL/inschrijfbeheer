@@ -1,0 +1,43 @@
+.niet-gevonden {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 60vh;
+    padding: 2rem;
+}
+
+.niet-gevonden-code {
+    margin: 0;
+    font-size: 5rem;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--kleur-primair);
+}
+
+.niet-gevonden-titel {
+    margin: 0.5rem 0 1rem;
+    font-size: 1.5rem;
+}
+
+.niet-gevonden-tekst {
+    margin: 0 0 1.5rem;
+    max-width: 30rem;
+    color: var(--kleur-tekst-zwak);
+}
+
+.niet-gevonden-knop {
+    display: inline-block;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    background-color: #333;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.niet-gevonden-knop:hover {
+    background-color: #555;
+}

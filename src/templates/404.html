@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_headers %}
+    <link rel="stylesheet" href="{% static "styles/404.css" %}">
+{% endblock extra_headers %}
+
+{% block content %}
+<div class="niet-gevonden">
+    <p class="niet-gevonden-code">404</p>
+    <h1 class="niet-gevonden-titel">Pagina niet gevonden</h1>
+    <p class="niet-gevonden-tekst">
+        De pagina die je zoekt bestaat niet of niet meer, of de link klopt niet.
+    </p>
+    <img src="{% static "images/404.jpg" %}">
+    <a href="/" class="niet-gevonden-knop">Terug naar de startpagina</a>
+</div>
+{% endblock content %}

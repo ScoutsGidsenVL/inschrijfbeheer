@@ -51,9 +51,12 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "mozilla_django_oidc.middleware.SessionRefresh",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = 60
 
 ROOT_URLCONF = 'config.urls'
 
@@ -210,3 +213,6 @@ LOGGING = {
         },
     },
 }
+
+
+OIDC_STORE_ACCESS_TOKEN = True
