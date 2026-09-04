@@ -248,6 +248,11 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
                 f"onbekend tarief {tarief_id} op evenement {context.evenement.id}"
             )
 
+        annulatie_waarde = bron.get("deleted", '0')
+        annulatie = False
+        if annulatie_waarde == '1':
+            annulatie = True
+
         return Doelgegevens(
             sleutels={"id": bron.get("id_participant")},
             velden={
@@ -256,6 +261,8 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
                 "tijdstip": parse_datetime(bron.get("create_date")),
                 "prijs": context.tarieven[tarief_id],
                 "is_weez": True,
+                "annulatie": timezone.now() if annulatie else None,
+                "annulatie_reden": "Inschrijving verwijderd uit Weez" if annulatie else None,
             },
         )
 

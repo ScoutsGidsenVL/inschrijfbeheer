@@ -98,7 +98,7 @@ class WeezInschrijvingProvider(LijstProvider[dict, InschrijvingFilter]):
         if filter is None:
             raise ValueError("InschrijvingFilter met een evenement_id is verplicht")
 
-        parameters = {"id_event[]": filter.evenement_id, "full": "1"}
+        parameters = {"id_event[]": filter.evenement_id, "full": "1", "include_deleted": "1"}
         if filter.sinds:
             parameters["last_update"] = filter.sinds
 
