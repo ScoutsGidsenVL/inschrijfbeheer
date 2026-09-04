@@ -1,11 +1,11 @@
 """Management command dat een synchronisatie start, voor Weez of Integreat.
 
 De bestandsnaam bepaalt de naam van het commando:
-    inschrijfbeheer/management/commands/synchroniseer.py -> manage.py synchroniseer
+    inschrijfbeheer/management/commands/sync.py -> manage.py sync
 
-    manage.py synchroniseer weez
-    manage.py synchroniseer integreat --alles
-    manage.py synchroniseer weez integreat --dry-run
+    manage.py sync weez
+    manage.py sync integreat --alles
+    manage.py sync weez integreat --dry-run
 """
 
 import logging
@@ -66,8 +66,7 @@ def maak_integreat_syncer(opties: dict) -> Synchronisatie:
     )
 
 
-# Eén regel per bron. Een derde bron toevoegen is hier één regel plus een
-# maak_*_syncer-functie.
+# Databronnen, indien er ooit één bijkomt een regel toevoegen
 BRONNEN: dict[str, Callable[[dict], Synchronisatie]] = {
     "weez": maak_weez_syncer,
     "integreat": maak_integreat_syncer,
@@ -116,7 +115,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # dict.fromkeys haalt dubbels eruit en houdt de opgegeven volgorde aan.
         bronnen = list(dict.fromkeys(options["bron"]))
         self.__waarschuw_over_ongebruikte_opties(bronnen, options)
 
@@ -129,14 +127,10 @@ class Command(BaseCommand):
     def __synchroniseer(self, bron: str, opties: dict) -> None:
         dry_run = opties["dry_run"]
         aanduiding = f"[{bron.upper()} SYNC]"
-        logger.info(
-            f"{aanduiding} Synchronisatie opgeroepen" + (" (dry-run)" if dry_run else "")
-        )
 
         syncer = BRONNEN[bron](opties)
 
-        # Eén transactie per bron, zodat een fout bij de tweede bron het werk
-        # van de eerste niet terugdraait.
+        # transactie per bron zodat falen van één bron geen effect heeft op de rest
         with transaction.atomic():
             syncer.synchroniseer()
             syncer.log_info()
@@ -147,7 +141,6 @@ class Command(BaseCommand):
                     f"{aanduiding} Dry-run: alle wijzigingen teruggedraaid, niets opgeslagen."
                 )
 
-        self.stdout.write(self.style.SUCCESS(f"{aanduiding} Klaar"))
 
     def __waarschuw_over_ongebruikte_opties(self, bronnen: list[str], opties: dict) -> None:
         """Zegt het wanneer je een Integreat-optie meegeeft zonder Integreat te synchroniseren."""

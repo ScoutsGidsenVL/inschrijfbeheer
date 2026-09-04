@@ -11,6 +11,17 @@ TEKST_VELDEN = ["logger_name", "message", "module", "function", "user_identifier
 
 @check_rollen
 def log_lijst(request: HttpRequest) -> HttpResponse:
+    """View voor het tonen van de logs
+    Deze view wordt gebruikt voor `/logs`
+
+    Filtering wordt ondersteund
+
+    Args:
+        request (HttpRequest): HTTP request voor de pagina
+
+    Returns:
+        HttpResponse: HTML document dat de pagina voorstelt
+    """
     logs = LogEntry.objects.all()
 
     filters = {}

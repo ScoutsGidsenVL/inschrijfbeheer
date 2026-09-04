@@ -34,6 +34,16 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
 @check_rollen
 def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    """View voor het tonen van de vragen en antwoorden van een inschrijving.
+    Deze view wordt gebruikt voor `/inschrijvingen/<id>/vragen`
+
+    Args:
+        request (HttpRequest): HTTP request voor de pagina
+        inschrijving_id (str): id van de inschrijving
+
+    Returns:
+        HttpResponse: HTML document dat de pagina voorstelt
+    """
     inschrijving = Inschrijving.objects.select_related("lid", "evenement").get(id=inschrijving_id)
     vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
 
@@ -45,8 +55,23 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
 @check_rollen
 def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
-    inschrijving = Inschrijving.objects.get(id=inschrijving_id)
-    if not inschrijving.annulatie:
+    """Functie voor het downloaden van een attest als een deelnemer aanwezig was.
+    Controleert of de deelnemer aanwezig was en geldig is
+
+    Deze functie wordt gebruikt voor `/inschrijvingen/<id>/attest/download`
+
+    Args:
+        request (HttpRequest): HTTP request voor de pagina
+        inschrijving_id (str): id van de inschrijving
+
+    Returns:
+        HttpResponse: pdf van het attest
+    
+    Raises:
+        Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
+    """
+    inschrijving = Inschrijving.objects.select_related("lid").get(id=inschrijving_id)
+    if not inschrijving.annulatie and not inschrijving.lid.foutboodschap:
         attest = genereer_deelname_attest(inschrijving_id)
         response = HttpResponse(attest, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
@@ -55,6 +80,21 @@ def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -
 
 @check_rollen
 def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    """Functie voor het mailen van een attest als een deelnemer aanwezig was.
+    Controleert of de deelnemer aanwezig was en geldig is
+
+    Deze functie wordt gebruikt voor `/inschrijvingen/<id>/attest/mail`
+
+    Args:
+        request (HttpRequest): HTTP request voor de pagina
+        inschrijving_id (str): id van de inschrijving
+
+    Returns:
+        HttpResponse: redirect naar de inschrijving pagina
+    
+    Raises:
+        Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
+    """
     inschrijving = Inschrijving.objects.get(id=inschrijving_id)
     if not inschrijving.annulatie:
         attest = genereer_deelname_attest(inschrijving_id)

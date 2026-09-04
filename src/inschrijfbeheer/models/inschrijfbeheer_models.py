@@ -28,8 +28,8 @@ def volgende_deelnemer_id():
 
 
 class Deelnemer(models.Model):
-    """Model voor een lid.
-    Dit model is niet strikt nodig, als enkel het lid id wordt bijgehouden in Inschrijving, 
+    """Model voor een deelnemer.
+    Dit model is niet strikt nodig, als enkel het deelnemer id wordt bijgehouden in Inschrijving, 
     moet de UI steeds SOAP calls maken naar de GA wat lange wachttijden tot gevolg heeft
 
     Attributes:
@@ -47,7 +47,7 @@ class Deelnemer(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "deelnemer" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "deelnemer"
 
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
@@ -58,12 +58,20 @@ class EvenementStatus(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "evenement_status" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "evenement_status"
 
     def __str__(self):
         return self.beschrijving
 
 class Categorie(models.Model):
+    """Categorie van een evenement
+
+    Attributes:
+        id (str): id
+        naam (str): naam van de categorie
+        alt_naam (str): alternatieve naam, meestal een kopie van naam
+        is_weez (str): geeft aan of de categorie van weez is
+    """
     id = models.CharField(primary_key=True)
     naam = models.CharField()
     alt_naam = models.CharField()
@@ -71,7 +79,7 @@ class Categorie(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "categorie" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "categorie"
 
     def __str__(self):
         return self.naam
@@ -112,7 +120,7 @@ class Evenement(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "evenement" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "evenement"
 
     def __str__(self):
         return self.titel
@@ -123,7 +131,7 @@ class DeelnemerType(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "deelnemertype" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "deelnemertype"
 
     def __str__(self):
         return self.naam
@@ -165,7 +173,7 @@ class Inschrijving(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = "inschrijving" # geeft naam van de tabel in de nieuwe databank aan
+        db_table = "inschrijving"
 
     def __str__(self):
         return str(self.lid)

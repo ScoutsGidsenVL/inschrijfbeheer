@@ -12,7 +12,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 
 from inschrijfbeheer.mapping.logic.mapper import MappingFout
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
+from inschrijfbeheer.mapping.logic.weez_mappers import (
     AntwoordContext,
     InschrijvingContext,
     InschrijvingsGegevens,
