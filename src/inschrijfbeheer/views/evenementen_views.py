@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponse
 from django.db.models import Q
-from django.contrib.auth.decorators import login_required
 
 from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
@@ -15,7 +14,7 @@ KOLOMMEN = {
     "status": "Status",
 }
 
-@login_required
+
 @check_rollen
 def evenement_lijst(request: HttpRequest) -> HttpResponse:
     zoekterm: str = request.GET.get('q', '').strip()
@@ -51,7 +50,7 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     })
 
 
-@login_required
+
 @check_rollen
 def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
@@ -65,7 +64,7 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
-@login_required
+
 @check_rollen
 def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
@@ -109,7 +108,7 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "evenement": evenement,
     })
 
-@login_required
+
 @check_rollen
 def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
@@ -120,7 +119,7 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
         "evenement": evenement
     })
 
-@login_required
+
 @check_rollen
 def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=evenement_id)

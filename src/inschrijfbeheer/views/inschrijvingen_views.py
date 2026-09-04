@@ -6,10 +6,9 @@
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
-from django.contrib.auth.decorators import login_required
 from inschrijfbeheer.utils.auth import check_rollen
 
-@login_required
+
 @check_rollen
 def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     """View voor het tonen van de details van een inschrijving.
@@ -31,7 +30,7 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
     })
 
 
-@login_required
+
 @check_rollen
 def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     inschrijving = Inschrijving.objects.select_related("lid", "evenement").get(id=inschrijving_id)

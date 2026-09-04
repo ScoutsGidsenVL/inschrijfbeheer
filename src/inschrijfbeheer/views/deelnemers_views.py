@@ -9,7 +9,6 @@ De views in deze module worden gebruikt voor het pad `/deelnemers/*`
 """
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from inschrijfbeheer.models import Inschrijving, Deelnemer
@@ -18,7 +17,7 @@ from inschrijfbeheer.utils.soap import haal_lidgegevens
 from inschrijfbeheer.utils.auth import check_rollen
 
 
-@login_required
+
 @check_rollen
 def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
     """View voor het oplijsten van alle deelnemers in de databank.
@@ -45,7 +44,7 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
     })
 
 
-@login_required
+
 @check_rollen
 def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     """View voor het weergeven van de details van een deelnemer.
@@ -70,7 +69,7 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
         "gegevens": gegevens,
     })
 
-@login_required
+
 @check_rollen
 def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     """View die alle inschrijvingen voor een deelnemer oplijst.

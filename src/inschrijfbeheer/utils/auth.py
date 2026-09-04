@@ -1,6 +1,7 @@
 """Module met extra functies/decorators voor de authenticatie/autorisatie van Inschrijfbeheer
 """
 from functools import wraps
+from django.contrib.auth.decorators import login_required
 
 import requests
 from django.http import Http404
@@ -62,4 +63,4 @@ def check_rollen(func):
 
         raise Http404()
 
-    return wrapper
+    return login_required(wrapper)
