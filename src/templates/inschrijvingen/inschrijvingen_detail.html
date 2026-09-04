@@ -35,4 +35,8 @@
         <input type="checkbox" disabled {% if inschrijving.annulatie == None %}checked{% endif %}>
     </div>
 </div>
+{% if not inschrijving.annulatie %}
+    <button onclick="window.location.href='{% url "inschrijving_attest_download" inschrijving_id=inschrijving.id %}'">Download attest</button>
+    <button onclick="window.location.href='{% url "inschrijving_attest_mail" inschrijving_id=inschrijving.id %}'">Mail attest</button>
+{% endif %}
 {% endblock inschrijvingen_content %}

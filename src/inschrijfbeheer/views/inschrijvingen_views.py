@@ -3,11 +3,12 @@
 ## Functies:
     **inschrijvingen_detail:** Geeft een view voor het tonen van alle details van een inschrijving
 """
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render, redirect
+from django.http import HttpRequest, HttpResponse, Http404
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
-
+from inschrijfbeheer.utils.attesten import genereer_deelname_attest
+from inschrijfbeheer.utils.mailer import stuur_attest_mail
 
 @check_rollen
 def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
@@ -40,3 +41,23 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
         "vraag_antwoorden" : vraag_antwoorden,
         "inschrijving": inschrijving,
     })
+
+
+@check_rollen
+def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    inschrijving = Inschrijving.objects.get(id=inschrijving_id)
+    if not inschrijving.annulatie:
+        attest = genereer_deelname_attest(inschrijving_id)
+        response = HttpResponse(attest, content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
+        return response
+    raise Http404()
+
+@check_rollen
+def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    inschrijving = Inschrijving.objects.get(id=inschrijving_id)
+    if not inschrijving.annulatie:
+        attest = genereer_deelname_attest(inschrijving_id)
+        stuur_attest_mail(attest, deelnemer=inschrijving.lid)
+        return redirect("inschrijving_detail", inschrijving_id=inschrijving_id)
+    raise Http404()

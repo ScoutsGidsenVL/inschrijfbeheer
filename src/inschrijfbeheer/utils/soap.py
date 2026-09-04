@@ -55,6 +55,7 @@ class LidGegevens:
     gsmnummer: str = ""
     gebruikersnaam: str = ""
     groepen: list = field(default_factory=list)
+    rekeningnummer: str = ""
  
     @property
     def volledige_naam(self):
@@ -116,6 +117,7 @@ class LidGegevens:
             gsmnummer=getattr(resultaat, "gsmnummer", "") or "",
             gebruikersnaam=getattr(resultaat, "gebruikersnaam", "") or "",
             groepen=groepen,
+            rekeningnummer=getattr(resultaat, "rekeningnummer", "") or "",
         )
  
  
