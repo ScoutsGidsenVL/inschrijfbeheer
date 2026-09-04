@@ -34,9 +34,9 @@ class WeezTariefProvider(LijstProvider[dict, TariefFilter]):
             return []
         return evenementen[0].get("tickets") or []
 
-    def haal_tarieven_op(self, evenement_id: str) -> dict[str, Any]:
-        """Geeft de tarieven van een evenement als {tarief_id: prijs}."""
-        return {
-            tarief.get("id"): tarief.get("price")
+    def haal_tarieven_op(self, evenement_id: str) -> dict[str, str]:
+        """Geeft de tarieven van een evenement als {id: id, prijs: prijs, naam: naam}."""
+        return [
+            {"id": tarief.get("id"), "prijs": tarief.get("price"), "naam": tarief.get("name")}
             for tarief in self.haal_alle_op(TariefFilter(evenement_id=evenement_id))
-        }
+        ]

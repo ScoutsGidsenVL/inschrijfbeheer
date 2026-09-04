@@ -46,12 +46,12 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     InschrijvingContext as IntegreatInschrijvingContext,
 )
 from inschrijfbeheer.mapping.logic.integreat_mappers import VraagContext as IntegreatVraagContext
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import AntwoordContext as WeezAntwoordContext
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
+from inschrijfbeheer.mapping.logic.weez_mappers import AntwoordContext as WeezAntwoordContext
+from inschrijfbeheer.mapping.logic.weez_mappers import (
     InschrijvingContext as WeezInschrijvingContext,
 )
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import VraagContext as WeezVraagContext
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import (
+from inschrijfbeheer.mapping.logic.weez_mappers import VraagContext as WeezVraagContext
+from inschrijfbeheer.mapping.logic.weez_mappers import (
     WeezAntwoordMapper,
     WeezCategorieMapper,
     WeezDeelnemerMapper,
