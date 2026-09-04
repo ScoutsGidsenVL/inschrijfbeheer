@@ -86,7 +86,17 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         queryset = queryset.exclude(annulatie__isnull=True)
 
     inschrijvingen = []
-    for instantie in queryset: 
+    for instantie in queryset:
+
+        annulatie = ""
+        aanwezig = True
+        if instantie.annulatie:
+            annulatie = instantie.annulatie
+            aanwezig = False
+        elif instantie.lid.foutboodschap:
+            annulatie = instantie.lid.foutboodschap
+            aanwezig = False
+
         inschrijvingen.append({
             "instantie": instantie,
             "waarden": [
@@ -95,8 +105,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
                 str(instantie.deelnemertype),
                 instantie.tijdstip,
                 instantie.prijs,
-                instantie.annulatie,
-                instantie.annulatie is None,
+                annulatie,
+                aanwezig,
             ],
         })
  
