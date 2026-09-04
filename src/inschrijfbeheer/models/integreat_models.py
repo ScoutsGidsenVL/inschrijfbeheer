@@ -53,6 +53,9 @@ class IntegreatCity(models.Model):
         managed = False
 
 class IntegreatSeminar(models.Model):
+    """Integreat model voor een evenement/vorming.
+    Dit heeft nog SeminarModule onder zich, maar dit wordt in de praktijk niet gebruikt
+    """
     oid = models.PositiveIntegerField(primary_key=True, db_column='OID')
     code = models.CharField(db_column='Code')
     naam = models.CharField(db_column='Name')
@@ -89,10 +92,8 @@ class IntegreatRegistration(models.Model):
     price = models.DecimalField(db_column='Price', max_digits=18, decimal_places=2, blank=True, null=True) 
     annulatie = models.DateTimeField(db_column='CanceledDate', blank=True, null=True)
     canceledmotivation = models.TextField(db_column='CanceledMotivation', blank=True, null=True)
-    # status = models.ForeignKey('IntegreatRegistrationstatus', models.DO_NOTHING, db_column='Status', blank=True, null=True)
     deelnemers_type = models.ForeignKey(IntegreatParticipantType, models.DO_NOTHING, db_column='ParticipantType', blank=True, null=True)
     tijdstip = models.DateTimeField(db_column='RegistrationDate', blank=True, null=True)
-    # organizationunitsite = models.ForeignKey('IntegreatOrganizationunitsite', models.DO_NOTHING, db_column='OrganizationUnitSite', blank=True, null=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
