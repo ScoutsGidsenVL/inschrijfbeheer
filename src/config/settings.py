@@ -210,3 +210,6 @@ LOGGING = {
         },
     },
 }
+
+
+OIDC_STORE_ACCESS_TOKEN = True

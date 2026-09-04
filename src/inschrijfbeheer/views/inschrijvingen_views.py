@@ -6,12 +6,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse, Http404
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
-from django.contrib.auth.decorators import login_required
-
+from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
 
-@login_required
+@check_rollen
 def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     """View voor het tonen van de details van een inschrijving.
     Deze view wordt gebruikt voor `/inschrijvingen/<id>`
@@ -32,7 +31,8 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
     })
 
 
-@login_required
+
+@check_rollen
 def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     inschrijving = Inschrijving.objects.select_related("lid", "evenement").get(id=inschrijving_id)
     vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
@@ -43,7 +43,7 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
     })
 
 
-@login_required
+@check_rollen
 def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     inschrijving = Inschrijving.objects.get(id=inschrijving_id)
     if not inschrijving.annulatie:
@@ -53,7 +53,7 @@ def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -
         return response
     raise Http404()
 
-@login_required
+@check_rollen
 def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     inschrijving = Inschrijving.objects.get(id=inschrijving_id)
     if not inschrijving.annulatie:
