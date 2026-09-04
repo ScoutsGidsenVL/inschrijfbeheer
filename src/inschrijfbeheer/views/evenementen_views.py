@@ -145,7 +145,7 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
     })
 
 
-@login_required
+@check_rollen
 def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement_id: str) -> HttpResponse:
     inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
     buffer = genereer_zip_attesten(inschrijvingen)
@@ -154,7 +154,7 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
     response["Content-Disposition"] = 'attachment; filename="deelname_attesten.zip"'
     return response
 
-@login_required
+@check_rollen
 def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id: str) -> HttpResponse:
     inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
 
