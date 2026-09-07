@@ -163,6 +163,7 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
     scope = scope_type(
         basis={},
         functies={"actief": True},
+        adressen={},
     )
  
     resultaat = client.service.LidGegevensV3(
