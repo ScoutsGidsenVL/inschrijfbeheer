@@ -7,6 +7,7 @@ from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_zip_attesten, genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mails
+from inschrijfbeheer.utils.paginering import pagineer
 
 KOLOMMEN = {
     "id": "ID",
@@ -127,8 +128,10 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     elif aanwezig_filter == "0":
         queryset = queryset.exclude(annulatie__isnull=True)
 
+    pagina, querystring = pagineer(request, queryset)
+
     inschrijvingen = []
-    for instantie in queryset:
+    for instantie in pagina:
 
         annulatie = ""
         aanwezig = True
@@ -156,6 +159,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         "kolommen": kolommen,
         "inschrijvingen": inschrijvingen,
         "evenement": evenement,
+        "pagina": pagina,
+        "querystring": querystring,
     })
 
 
