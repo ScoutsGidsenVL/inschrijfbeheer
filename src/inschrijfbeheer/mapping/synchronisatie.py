@@ -67,6 +67,7 @@ class SynchronisatieInfo:
 @dataclass
 class SynchronisatieConfig:
     limiet: int | None = None
+    sync_alles: bool = False
 
 
 

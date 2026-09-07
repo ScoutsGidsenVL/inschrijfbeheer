@@ -104,7 +104,8 @@ class WeezSyncer(Synchronisatie):
 
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez-evenementen op en zet ze om naar Evenement-modellen."""
-        self.tijdslimiet = self.__bepaal_tijdslimiet()
+        if not self.config.sync_alles:
+            self.tijdslimiet = self.__bepaal_tijdslimiet()
         WeezSynchronisatie.objects.create()  # log dat een synchronisatie is gestart
         self.info.status(SynchronisatieStatus.BEZIG)
 
@@ -168,7 +169,7 @@ class WeezSyncer(Synchronisatie):
             deelnemertypes[tarief["id"]] = {"prijs": tarief["prijs"], "type": deelnemertype}
 
         bronnen = self.inschrijving_provider.haal_alle_op(
-            InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet)
+            InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet, sync_alles=self.config.sync_alles)
         )
 
         for bron in bronnen:
@@ -233,7 +234,7 @@ class WeezSyncer(Synchronisatie):
             raise ValueError("synchroniseer_vragen heeft een evenement nodig")
 
         bronnen = self.inschrijving_provider.haal_alle_op(
-            InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet)
+            InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet, sync_alles=self.config.sync_alles)
         )
         for bron in bronnen:
             vragen = bron.get("answers") or []

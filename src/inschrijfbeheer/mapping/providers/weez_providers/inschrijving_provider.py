@@ -12,6 +12,7 @@ logger = logging.getLogger("inschrijfbeheer")
 class InschrijvingFilter:
     evenement_id: str
     sinds: str | None = None
+    sync_alles: bool = False
 
 
 class WeezInschrijvingProvider(LijstProvider[dict, InschrijvingFilter]):
@@ -30,7 +31,8 @@ class WeezInschrijvingProvider(LijstProvider[dict, InschrijvingFilter]):
             raise ValueError("InschrijvingFilter met een evenement_id is verplicht")
 
         parameters = {"id_event[]": filter.evenement_id, "full": "1"}
-        if filter.sinds:
+
+        if not filter.sync_alles and filter.sinds:
             parameters["last_update"] = filter.sinds
 
         respons = self.client.get("participant/list", parameters=parameters)
