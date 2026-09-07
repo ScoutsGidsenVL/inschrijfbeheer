@@ -1,0 +1,15 @@
+{% if pagina.has_other_pages %}
+<nav class="paginering" aria-label="Paginering">
+    {% if pagina.has_previous %}
+        <a href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">&laquo; Eerste</a>
+        <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ pagina.previous_page_number }}">Vorige</a>
+    {% endif %}
+
+    <span>Pagina {{ pagina.number }} van {{ pagina.paginator.num_pages }} ({{ pagina.paginator.count }} resultaten)</span>
+
+    {% if pagina.has_next %}
+        <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ pagina.next_page_number }}">Volgende</a>
+        <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ pagina.paginator.num_pages }}">Laatste &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
