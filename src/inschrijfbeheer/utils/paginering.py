@@ -2,7 +2,7 @@ from django.core.paginator import Page, Paginator
 from django.http import HttpRequest
 
 
-def pagineer(request: HttpRequest, queryset, per_pagina: int = 5) -> tuple[Page, str]:
+def pagineer(request: HttpRequest, queryset, per_pagina: int = 50) -> tuple[Page, str]:
     """Pagineert een queryset op basis van de 'page' GET-parameter.
 
     Args:
