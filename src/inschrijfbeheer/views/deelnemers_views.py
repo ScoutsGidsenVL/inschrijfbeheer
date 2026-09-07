@@ -105,7 +105,11 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     elif aanwezig_filter == '0':
         inschrijvingen = inschrijvingen.exclude(annulatie__isnull=True)
 
+    pagina, querystring = pagineer(request, inschrijvingen)
+
     return render(request, "deelnemers/deelnemers_inschrijvingen.html", {
-        "inschrijvingen": inschrijvingen,
+        "inschrijvingen": pagina,
         "deelnemer": deelnemer,
+        "querystring": querystring,
+        "pagina": pagina,
     })
