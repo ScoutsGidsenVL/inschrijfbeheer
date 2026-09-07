@@ -101,13 +101,6 @@
     </tbody>
 </table>
 
-<div class="log-paginering">
-    {% if pagina.has_previous %}
-        <a href="?{{ basis_querystring }}&pagina={{ pagina.previous_page_number }}">Vorige</a>
-    {% endif %}
-    Pagina {{ pagina.number }} van {{ pagina.paginator.num_pages }}
-    {% if pagina.has_next %}
-        <a href="?{{ basis_querystring }}&pagina={{ pagina.next_page_number }}">Volgende</a>
-    {% endif %}
-</div>
+{% include "widgets/paginering.html" with pagina=pagina %}
+
 {% endblock content %}

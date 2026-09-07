@@ -15,6 +15,7 @@ from inschrijfbeheer.models import Inschrijving, Deelnemer
 
 from inschrijfbeheer.utils.soap import haal_lidgegevens
 from inschrijfbeheer.utils.auth import check_rollen
+from inschrijfbeheer.utils.paginering import pagineer
 
 
 
@@ -39,8 +40,11 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
         | Q(mailadres__icontains=zoekterm)
     ).distinct()
 
+    deelnemers, querystring = pagineer(request, deelnemers)
+
     return render(request, "deelnemers/deelnemers_lijst.html", {
-        "deelnemers": deelnemers
+        "deelnemers": deelnemers,
+        "querystring": querystring,
     })
 
 
@@ -101,7 +105,11 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     elif aanwezig_filter == '0':
         inschrijvingen = inschrijvingen.exclude(annulatie__isnull=True)
 
+    pagina, querystring = pagineer(request, inschrijvingen)
+
     return render(request, "deelnemers/deelnemers_inschrijvingen.html", {
-        "inschrijvingen": inschrijvingen,
+        "inschrijvingen": pagina,
         "deelnemer": deelnemer,
+        "querystring": querystring,
+        "pagina": pagina,
     })
