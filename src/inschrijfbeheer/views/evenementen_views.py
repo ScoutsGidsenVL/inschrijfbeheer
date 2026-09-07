@@ -59,9 +59,12 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
 
     categorieen = Categorie.objects.all()
 
+    evenementen, querystring = pagineer(request, evenementen)
+
     return render(request, "evenementen/evenementen_lijst.html", {
         "evenementen": evenementen,
         "categorieen": categorieen,
+        "querystring": querystring,
     })
 
 
