@@ -9,12 +9,19 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 from inschrijfbeheer.models import Inschrijving
-from inschrijfbeheer.utils.soap import haal_lidgegevens
+from inschrijfbeheer.utils.soap import haal_lidgegevens, LidGegevens
 
 load_dotenv()
 PDF_PAD = os.getenv("DEELNAME_ATTEST_PDF")
 
 logger = logging.getLogger("inschrijfbeheer")
+
+
+def __bepaal_postadres(gegevens: LidGegevens) -> str:
+    for adres in gegevens.adressen:
+        if adres.postadres:
+            return f"{adres.straat} {adres.nummer}, {adres.postcode} {adres.gemeente}"
+    return ""
 
 
 def genereer_deelname_attest(inschrijving_id: str):
@@ -35,7 +42,7 @@ def genereer_deelname_attest(inschrijving_id: str):
     pdf.drawString(300, 505, f"€ {'{:.2g}'.format(inschrijving.prijs)}")
     pdf.drawString(300, 455, str(lidgegevens.lidnummer))
     pdf.drawString(300, 435, lidgegevens.volledige_naam)
-    pdf.drawString(300, 415, "ADRES")
+    pdf.drawString(300, 415, __bepaal_postadres(lidgegevens))
     pdf.drawString(300, 360, lidgegevens.volledige_naam)
     pdf.drawString(300, 340, lidgegevens.rekeningnummer)
 

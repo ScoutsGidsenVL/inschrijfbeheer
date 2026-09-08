@@ -38,7 +38,17 @@ class Groep:
     gewicht: int = 0
     actief: bool = False
     functies: list = field(default_factory=list)
- 
+
+
+@dataclass
+class Adres:
+    """Eén adres van de persoon"""
+    straat: str = ""
+    nummer: str = ""
+    bus: str | None = None
+    postcode: str = ""
+    gemeente: str = ""
+    postadres: bool = False
  
 @dataclass
 class LidGegevens:
@@ -56,6 +66,7 @@ class LidGegevens:
     gebruikersnaam: str = ""
     groepen: list = field(default_factory=list)
     rekeningnummer: str = ""
+    adressen: list = field(default_factory=list)
  
     @property
     def volledige_naam(self):
@@ -73,6 +84,23 @@ class LidGegevens:
         datetime.date; die wordt hier omgezet naar een ISO-string
         (jjjj-mm-dd) zodat de template er zonder extra filters mee kan werken.
         """
+
+        adressen = []
+        adressen_container = getattr(resultaat, "adressen", None)
+        ruwe_adressen = getattr(adressen_container, "adres", None) if adressen_container else None
+        for ruw_adres in ruwe_adressen or []:
+            adressen.append(
+                Adres(
+                    straat=getattr(ruw_adres, "straat", ""),
+                    nummer=getattr(ruw_adres, "nummer", ""),
+                    bus=getattr(ruw_adres, "bus", ""),
+                    postcode=getattr(ruw_adres, "postcode", ""),
+                    gemeente=getattr(ruw_adres, "gemeente", ""),
+                    postadres=getattr(ruw_adres, "postadres", False),
+                )
+            )
+
+
         groepen = []
         groepen_container = getattr(resultaat, "groepen", None)
         ruwe_groepen = getattr(groepen_container, "groep", None) if groepen_container else None
@@ -118,6 +146,7 @@ class LidGegevens:
             gebruikersnaam=getattr(resultaat, "gebruikersnaam", "") or "",
             groepen=groepen,
             rekeningnummer=getattr(resultaat, "rekeningnummer", "") or "",
+            adressen=adressen,
         )
  
  
@@ -163,6 +192,7 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
     scope = scope_type(
         basis={},
         functies={"actief": True},
+        adressen={},
     )
  
     resultaat = client.service.LidGegevensV3(
@@ -170,7 +200,7 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
         scope=scope,
         _soapheaders={"applicatie": applicatie_naam},
     )
- 
+     
     return LidGegevens.van_respons(resultaat)
 
 def haal_lidnaam(lid_id, client=None, applicatie_naam=APPLICATIE_NAAM):
