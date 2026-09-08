@@ -30,7 +30,7 @@ from inschrijfbeheer.mapping.weez_syncer import WeezSyncer
 
 logger = logging.getLogger("inschrijfbeheer")
 
-INTEGREAT_OPTIES = ("alles", "terugblik_dagen")
+INTEGREAT_OPTIES = ("terugblik_dagen")
 
 
 def maak_integreat_providers() -> IntegreatProviders:
@@ -51,7 +51,11 @@ def maak_integreat_providers() -> IntegreatProviders:
 
 
 def maak_weez_syncer(opties: dict) -> Synchronisatie:
-    return WeezSyncer(SynchronisatieConfig(limiet=opties["limiet"]))
+    if opties["alles"]:
+        config = SynchronisatieConfig(limiet=opties["limiet"], sync_alles=True)
+    else:
+        config = SynchronisatieConfig(limiet=opties["limiet"], sync_alles=False)
+    return WeezSyncer(config)
 
 
 def maak_integreat_syncer(opties: dict) -> Synchronisatie:

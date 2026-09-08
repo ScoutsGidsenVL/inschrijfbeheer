@@ -6,6 +6,9 @@
 {% endblock extra_deelnemers_headers %}
 
 {% block deelnemers_content %}
+
+{% if gegevens %}
+
 <h1>{{ gegevens.volledige_naam }}</h1>
 
 <div class="detail-attribuut-container">
@@ -77,4 +80,12 @@
 {% empty %}
     <p>Geen adressen gevonden voor dit lid.</p>
 {% endfor %}
+
+{% else %}
+    <div class="foutboodschap">
+        <div class="foutboodschap-icoon">!</div>
+        <div class="foutboodschap-tekst">De gegevens van de deelnemer konden niet opgehaald worden</div>
+    </div>
+{% endif %}
+
 {% endblock deelnemers_content %}
