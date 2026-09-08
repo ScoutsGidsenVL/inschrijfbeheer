@@ -68,4 +68,13 @@
 {% empty %}
     <p>Geen groepen gevonden voor dit lid.</p>
 {% endfor %}
+<h2>Adressen</h2>
+{% for adres in gegevens.adressen %}
+    {% if adres.postadres %}
+        <p>{{ adres.straat }} {{ adres.nummer }}<br>
+        {{ adres.postcode }} {{ adres.gemeente }}</p>
+    {% endif %}
+{% empty %}
+    <p>Geen adressen gevonden voor dit lid.</p>
+{% endfor %}
 {% endblock deelnemers_content %}
