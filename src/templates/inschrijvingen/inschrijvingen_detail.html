@@ -6,6 +6,16 @@
 {% endblock extra_inschrijvingen_headers %}
 
 {% block inschrijvingen_content %}
+
+{% if messages %}
+    <div id="melding-popup" class="melding-popup">
+        {% for message in messages %}
+            <p class="melding {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+        <button type="button" onclick="document.getElementById('melding-popup').remove()">×</button>
+    </div>
+{% endif %}
+
 <h2>Algemene informatie</h2>
 
 <div class="detail-attribuut-container">
