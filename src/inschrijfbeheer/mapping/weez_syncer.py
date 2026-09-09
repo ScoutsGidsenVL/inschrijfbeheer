@@ -175,8 +175,6 @@ class WeezSyncer(Synchronisatie):
         for bron in bronnen:
             vragen = bron.get("answers") or []
 
-            # Ontbreekt er een verplichte vraag, dan geldt dat voor het hele
-            # formulier en dus voor alle deelnemers van dit evenement.
             alle_verplichte_vragen, rest = check_verplichte_vragen(vragen)
             if not alle_verplichte_vragen:
                 self.__geen_verplichte_vraag(evenement, rest)

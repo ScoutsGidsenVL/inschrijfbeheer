@@ -20,7 +20,7 @@ from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 logger = logging.getLogger("inschrijfbeheer")
 
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
-VERPLICHTE_VRAGEN = {"lidnummer", "nom", "prenom", "email"}
+VERPLICHTE_VRAGEN = {"lidnummer", "nom", "prenom", "email", "date_de_naissance"}
 
 
 def parse_datetime(waarde: str | None) -> datetime | None:
@@ -42,6 +42,7 @@ class InschrijvingsGegevens:
     voornaam: str = ""
     achternaam: str = ""
     mailadres: str = ""
+    geboortedatum: datetime = datetime.now()
 
 
 def check_verplichte_vragen(vragen: list[dict] | None) -> tuple[bool, set]:
@@ -81,6 +82,9 @@ def bepaal_inschrijvingsgegevens(vragen: list[dict] | None) -> InschrijvingsGege
             case "email":
                 gegevens.mailadres = waarde
                 aantal += 1
+            case "date_de_naissance":
+                gegevens.geboortedatum = waarde
+                aantal += 1
 
     if aantal == len(VERPLICHTE_VRAGEN):
         return gegevens
@@ -116,11 +120,18 @@ def los_lid_op(provider: LidProvider, gegevens: InschrijvingsGegevens) -> LidRes
     if lidgegevens is None:
         return LidResultaat(foutboodschap=f"Lidnummer niet gevonden: {gegevens.lidnummer}")
 
-    # Huidige regel: minstens één van voornaam of achternaam moet overeenkomen.
-    if not (
-        lidgegevens.voornaam == gegevens.voornaam
-        or lidgegevens.naam == gegevens.achternaam
-    ):
+    aantal_overeenkomsten = sum(
+        [
+            lidgegevens.voornaam == gegevens.voornaam,
+            lidgegevens.naam == gegevens.achternaam,
+            lidgegevens.emailadres == gegevens.mailadres,
+            datetime.strptime(lidgegevens.geboortedatum, "%Y-%m-%d")
+            == datetime.strptime(gegevens.geboortedatum, "%d/%m/%Y"),
+            lidgegevens.lidnummer == gegevens.lidnummer,
+        ]
+    )
+
+    if aantal_overeenkomsten < 3:
         return LidResultaat(
             foutboodschap=f"Onvoldoende matchende velden in inschrijving: {gegevens.lidnummer}"
         )
