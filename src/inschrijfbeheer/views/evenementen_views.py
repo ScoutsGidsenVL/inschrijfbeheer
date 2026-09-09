@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpRequest, HttpResponse
 from django.db.models import Q
+from django.contrib import messages
 
 from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
 from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
@@ -251,4 +252,5 @@ def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id:
         maildata.append((genereer_deelname_attest(inschrijving.id), inschrijving.lid))
 
     stuur_attest_mails(maildata)
+    messages.success(request, "Alle attesten werden succesvol verstuurd.")
     return redirect("evenement_inschrijvingen", id=evenement_id)

@@ -5,6 +5,8 @@
 """
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse, Http404
+from django.contrib import messages
+
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
@@ -99,5 +101,6 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
     if not inschrijving.annulatie:
         attest = genereer_deelname_attest(inschrijving_id)
         stuur_attest_mail(attest, deelnemer=inschrijving.lid)
+        messages.success(request, "Het attest werd succesvol verstuurd.")
         return redirect("inschrijving_detail", inschrijving_id=inschrijving_id)
     raise Http404()
