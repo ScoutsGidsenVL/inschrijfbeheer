@@ -44,14 +44,14 @@ class InschrijvingsGegevens:
     mailadres: str = ""
 
 
-def check_verplichte_vragen(vragen: list[dict] | None) -> bool:
+def check_verplichte_vragen(vragen: list[dict] | None) -> tuple[bool, set]:
     """Controleert of het formulier alle verplichte vragen bevat."""
     labels = {
         (vraag.get("label") or "").lower()
         for vraag in vragen or []
         if vraag.get("label")
     }
-    return VERPLICHTE_VRAGEN.issubset(labels)
+    return VERPLICHTE_VRAGEN.issubset(labels), VERPLICHTE_VRAGEN.difference(labels)
 
 
 def bepaal_inschrijvingsgegevens(vragen: list[dict] | None) -> InschrijvingsGegevens | None:

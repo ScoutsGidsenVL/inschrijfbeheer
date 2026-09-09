@@ -177,8 +177,9 @@ class WeezSyncer(Synchronisatie):
 
             # Ontbreekt er een verplichte vraag, dan geldt dat voor het hele
             # formulier en dus voor alle deelnemers van dit evenement.
-            if not check_verplichte_vragen(vragen):
-                self.__geen_verplichte_vraag(evenement)
+            alle_verplichte_vragen, rest = check_verplichte_vragen(vragen)
+            if not alle_verplichte_vragen:
+                self.__geen_verplichte_vraag(evenement, rest)
                 break
 
             gegevens = bepaal_inschrijvingsgegevens(vragen)
@@ -320,11 +321,11 @@ class WeezSyncer(Synchronisatie):
                     InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN
                 )
 
-    def __geen_verplichte_vraag(self, evenement: Evenement) -> None:
+    def __geen_verplichte_vraag(self, evenement: Evenement, rest: set) -> None:
         self.logger.warning(
-            f"Evenement {evenement.titel} ({evenement.id}) bevat één van de verplichte vragen niet"
+            f"Evenement {evenement.titel} ({evenement.id}) mist volgende verplichte vragen: {','.join(rest)}"
         )
         evenement.foutboodschap = (
-            "Evenement mist een verplichte vraag, inschrijvingen worden niet gesynchroniseerd"
+            f"Evenement mist volgende verplichte vragen: {', '.join(rest)}, inschrijvingen worden niet gesynchroniseerd"
         )
         evenement.save()
