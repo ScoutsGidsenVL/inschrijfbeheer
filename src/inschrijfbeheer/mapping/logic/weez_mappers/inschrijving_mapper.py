@@ -43,7 +43,7 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
         if not scan_data:
             registratie = False
         else:
-            registratie = scan_data.get("status") == '1'
+            registratie = scan_data.get("status") != '0'
 
         return Doelgegevens(
             sleutels={"id": bron.get("id_participant")},
