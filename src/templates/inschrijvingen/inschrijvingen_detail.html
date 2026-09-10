@@ -42,7 +42,7 @@
 <div class="detail-attribuut-container">
     <div class="detail-attribuut-label">Aanwezig</div>
     <div class="detail-attribuut-waarde">
-        <input type="checkbox" disabled {% if inschrijving.annulatie == None %}checked{% endif %}>
+        <input type="checkbox" disabled {% if inschrijving.aanwezig %}checked{% endif %}>
     </div>
 </div>
 {% if inschrijving.aanwezig %}
