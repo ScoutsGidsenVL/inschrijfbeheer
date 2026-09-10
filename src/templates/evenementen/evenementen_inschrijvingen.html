@@ -46,8 +46,8 @@
                 <td>
                     {% if inschrijving.annulatie %}
                         {{inschrijving.annulatie_reden}}
-                    {% elif inschrijving.deelnemer.foutboodschap %}
-                        {{inschrijving.deelnemer.foutboodschap}}
+                    {% elif inschrijving.lid.foutboodschap %}
+                        {{inschrijving.lid.foutboodschap}}
                     {% endif %}
                 </td>
                 <td><input type="checkbox" disabled {% if inschrijving.registratie %}checked{% endif %}></td>
