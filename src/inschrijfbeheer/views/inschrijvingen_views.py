@@ -48,8 +48,8 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
             vraag_antwoord.antwoord = nieuw_antwoord
             form_data[weez_sleutel_van(vraag_antwoord.vraag)] = nieuw_antwoord
 
-        InschrijvingVraagAntwoord.objects.bulk_update(vraag_antwoorden, ["antwoord"])
         stuur_weezevent_update(inschrijving, form_data)
+        InschrijvingVraagAntwoord.objects.bulk_update(vraag_antwoorden, ["antwoord"])
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 
