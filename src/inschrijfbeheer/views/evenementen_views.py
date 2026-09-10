@@ -112,7 +112,7 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
     zoekterm = request.GET.get('q', '')
  
-    kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
+    kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Geregistreerd"]
 
     queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
     if zoekterm:
@@ -135,13 +135,10 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     for instantie in pagina:
 
         annulatie = ""
-        aanwezig = True
         if instantie.annulatie:
             annulatie = instantie.annulatie
-            aanwezig = False
         elif instantie.lid.foutboodschap:
             annulatie = instantie.lid.foutboodschap
-            aanwezig = False
 
         inschrijvingen.append({
             "instantie": instantie,
@@ -152,7 +149,7 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
                 instantie.tijdstip,
                 instantie.prijs,
                 annulatie,
-                aanwezig,
+                instantie.registratie
             ],
         })
  

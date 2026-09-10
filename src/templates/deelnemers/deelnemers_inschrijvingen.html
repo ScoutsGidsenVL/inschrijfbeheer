@@ -23,7 +23,7 @@
             <th>Evenement</th>
             <th>Deelnemertype</th>
             <th>Betaald</th>
-            <th>Aanwezig</th>
+            <th>Geregistreerd</th>
         </tr>
     </thead>
     <tbody>
@@ -32,7 +32,7 @@
                 <td>{{ inschrijving.evenement }}</td>
                 <td>{{ inschrijving.deelnemertype }}</td>
                 <td>{{ inschrijving.prijs|default:"" }}</td>
-                <td><input type="checkbox" disabled {% if inschrijving.annulatie == None %}checked{% endif %}></td>
+                <td><input type="checkbox" disabled {% if inschrijving.registratie %}checked{% endif %}></td>
             </tr>
         {% endfor %}
     </tbody>
