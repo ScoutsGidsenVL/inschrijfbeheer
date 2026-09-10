@@ -24,26 +24,33 @@
 <table class="inschrijving-tabel">
     <thead>
         <tr>
-            {% for kolom in kolommen %}
-                <th>{{ kolom }}</th>
-            {% endfor %}
+            <th>ID</th>
+            <th>Deelnemer</th>
+            <th>Type</th>
+            <th>Tijdstip</th>
+            <th>Betaald</th>
+            <th>Annulatie</th>
+            <th>Geregistreerd</th>
         </tr>
     </thead>
     <tbody>
-        {% for rij in inschrijvingen %}
-            <tr class="inschrijving-rij {% if rij.instantie.lid.foutboodschap %}foutrij{% endif %}" 
-                onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=rij.instantie.id %}'"
+        {% for inschrijving in inschrijvingen %}
+            <tr class="inschrijving-rij {% if inschrijving.lid.foutboodschap %}foutrij{% endif %}" 
+                onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=inschrijving.id %}'"
                 {% if rij.instantie.lid.foutboodschap %}title="{{rij.instantie.lid.foutboodschap}}"{% endif %}>
-                {% for waarde in rij.waarden %}
-                    <td>
-                        {% if waarde|is_boolean %}
-                            <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
-                        {% elif waarde|is_none %}
-                        {% else %}
-                            {{ waarde }}
-                        {% endif %}
-                    </td>
-                {% endfor %}
+                <td> {{inschrijving.id}} </td>
+                <td> {{inschrijving.lid}} </td>
+                <td> {{inschrijving.deelnemertype}} </td>
+                <td> {{inschrijving.tijdstip}} </td>
+                <td> {{inschrijving.prijs}} </td>
+                <td>
+                    {% if inschrijving.annulatie %}
+                        {{inschrijving.annulatie_reden}}
+                    {% elif inschrijving.deelnemer.foutboodschap %}
+                        {{inschrijving.deelnemer.foutboodschap}}
+                    {% endif %}
+                </td>
+                <td><input type="checkbox" disabled {% if inschrijving.registratie %}checked{% endif %}></td>
             </tr>
         {% endfor %}
     </tbody>
