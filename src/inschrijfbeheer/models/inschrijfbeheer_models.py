@@ -180,6 +180,10 @@ class Inschrijving(models.Model):
     def __str__(self):
         return str(self.lid)
 
+    @property
+    def aanwezig(self) -> bool:
+        return not self.annulatie and self.registratie
+
 
 class EvenementVraagType(models.Model):
     """Model voor het type van vrije vragen bij een evenement
