@@ -5,6 +5,7 @@
 """
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse, Http404
+from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.db import transaction
 import logging
@@ -17,7 +18,7 @@ from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deel
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
-from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
+from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch, doe_weez_post
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van, bepaal_inschrijvingsgegevens, los_lid_op
 
 logger = logging.getLogger("inschrijfbeheer")
@@ -227,3 +228,13 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
         messages.success(request, "Het attest werd succesvol verstuurd.")
         return redirect("inschrijving_detail", inschrijving_id=inschrijving_id)
     raise Http404()
+
+
+@require_http_methods(['PATCH'])
+@transaction.atomic
+def inschrijvingen_registreren(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    inschrijving = Inschrijving.objects.get(id=inschrijving_id)
+
+    inschrijving.registratie = True
+    inschrijving.save()
+    return HttpResponse()
