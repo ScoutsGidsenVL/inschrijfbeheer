@@ -3,15 +3,6 @@
 
 {% block evenementen_content %}
 
-{% if messages %}
-    <div id="melding-popup" class="melding-popup">
-        {% for message in messages %}
-            <p class="melding {{ message.tags }}">{{ message }}</p>
-        {% endfor %}
-        <button type="button" onclick="document.getElementById('melding-popup').remove()">×</button>
-    </div>
-{% endif %}
-
 {% if not evenement.foutboodschap %}
     <button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten_download" evenement_id=evenement.id %}'">Download attesten voor aanwezige deelnemers</button>
     <button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten_mail" evenement_id=evenement.id %}'">Mail attesten voor aanwezige deelnemers</button>

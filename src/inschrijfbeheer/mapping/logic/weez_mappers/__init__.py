@@ -22,6 +22,9 @@ from .evenement_mapper import (
 from .evenementvraag_mapper import (
     VraagContext,
     WeezEvenementVraagMapper,
+    koppel_eigen_vragen,
+    weez_sleutel_van,
+    alias_van_label,
 )
 
 from .inschrijving_mapper import (
