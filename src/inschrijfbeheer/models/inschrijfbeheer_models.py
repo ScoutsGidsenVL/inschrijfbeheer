@@ -182,7 +182,12 @@ class Inschrijving(models.Model):
 
     @property
     def aanwezig(self) -> bool:
-        return not self.annulatie and self.registratie
+        """Property die de aanwezigheid modelleert
+
+        Returns:
+            bool: of de persoon als aanwezig wordt beschouwd
+        """
+        return (not self.annulatie) and (self.registratie) and (not self.lid.foutboodschap)
 
 
 class EvenementVraagType(models.Model):

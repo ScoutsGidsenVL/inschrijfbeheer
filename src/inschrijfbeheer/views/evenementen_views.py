@@ -196,7 +196,7 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
     Returns:
         HttpResponse: HTML document dat een zip bevat met alle attesten
     """
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True, registratie=True)
     buffer = genereer_zip_attesten(inschrijvingen)
 
     response = HttpResponse(buffer, content_type="application/zip")
@@ -217,7 +217,7 @@ def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id:
     Returns:
         HttpResponse: redirect naar de pagina met inschrijvingen
     """
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True, registratie=True)
 
     maildata = []
     for inschrijving in inschrijvingen:

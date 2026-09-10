@@ -196,7 +196,7 @@ def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -
         Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
     """
     inschrijving = Inschrijving.objects.select_related("lid").get(id=inschrijving_id)
-    if not inschrijving.annulatie and not inschrijving.lid.foutboodschap:
+    if inschrijving.aanwezig:
         attest = genereer_deelname_attest(inschrijving_id)
         response = HttpResponse(attest, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
@@ -221,7 +221,7 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
         Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
     """
     inschrijving = Inschrijving.objects.get(id=inschrijving_id)
-    if not inschrijving.annulatie:
+    if inschrijving.aanwezig:
         attest = genereer_deelname_attest(inschrijving_id)
         stuur_attest_mail(attest, deelnemer=inschrijving.lid)
         messages.success(request, "Het attest werd succesvol verstuurd.")
