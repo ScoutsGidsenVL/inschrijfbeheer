@@ -2,6 +2,7 @@
 """
 from dotenv import load_dotenv
 import os
+import logging
 from functools import wraps
 from django.contrib.auth.decorators import login_required
 
@@ -10,6 +11,8 @@ from django.http import Http404
 
 load_dotenv()
 GA_API = os.getenv("GA_RESTAPI_URL")
+
+logger = logging.getLogger("inschrijfbeheer")
 
 def haal_groepen(request):
     """Haalt het profiel van de ingelogde gebruiker op bij Groepsadmin.
@@ -53,14 +56,17 @@ def check_rollen(func):
     def wrapper(request, *args, **kwargs):
         try:
             profiel = haal_groepen(request)
-            for groep in profiel.get("groepen", []):
-                if groep.get("id") == "X1027G":
-                    for verantwoordelijkheid in groep.get("verantwoordelijkheden", []):
-                        if verantwoordelijkheid == "personeel":
-                            return func(request, *args, **kwargs)
         except (requests.RequestException, ValueError, AttributeError):
+            logger.exception("check_rollen faalde voor gebruiker %s op %s %s", request.user, request.method, request.path)
             raise Http404()
 
+        for groep in profiel.get("groepen", []):
+            if groep.get("id") == "X1027G":
+                for verantwoordelijkheid in groep.get("verantwoordelijkheden", []):
+                    if verantwoordelijkheid == "personeel":
+                        return func(request, *args, **kwargs)
+
+        logger.warning("Gebruiker %s heeft geen toegang via X1027G/personeel (%s %s)", request.user, request.method, request.path)
         raise Http404()
 
     return login_required(wrapper)
