@@ -26,6 +26,8 @@ from inschrijfbeheer.mapping.logic.weez_mappers import (
     bepaal_inschrijvingsgegevens,
     check_verplichte_vragen,
     los_lid_op,
+    koppel_eigen_vragen,
+    alias_van_label
 )
 from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
@@ -35,6 +37,8 @@ from inschrijfbeheer.mapping.providers import (
     WeezEvenementProvider,
     WeezInschrijvingProvider,
     WeezTariefProvider,
+    FormFilter,
+    WeezFormProvider
 )
 from inschrijfbeheer.mapping.synchronisatie import (
     Synchronisatie,
@@ -78,10 +82,8 @@ class WeezSyncer(Synchronisatie):
         self.evenement_provider = WeezEvenementProvider(self.client)
         self.inschrijving_provider = WeezInschrijvingProvider(self.client)
         self.tarief_provider = WeezTariefProvider(self.client)
+        self.form_provider = WeezFormProvider(self.client)
 
-        # Categorie, Deelnemer, EvenementVraag en InschrijvingVraagAntwoord
-        # hebben geen eigen provider: hun data zit genest in het antwoord van
-        # het evenement of van de deelnemer.
         self.categorieen = SyncOnderdelen(
             model=Categorie, mapper=WeezCategorieMapper(), enkel_aanmaken=True
         )
@@ -101,6 +103,7 @@ class WeezSyncer(Synchronisatie):
         self.deelnemertypes = SyncOnderdelen(model=DeelnemerType, mapper=WeezDeelnemerTypeMapper())
 
         self.tijdslimiet: str | None = None
+        self.__eigen_vraag_ids: dict[str, dict[int, str]] = {}
 
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez-evenementen op en zet ze om naar Evenement-modellen."""
@@ -174,6 +177,7 @@ class WeezSyncer(Synchronisatie):
 
         for bron in bronnen:
             vragen = bron.get("answers") or []
+            eigen_ids = self.__haal_eigen_vraag_ids(evenement, bron)
 
             alle_verplichte_vragen, rest = check_verplichte_vragen(vragen)
             if not alle_verplichte_vragen:
@@ -207,23 +211,13 @@ class WeezSyncer(Synchronisatie):
                 self.info.registreer(Inschrijving, SynchronisatieActie.OVERGESLAGEN)
                 continue
 
-            self.__synchroniseer_antwoorden(evenement, inschrijving, vragen)
+            self.__synchroniseer_antwoorden(evenement, inschrijving, vragen, eigen_ids)
 
         return self.info
 
     def synchroniseer_vragen(
         self, evenement: Evenement | None = None, inschrijving: Inschrijving | None = None
     ) -> SynchronisatieInfo:
-        """Methode die alle vragen synchroniseert.
-        Indien gegeven doet het dit enkel voor de vragen van een gegeven evenement.
-
-        Args:
-            evenement (Evenement | None, optional): evenement waarvoor de vragen moeten gesynchroniseerd worden. Defaults to None.
-            inschrijving (Inschrijving | None, optional): nog niet ondersteund, zie hieronder. Defaults to None.
-
-        Returns:
-            SynchronisatieInfo: info over de huidige synchronisatie
-        """
         if inschrijving is not None:
             raise NotImplementedError(
                 "Vragen per inschrijving vereist een weez_id-veld op Inschrijving"
@@ -232,13 +226,25 @@ class WeezSyncer(Synchronisatie):
         if evenement is None:
             raise ValueError("synchroniseer_vragen heeft een evenement nodig")
 
-        bronnen = self.inschrijving_provider.haal_alle_op(
-            InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet, sync_alles=self.config.sync_alles)
+        filter = InschrijvingFilter(
+            evenement_id=evenement.id, sinds=self.tijdslimiet, sync_alles=self.config.sync_alles
         )
-        for bron in bronnen:
+        
+        for bron in self.inschrijving_provider.haal_alle_op(filter):
             vragen = bron.get("answers") or []
+            eigen_ids = self.__haal_eigen_vraag_ids(evenement, bron)
+
             for volgorde, vraag_bron in enumerate(vragen):
-                self.__bewaar_vraag(evenement, volgorde, vraag_bron)
+                context = VraagContext(
+                    evenement=evenement,
+                    volgorde=volgorde,
+                    weez_vraag_id=eigen_ids.get(volgorde),
+                )
+                try:
+                    self.bewaar(self.vragen, self.vragen.mapper.map(vraag_bron, context))
+                except MappingFout as fout:
+                    logger.warning("Vraag overgeslagen op evenement %s: %s", evenement.id, fout)
+                    self.info.registreer(EvenementVraag, SynchronisatieActie.OVERGESLAGEN)
 
         return self.info
 
@@ -282,12 +288,23 @@ class WeezSyncer(Synchronisatie):
             return None
 
     def __bewaar_vraag(
-        self, evenement: Evenement, volgorde: int, bron: dict
+        self,
+        evenement: Evenement,
+        volgorde: int,
+        bron: dict,
+        weez_vraag_id: str | None = None,
     ) -> EvenementVraag | None:
         try:
             vraag, _ = self.bewaar(
                 self.vragen,
-                self.vragen.mapper.map(bron, VraagContext(evenement=evenement, volgorde=volgorde)),
+                self.vragen.mapper.map(
+                    bron,
+                    VraagContext(
+                        evenement=evenement,
+                        volgorde=volgorde,
+                        weez_vraag_id=weez_vraag_id,
+                    ),
+                ),
             )
             return vraag
         except MappingFout as fout:
@@ -296,10 +313,14 @@ class WeezSyncer(Synchronisatie):
             return None
 
     def __synchroniseer_antwoorden(
-        self, evenement: Evenement, inschrijving: Inschrijving, vragen: list[dict]
+        self,
+        evenement: Evenement,
+        inschrijving: Inschrijving,
+        vragen: list[dict],
+        eigen_ids: dict[int, str],
     ) -> None:
         for volgorde, bron in enumerate(vragen):
-            vraag = self.__bewaar_vraag(evenement, volgorde, bron)
+            vraag = self.__bewaar_vraag(evenement, volgorde, bron, eigen_ids.get(volgorde))
             if vraag is None:
                 self.info.registreer(
                     InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN
@@ -327,3 +348,38 @@ class WeezSyncer(Synchronisatie):
             f"Evenement mist volgende verplichte vragen: {', '.join(rest)}, inschrijvingen worden niet gesynchroniseerd"
         )
         evenement.save()
+
+    def __haal_eigen_vraag_ids(self, evenement: Evenement, bron: dict) -> dict[int, str]:
+        """Bepaalt per positie in de antwoordenlijst het Weez-vraag-id.
+
+        Het formulier hangt bij Weez aan het deelnemertype, dus het resultaat
+        geldt voor elke deelnemer met datzelfde type. Een onvolledige
+        koppeling wordt niet bewaard, zodat een volgende deelnemer het opnieuw
+        mag proberen.
+
+        Args:
+            evenement (Evenement): evenement dat gesynchroniseerd wordt
+            bron (dict): deelnemer zoals de oude API die levert
+
+        Returns:
+            dict[int, str]: positie in de antwoordenlijst naar Weez-vraag-id
+        """
+        id_ticket = str(bron.get("id_ticket"))
+        vragen = bron.get("answers") or []
+        aantal_eigen = sum(
+            1 for vraag in vragen if alias_van_label(vraag.get("label")) is None
+        )
+
+        bewaard = self.__eigen_vraag_ids.get(id_ticket)
+        if bewaard is not None:
+            return bewaard
+
+        form = self.form_provider.haal_op(
+            FormFilter(evenement_id=evenement.id, deelnemer_id=str(bron["id_participant"]))
+        )
+        gekoppeld = koppel_eigen_vragen(vragen, form)
+
+        if len(gekoppeld) == aantal_eigen:
+            self.__eigen_vraag_ids[id_ticket] = gekoppeld
+
+        return gekoppeld

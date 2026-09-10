@@ -17,3 +17,8 @@ from .tarief_provider import (
     TariefFilter,
     WeezTariefProvider
 )
+
+from .form_provider import (
+    FormFilter,
+    WeezFormProvider,
+)
