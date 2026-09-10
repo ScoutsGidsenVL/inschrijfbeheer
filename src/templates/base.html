@@ -7,6 +7,14 @@
     {% endblock extra_headers %}
 </head>
 <body>
+    {% if messages %}
+        <div id="melding-popup" class="melding-popup">
+            {% for message in messages %}
+                <p class="melding {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+            <button type="button" onclick="document.getElementById('melding-popup').remove()">×</button>
+        </div>
+    {% endif %}
     <header class="hoofding">
         <h1>Inschrijfbeheer</h1>
     </header>
