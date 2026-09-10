@@ -4,6 +4,7 @@
     **doe_weez_get:** maakt een GET request naar de Weez API met de nodige extra parameters
 """
 from requests import get, Response, Session
+import json
 import os
 from dotenv import load_dotenv
 
@@ -36,6 +37,42 @@ def doe_weez_get(sessie: Session, url: str, parameters: dict = {}) -> Response:
         timeout=10
     )
 
+    response.raise_for_status()
+
+    return response.json()
+
+
+def doe_weez_patch(sessie: Session, url: str, data: dict) -> Response:
+    """Doet een PATCH request naar de API van Weez met de nodige data
+
+    Args:
+        sessie (Session): sessie waarbinnen de requests gemaakt kunnen worden
+        url (str): url waar de request gemaakt moet worden, exclusief BASE_URL
+        data (dict): dict die als JSON wordt meegestuurd in het "data"-veld van de request
+
+    Returns:
+        Response: respons van de API
+
+    Raises:
+        HTTPError: indien de request een foutstatus ontvangt
+    """
+    print({
+            "api_key": WEEZ_API_KEY,
+            "access_token": WEEZ_ACCESS_TOKEN,
+            "data": json.dumps(data),
+        })
+    response = sessie.patch(
+        f"{BASE_URL}{url}",
+        data={
+            "api_key": WEEZ_API_KEY,
+            "access_token": WEEZ_ACCESS_TOKEN,
+            "data": json.dumps(data),
+        },
+        timeout=10,
+    )
+
+    if not response.ok:
+        print("Weez API gaf status %s: %s", response.status_code, response.text)
     response.raise_for_status()
 
     return response.json()
