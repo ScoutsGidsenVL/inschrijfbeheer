@@ -69,7 +69,7 @@ from inschrijfbeheer.mapping.providers.weez_providers import (
     WeezInschrijvingProvider,
     WeezTariefProvider,
 )
-from inschrijfbeheer.mapping.synchronisatie import SynchronisatieActie, SynchronisatieInfo
+from inschrijfbeheer.mapping import SynchronisatieActie, SynchronisatieInfo
 from inschrijfbeheer.models import (
     Categorie,
     Deelnemer,

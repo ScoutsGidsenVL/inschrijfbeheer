@@ -40,7 +40,7 @@ from inschrijfbeheer.mapping.providers import (
     FormFilter,
     WeezFormProvider
 )
-from inschrijfbeheer.mapping.synchronisatie import (
+from inschrijfbeheer.mapping import (
     Synchronisatie,
     SynchronisatieActie,
     SynchronisatieConfig,
@@ -95,6 +95,7 @@ class WeezSyncer(Synchronisatie):
             model=Inschrijving,
             mapper=WeezInschrijvingMapper(),
             provider=self.inschrijving_provider,
+            enkel_aanmaken=False
         )
         self.vragen = SyncOnderdelen(model=EvenementVraag, mapper=WeezEvenementVraagMapper())
         self.antwoorden = SyncOnderdelen(
