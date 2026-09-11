@@ -29,6 +29,7 @@ class Doelgegevens(Generic[N]):
     sleutels: dict[str, Any]
     velden: dict[str, Any] = field(default_factory=dict)
     vervang_bestaande: bool = False
+    vervang_sleutels: dict | None = None
 
 
 class Mapper(Generic[T, C, N], ABC):
