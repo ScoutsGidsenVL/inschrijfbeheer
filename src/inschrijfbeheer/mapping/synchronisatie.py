@@ -15,6 +15,7 @@ class SynchronisatieActie(Enum):
     AANGEMAAKT = auto()
     BIJGEWERKT = auto()
     OVERGESLAGEN = auto()
+    VERWIJDERD = auto()
 
 
 @dataclass
@@ -156,6 +157,16 @@ class Synchronisatie(ABC):
             tuple[N, bool]: het bewaarde object en of het aangemaakt werd
         """
         manager = onderdelen.model.objects
+
+        if doel.vervang_bestaande:
+            verouderd = manager.filter(**doel.sleutels)
+            nieuwe_pk = doel.velden.get(onderdelen.model._meta.pk.name)
+            if nieuwe_pk is not None:
+                verouderd = verouderd.exclude(pk=nieuwe_pk)
+
+            for bestaand in verouderd:
+                bestaand.delete()
+                self.info.registreer(onderdelen.model, SynchronisatieActie.VERWIJDERD)
  
         if onderdelen.enkel_aanmaken:
             bewaard, aangemaakt = manager.get_or_create(

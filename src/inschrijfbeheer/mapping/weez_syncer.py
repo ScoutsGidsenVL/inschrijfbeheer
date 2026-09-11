@@ -95,6 +95,7 @@ class WeezSyncer(Synchronisatie):
             model=Inschrijving,
             mapper=WeezInschrijvingMapper(),
             provider=self.inschrijving_provider,
+            enkel_aanmaken=False
         )
         self.vragen = SyncOnderdelen(model=EvenementVraag, mapper=WeezEvenementVraagMapper())
         self.antwoorden = SyncOnderdelen(
