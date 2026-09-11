@@ -71,9 +71,6 @@ class WeezSyncer(Synchronisatie):
         client: WeezClient | None = None,
         lid_provider: LidProvider | None = None,
     ):
-        # sync_config staat eerst, gelijk aan Synchronisatie.__init__, zodat
-        # WeezSyncer(SynchronisatieConfig(...)) blijft werken. client en
-        # lid_provider zijn er om in tests een nagemaakte bron mee te geven.
         super().__init__(sync_config)
 
         self.client = WeezClient() if client is None else client

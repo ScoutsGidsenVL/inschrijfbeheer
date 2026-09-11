@@ -56,11 +56,6 @@ def doe_weez_patch(sessie: Session, url: str, data: dict) -> Response:
     Raises:
         HTTPError: indien de request een foutstatus ontvangt
     """
-    print({
-            "api_key": WEEZ_API_KEY,
-            "access_token": WEEZ_ACCESS_TOKEN,
-            "data": json.dumps(data),
-        })
     response = sessie.patch(
         f"{BASE_URL}{url}",
         data={
@@ -70,9 +65,6 @@ def doe_weez_patch(sessie: Session, url: str, data: dict) -> Response:
         },
         timeout=10,
     )
-
-    if not response.ok:
-        print("Weez API gaf status %s: %s", response.status_code, response.text)
     response.raise_for_status()
 
     return response.json()

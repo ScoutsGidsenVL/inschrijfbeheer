@@ -10,9 +10,11 @@ from django.db import transaction
 import logging
 from typing import Iterable
 
+from inschrijfbeheer.management.commands.sync import maak_weez_syncer
 from inschrijfbeheer.mapping.logic.weez_mappers.deelnemer_mapper import WeezDeelnemerMapper
 from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import LidResultaat
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
+from inschrijfbeheer.mapping.utils.synchronisatie import SynchronisatieStatus
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deelnemer
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
@@ -58,14 +60,13 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
         stuur_weezevent_update(inschrijving, form_data)
 
-        with transaction.atomic():
-            InschrijvingVraagAntwoord.objects.bulk_update(vraag_antwoorden, ["antwoord"])
-            resultaat = herbepaal_deelnemer(inschrijving, vraag_antwoorden)
+        syncer = maak_weez_syncer({"alles": None, "limiet": None})
 
-        if resultaat.foutboodschap:
-            messages.warning(request, resultaat.foutboodschap)
-        else:
-            messages.success(request, "De gegevens kloppen nu met de ledendatabank.")
+        with transaction.atomic(), syncer.client:
+            info = syncer.synchroniseer_inschrijvingen(inschrijving.evenement)
+
+        if info.status == SynchronisatieStatus.GESLAAGD:
+            messages.success(request, "Synchronisatie geslaagd")
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 

@@ -21,10 +21,13 @@ class InschrijfbeheerDatabank:
             tuple[N, bool]: het bewaarde object en of het aangemaakt werd
         """
         manager = onderdelen.model.objects
+        pk_naam = onderdelen.model._meta.pk.name
 
         if doel.vervang_bestaande:
-            verouderd = manager.filter(**doel.sleutels)
-            nieuwe_pk = doel.velden.get(onderdelen.model._meta.pk.name)
+            filter_sleutels = doel.vervang_sleutels or doel.sleutels
+            verouderd = manager.filter(**filter_sleutels)
+
+            nieuwe_pk = doel.velden.get(pk_naam, doel.sleutels.get(pk_naam))
             if nieuwe_pk is not None:
                 verouderd = verouderd.exclude(pk=nieuwe_pk)
 
