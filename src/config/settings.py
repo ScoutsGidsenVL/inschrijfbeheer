@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('DJANGO_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mozilla_django_oidc',
+    'debug_toolbar',
     'inschrijfbeheer',
 ]
 
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     "mozilla_django_oidc.middleware.SessionRefresh",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = 60
@@ -216,3 +218,7 @@ LOGGING = {
 
 
 OIDC_STORE_ACCESS_TOKEN = True
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]

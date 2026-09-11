@@ -4,6 +4,12 @@ import jwt
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
+
+USERINFO_CACHE_TIMEOUT = 300  # korter dan de levensduur van het access token
 
 JWKS_CACHE_KEY = "keycloak_jwks"
 JWKS_STALE_CACHE_KEY = "keycloak_jwks_stale"
@@ -64,3 +70,35 @@ class KeycloakOIDCBackend(OIDCAuthenticationBackend):
         cache.set(JWKS_CACHE_KEY, jwks, JWKS_CACHE_TIMEOUT)
         cache.set(JWKS_STALE_CACHE_KEY, jwks, JWKS_STALE_TIMEOUT)
         return jwks
+
+
+    def get_userinfo(self, access_token, id_token, payload):
+        # payload bevat de al geverifieerde claims uit het ID token.
+        if payload and payload.get("email"):
+            return payload
+        return self._userinfo_met_cache(access_token, id_token, payload)
+
+    def _userinfo_met_cache(self, access_token, id_token, payload):
+        sleutel = "keycloak_userinfo_" + hashlib.sha256(
+            access_token.encode("utf-8")
+        ).hexdigest()
+
+        info = cache.get(sleutel)
+        if info is not None:
+            return info
+
+        try:
+            info = super().get_userinfo(access_token, id_token, payload)
+        except requests.HTTPError as exc:
+            respons = exc.response
+            if respons is not None and respons.status_code == 429:
+                logger.warning(
+                    "Keycloak beperkt userinfo, Retry-After=%s",
+                    respons.headers.get("Retry-After"),
+                )
+                if payload:
+                    return payload
+            raise
+
+        cache.set(sleutel, info, USERINFO_CACHE_TIMEOUT)
+        return info
