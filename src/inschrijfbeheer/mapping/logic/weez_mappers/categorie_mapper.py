@@ -24,6 +24,10 @@ class WeezCategorieMapper(Mapper[dict, None, Categorie]):
         naam = bron.get("name", "")
         return Doelgegevens(
             sleutels={"id": str(bron["id"])},
-            velden={"naam": naam, "alt_naam": naam, "is_weez": True},
+            velden={
+                "naam": naam.split('.')[-1],
+                "alt_naam": naam,
+                "is_weez": True
+            },
         )
 
