@@ -40,7 +40,7 @@ from inschrijfbeheer.mapping.providers import (
     FormFilter,
     WeezFormProvider
 )
-from inschrijfbeheer.mapping.synchronisatie import (
+from inschrijfbeheer.mapping import (
     Synchronisatie,
     SynchronisatieActie,
     SynchronisatieConfig,

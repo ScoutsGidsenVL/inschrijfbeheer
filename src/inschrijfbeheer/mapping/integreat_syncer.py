@@ -32,7 +32,7 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     normaliseer_code,
 )
 from inschrijfbeheer.mapping.providers.data_provider import LijstProvider
-from inschrijfbeheer.mapping.synchronisatie import (
+from inschrijfbeheer.mapping import (
     Synchronisatie,
     SynchronisatieActie,
     SynchronisatieConfig,
