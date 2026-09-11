@@ -8,6 +8,7 @@ from django.urls import path, include
 from django.views.generic.base import RedirectView
 from django.views.static import serve
 from django.conf import settings
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 from inschrijfbeheer.views import log_lijst
 
@@ -20,4 +21,4 @@ urlpatterns = [
     path("evenementen/", include("inschrijfbeheer.urls.evenementen_urls")),
     path("deelnemers/", include("inschrijfbeheer.urls.deelnemers_urls")),
     path("inschrijvingen/", include("inschrijfbeheer.urls.inschrijvingen_urls")),
-]
+] + debug_toolbar_urls()
