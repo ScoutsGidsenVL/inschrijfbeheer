@@ -39,5 +39,6 @@ class IntegreatInschrijvingMapper(Mapper[IntegreatRegistration, InschrijvingCont
                 "prijs": bron.price,
                 "annulatie": bron.annulatie,
                 "annulatie_reden": bron.canceledmotivation,
+                "registratie": not bron.cancelation,
             },
         )

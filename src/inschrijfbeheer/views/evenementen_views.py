@@ -112,8 +112,6 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
     zoekterm = request.GET.get('q', '')
  
-    kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
-
     queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
     if zoekterm:
         queryset = queryset.filter(
@@ -130,35 +128,9 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         queryset = queryset.exclude(annulatie__isnull=True)
 
     pagina, querystring = pagineer(request, queryset)
-
-    inschrijvingen = []
-    for instantie in pagina:
-
-        annulatie = ""
-        aanwezig = True
-        if instantie.annulatie:
-            annulatie = instantie.annulatie
-            aanwezig = False
-        elif instantie.lid.foutboodschap:
-            annulatie = instantie.lid.foutboodschap
-            aanwezig = False
-
-        inschrijvingen.append({
-            "instantie": instantie,
-            "waarden": [
-                instantie.id,
-                instantie.lid,
-                str(instantie.deelnemertype),
-                instantie.tijdstip,
-                instantie.prijs,
-                annulatie,
-                aanwezig,
-            ],
-        })
  
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
-        "kolommen": kolommen,
-        "inschrijvingen": inschrijvingen,
+        "inschrijvingen": pagina,
         "evenement": evenement,
         "pagina": pagina,
         "querystring": querystring,
@@ -224,7 +196,7 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
     Returns:
         HttpResponse: HTML document dat een zip bevat met alle attesten
     """
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True, registratie=True)
     buffer = genereer_zip_attesten(inschrijvingen)
 
     response = HttpResponse(buffer, content_type="application/zip")
@@ -245,7 +217,7 @@ def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id:
     Returns:
         HttpResponse: redirect naar de pagina met inschrijvingen
     """
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True, registratie=True)
 
     maildata = []
     for inschrijving in inschrijvingen:

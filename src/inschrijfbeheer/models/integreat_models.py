@@ -85,6 +85,7 @@ class IntegreatRegistration(models.Model):
         canceledmotivation (str): reden voor annulatie. Nullable
         deelnemers_type (IntegreatParticipantType): type van de deelnemer. Nullable
         tijdstip (datetime): moment van inschrijving. Nullable
+        cancelation (bool): geeft aan of een deelnemer niet aanwezig was. Nullable
     """
     oid = models.BigIntegerField(db_column='OID', primary_key=True)
     seminar = models.ForeignKey(IntegreatSeminar, models.DO_NOTHING, db_column='Seminar', blank=True, null=True)
@@ -94,6 +95,7 @@ class IntegreatRegistration(models.Model):
     canceledmotivation = models.TextField(db_column='CanceledMotivation', blank=True, null=True)
     deelnemers_type = models.ForeignKey(IntegreatParticipantType, models.DO_NOTHING, db_column='ParticipantType', blank=True, null=True)
     tijdstip = models.DateTimeField(db_column='RegistrationDate', blank=True, null=True)
+    cancelation = models.BooleanField(db_column='Cancelation', blank=True, null=True)
 
     class Meta:
         app_label = "inschrijfbeheer"

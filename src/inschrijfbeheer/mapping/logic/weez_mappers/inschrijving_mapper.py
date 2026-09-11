@@ -39,6 +39,12 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
         if annulatie_waarde == '1':
             annulatie = True
 
+        scan_data = bron.get("control_status", None)
+        if not scan_data:
+            registratie = False
+        else:
+            registratie = scan_data.get("status") != '0'
+
         return Doelgegevens(
             sleutels={"id": bron.get("id_participant")},
             velden={
@@ -50,5 +56,6 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
                 "is_weez": True,
                 "annulatie": timezone.now() if annulatie else None,
                 "annulatie_reden": "Inschrijving verwijderd uit Weez" if annulatie else None,
+                "registratie": registratie,
             },
         )

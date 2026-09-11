@@ -159,6 +159,7 @@ class Inschrijving(models.Model):
         tijdstip (datetime): tijdstip van inschrijving
         annulatie (datetime): tijdstip van annulatie. Nullable, null als niet geannuleerd
         annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
+        registratie (bool): geeft aan of een deelnemer geregistreerd werd. Defaults to False
         is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
     """
     id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
@@ -169,6 +170,7 @@ class Inschrijving(models.Model):
     tijdstip = models.DateTimeField(null=True, blank=True)
     annulatie = models.DateTimeField(null=True, blank=True)
     annulatie_reden = models.TextField(null=True, blank=True)
+    registratie = models.BooleanField(default=False)
     is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
@@ -177,6 +179,15 @@ class Inschrijving(models.Model):
 
     def __str__(self):
         return str(self.lid)
+
+    @property
+    def aanwezig(self) -> bool:
+        """Property die de aanwezigheid modelleert
+
+        Returns:
+            bool: of de persoon als aanwezig wordt beschouwd
+        """
+        return (not self.annulatie) and (self.registratie) and (not self.lid.foutboodschap)
 
 
 class EvenementVraagType(models.Model):

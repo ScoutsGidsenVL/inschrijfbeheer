@@ -3,10 +3,13 @@
 
 {% block evenementen_content %}
 
+{% csrf_token %}
+
 {% if not evenement.foutboodschap %}
     <button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten_download" evenement_id=evenement.id %}'">Download attesten voor aanwezige deelnemers</button>
     <button onclick="window.location.href='{% url "evenementen_inschrijvingen_attesten_mail" evenement_id=evenement.id %}'">Mail attesten voor aanwezige deelnemers</button>
 {% endif %}
+
 <form method="get" class="inschrijving-filter">
     <label>
         Zoek deelnemer
@@ -21,34 +24,145 @@
     </label>
     <button type="submit">Filter</button>
 </form>
+
+<div class="selectie-balk">
+    <button type="button" id="registreer-selectie" disabled>Zet selectie op geregistreerd</button>
+    <span id="registratie-status" role="status" aria-live="polite"></span>
+</div>
+
 <table class="inschrijving-tabel">
     <thead>
         <tr>
-            {% for kolom in kolommen %}
-                <th>{{ kolom }}</th>
-            {% endfor %}
+            <th><input type="checkbox" id="selecteer-alles" title="Selecteer alles"></th>
+            <th>ID</th>
+            <th>Deelnemer</th>
+            <th>Type</th>
+            <th>Tijdstip</th>
+            <th>Betaald</th>
+            <th>Annulatie</th>
+            <th>Geregistreerd</th>
         </tr>
     </thead>
     <tbody>
-        {% for rij in inschrijvingen %}
-            <tr class="inschrijving-rij {% if rij.instantie.lid.foutboodschap %}foutrij{% endif %}" 
-                onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=rij.instantie.id %}'"
+        {% for inschrijving in inschrijvingen %}
+            <tr class="inschrijving-rij {% if inschrijving.lid.foutboodschap %}foutrij{% endif %}"
+                onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=inschrijving.id %}'"
                 {% if rij.instantie.lid.foutboodschap %}title="{{rij.instantie.lid.foutboodschap}}"{% endif %}>
-                {% for waarde in rij.waarden %}
-                    <td>
-                        {% if waarde|is_boolean %}
-                            <input type="checkbox" disabled {% if waarde %}checked{% endif %}>
-                        {% elif waarde|is_none %}
-                        {% else %}
-                            {{ waarde }}
-                        {% endif %}
-                    </td>
-                {% endfor %}
+                <td class="selectie-cel" onclick="event.stopPropagation()">
+                    {% if not inschrijving.registratie %}
+                        <input type="checkbox"
+                               class="selectie-vakje"
+                               value="{{ inschrijving.id }}"
+                               data-registratie-url="/inschrijvingen/{{ inschrijving.id }}/registreren/">
+                    {% endif %}
+                </td>
+                <td> {{inschrijving.id}} </td>
+                <td> {{inschrijving.lid}} </td>
+                <td> {{inschrijving.deelnemertype}} </td>
+                <td> {{inschrijving.tijdstip}} </td>
+                <td> {{inschrijving.prijs}} </td>
+                <td>
+                    {% if inschrijving.annulatie %}
+                        {{inschrijving.annulatie_reden}}
+                    {% elif inschrijving.lid.foutboodschap %}
+                        {{inschrijving.lid.foutboodschap}}
+                    {% endif %}
+                </td>
+                <td class="registratie-cel"><input type="checkbox" disabled {% if inschrijving.registratie %}checked{% endif %}></td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 {% include "widgets/paginering.html" with pagina=pagina %}
+
+<script>
+(function () {
+    var alles = document.getElementById("selecteer-alles");
+    var knop = document.getElementById("registreer-selectie");
+    var status = document.getElementById("registratie-status");
+    var csrf = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+    function vakjes() {
+        return Array.prototype.slice.call(document.querySelectorAll(".selectie-vakje"));
+    }
+
+    function geselecteerd() {
+        return vakjes().filter(function (v) { return v.checked; });
+    }
+
+    function ververs() {
+        var open = vakjes();
+        var aantal = geselecteerd().length;
+        knop.disabled = aantal === 0;
+        knop.textContent = aantal === 0
+            ? "Zet selectie op geregistreerd"
+            : "Zet " + aantal + " inschrijving(en) op geregistreerd";
+        alles.checked = open.length > 0 && aantal === open.length;
+        alles.indeterminate = aantal > 0 && aantal < open.length;
+    }
+
+    alles.addEventListener("change", function () {
+        var aan = alles.checked;
+        vakjes().forEach(function (v) { v.checked = aan; });
+        ververs();
+    });
+
+    document.querySelector(".inschrijving-tabel tbody").addEventListener("change", function (e) {
+        if (e.target.classList.contains("selectie-vakje")) { ververs(); }
+    });
+
+    function registreer(vakje) {
+        return fetch(vakje.dataset.registratieUrl, {
+            method: "PATCH",
+            headers: {
+                "X-CSRFToken": csrf,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: "same-origin"
+        }).then(function (respons) {
+            if (!respons.ok) { throw new Error("Status " + respons.status); }
+        });
+    }
+
+    knop.addEventListener("click", function () {
+        var selectie = geselecteerd();
+        if (selectie.length === 0) { return; }
+
+        knop.disabled = true;
+        alles.disabled = true;
+        status.textContent = "Bezig met " + selectie.length + " inschrijving(en)...";
+
+        Promise.allSettled(selectie.map(registreer)).then(function (resultaten) {
+            var gelukt = 0;
+            var mislukt = [];
+
+            resultaten.forEach(function (resultaat, i) {
+                var vakje = selectie[i];
+                var rij = vakje.closest("tr");
+                if (resultaat.status === "fulfilled") {
+                    gelukt++;
+                    rij.querySelector(".registratie-cel input").checked = true;
+                    vakje.remove();
+                } else {
+                    mislukt.push(vakje.value);
+                    rij.classList.add("foutrij");
+                }
+            });
+
+            status.textContent = mislukt.length === 0
+                ? gelukt + " inschrijving(en) op geregistreerd gezet."
+                : gelukt + " gelukt, mislukt voor: " + mislukt.join(", ");
+
+            alles.disabled = false;
+            alles.checked = false;
+            alles.indeterminate = false;
+            ververs();
+        });
+    });
+
+    ververs();
+})();
+</script>
 
 {% endblock evenementen_content %}

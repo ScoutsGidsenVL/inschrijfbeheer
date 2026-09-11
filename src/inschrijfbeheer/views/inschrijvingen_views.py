@@ -4,7 +4,8 @@
     **inschrijvingen_detail:** Geeft een view voor het tonen van alle details van een inschrijving
 """
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse, Http404
+from django.http import HttpRequest, HttpResponse, Http404, HttpResponseNotFound
+from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.db import transaction
 import logging
@@ -17,7 +18,8 @@ from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deel
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
-from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
+from inschrijfbeheer.utils.scanner import scan_inschrijving
+from inschrijfbeheer.utils.weez_api import maak_sessie
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van, bepaal_inschrijvingsgegevens, los_lid_op
 
 logger = logging.getLogger("inschrijfbeheer")
@@ -196,7 +198,7 @@ def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -
         Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
     """
     inschrijving = Inschrijving.objects.select_related("lid").get(id=inschrijving_id)
-    if not inschrijving.annulatie and not inschrijving.lid.foutboodschap:
+    if inschrijving.aanwezig:
         attest = genereer_deelname_attest(inschrijving_id)
         response = HttpResponse(attest, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
@@ -221,9 +223,24 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
         Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
     """
     inschrijving = Inschrijving.objects.get(id=inschrijving_id)
-    if not inschrijving.annulatie:
+    if inschrijving.aanwezig:
         attest = genereer_deelname_attest(inschrijving_id)
         stuur_attest_mail(attest, deelnemer=inschrijving.lid)
         messages.success(request, "Het attest werd succesvol verstuurd.")
         return redirect("inschrijving_detail", inschrijving_id=inschrijving_id)
     raise Http404()
+
+
+@require_http_methods(['PATCH'])
+@transaction.atomic
+def inschrijvingen_registreren(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
+    inschrijving = Inschrijving.objects.get(id=inschrijving_id)
+
+    resultaat = scan_inschrijving(inschrijving)
+    if resultaat.gelukt:
+        inschrijving.registratie = True
+        inschrijving.save()
+        return HttpResponse()
+
+    logger.warning("Aanwezig zetten deelnemer gefaald")
+    return HttpResponseNotFound()
