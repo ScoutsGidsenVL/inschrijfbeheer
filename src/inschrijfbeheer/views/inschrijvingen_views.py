@@ -4,7 +4,7 @@
     **inschrijvingen_detail:** Geeft een view voor het tonen van alle details van een inschrijving
 """
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse, Http404
+from django.http import HttpRequest, HttpResponse, Http404, HttpResponseNotFound
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.db import transaction
@@ -18,7 +18,8 @@ from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deel
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
-from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch, doe_weez_post
+from inschrijfbeheer.utils.scanner import scan_inschrijving
+from inschrijfbeheer.utils.weez_api import maak_sessie
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van, bepaal_inschrijvingsgegevens, los_lid_op
 
 logger = logging.getLogger("inschrijfbeheer")
@@ -235,6 +236,11 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
 def inschrijvingen_registreren(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     inschrijving = Inschrijving.objects.get(id=inschrijving_id)
 
-    inschrijving.registratie = True
-    inschrijving.save()
-    return HttpResponse()
+    resultaat = scan_inschrijving(inschrijving)
+    if resultaat.gelukt:
+        inschrijving.registratie = True
+        inschrijving.save()
+        return HttpResponse()
+
+    logger.warning("Aanwezig zetten deelnemer gefaald")
+    return HttpResponseNotFound()
