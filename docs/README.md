@@ -79,6 +79,11 @@ Dit opent de applicatie op [http://localhost:2197](http://localhost:2197)
 
 Meer info over de webapplicatie is te vinden in [webapplicatie.md](./webapplicatie.md)
 
+### Taken
+
+Om het synchroniseren en andere grote taken uit te voeren werd gebruik gemaakt van [`procrastinate`](https://procrastinate.readthedocs.io/en/stable/).
+Deze package laat toe om taken te plannen of asynchroon uit te voeren. Meer info over de taken voor synchronisatie kunnen gevonden worden in [Synchronisatie](#synchronisatie).
+
 ## Structuur
 
 ```
