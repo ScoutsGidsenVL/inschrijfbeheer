@@ -14,6 +14,7 @@ Alle dependencies zijn te vinden in [requirements.txt](../requirements.txt). Het
 > cd src
 > python manage.py makemigrations
 > python manage.py migrate
+> python manage.py migrate procrastinate
 ```
 
 [settings.py](../src/inschrijfbeheer/settings.py) verwacht een aantal environment variables, dus een bestand met naam `.env` moet aangemaakt worden in de root van het project.
