@@ -6,6 +6,7 @@ from django.db import transaction
 from procrastinate import exceptions
 from procrastinate.contrib.django import app
 
+from inschrijfbeheer.mapping.integreat_syncer import IntegreatSyncer
 from inschrijfbeheer.mapping.utils.synchronisatie import SynchronisatieConfig
 from inschrijfbeheer.mapping.weez_syncer import WeezSyncer
 from inschrijfbeheer.models import Evenement, Inschrijving
@@ -144,17 +145,18 @@ def uurlijkse_synchronisatie_taak(timestamp: int) -> str:
         terugblik_dagen=TERUGBLIK_DAGEN,
     )
  
-    syncer = WeezSyncer(config=config)
+    weez_syncer = WeezSyncer(config=config)
+    integreat_syncer = IntegreatSyncer(config=config)
  
     logger.info(
         "Start uurlijkse synchronisatie",
         extra={"timestamp": timestamp, "terugblik_dagen": config.terugblik_dagen},
     )
  
-    with syncer.client:
-        info = syncer.synchroniseer()
+    weez_syncer.voer_uit()
+    integreat_syncer.voer_uit()
  
     logger.info(
         "Uurlijkse synchronisatie klaar",
-        extra={"timestamp": timestamp, "info": str(info)},
+        extra={"timestamp": timestamp},
     )
