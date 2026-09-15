@@ -63,7 +63,7 @@ Voor het uitvoeren van een migratie van de data van Integreat naar de databank v
 
 ```shell
 > cd src
-> python manage.py sync <weez|integreat> [--dry-run] [--limiet LIMIET] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
+> python manage.py sync <weez|integreat> [--dry-run] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
 > python manage.py sync --help # meer info
 ```
 

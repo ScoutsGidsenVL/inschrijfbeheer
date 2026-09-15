@@ -17,7 +17,6 @@ Deze 2 klassen worden gebruikt door subklasses van [`Synchronisatie`](../src/ins
 
 | opties | Beschrijving |
 |--------|--------------|
-| --limiet LIMIET | stelt een limiet in voor het aantal ingeladen objecten van iedere tabel |
 | --dry-run | voer een run uit zonder weg te schrijven naar de nieuwe databank |
 | --alles | enkel voor integreat, negeert het standaard tijdvenster en haalt alle evenementen op |
 | --terugblik-dagen TERUGBLIK_DAGEN | enkel voor integreat, hoeveel dagen na de eindtijd nog gesynchroniseerd moet worden |
