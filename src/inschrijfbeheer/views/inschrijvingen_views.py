@@ -6,22 +6,15 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse, Http404
 from django.contrib import messages
-from django.db import transaction
 import logging
-from typing import Iterable
 
-from inschrijfbeheer.management.commands.sync import maak_weez_syncer
-from inschrijfbeheer.mapping.logic.weez_mappers.deelnemer_mapper import WeezDeelnemerMapper
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import LidResultaat
-from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
-from inschrijfbeheer.mapping.utils.synchronisatie import SynchronisatieStatus
-from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deelnemer
+from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
 from inschrijfbeheer.utils.tasks import synchroniseer_inschrijvingen_taak
 from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
-from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van, bepaal_inschrijvingsgegevens, los_lid_op
+from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van
 
 logger = logging.getLogger("inschrijfbeheer")
 

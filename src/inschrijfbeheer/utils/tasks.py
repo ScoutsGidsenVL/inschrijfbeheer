@@ -1,7 +1,7 @@
 from django.db import transaction
 from procrastinate.contrib.django import app
 
-from inschrijfbeheer.management.commands.sync import maak_weez_syncer
+from inschrijfbeheer.mapping.weez_syncer import WeezSyncer
 from inschrijfbeheer.models import Evenement, Inschrijving
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mails
@@ -11,7 +11,7 @@ from inschrijfbeheer.utils.mailer import stuur_attest_mails
 @app.task
 def synchroniseer_inschrijvingen_taak(evenement_id: str):
     evenement = Evenement.objects.get(id=evenement_id)
-    syncer = maak_weez_syncer({"alles": None, "limiet": None})
+    syncer = WeezSyncer()
 
     with transaction.atomic(), syncer.client:
         syncer.synchroniseer_inschrijvingen(evenement=evenement)

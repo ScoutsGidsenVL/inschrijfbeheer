@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from typing import TypeVar, Any, Generic
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from collections import defaultdict
 
 from inschrijfbeheer.mapping.logic.mapper import Mapper
@@ -64,10 +64,39 @@ class SynchronisatieInfo:
         return weergave
 
 
-@dataclass
+@dataclass(frozen=True)
 class SynchronisatieConfig:
+    """Alles wat de gebruiker kiest bij het starten van een synchronisatie.
+ 
+    Alleen deze waarden komen van buitenaf. Providers en SyncOnderdelen stelt
+    elke syncer zelf samen, dus je maakt een syncer met niets meer dan dit.
+    """
+ 
     limiet: int | None = None
     sync_alles: bool = False
+    dry_run: bool = False
+    terugblik_dagen: int | None = None
+ 
+    @classmethod
+    def van_opties(cls, opties: dict[str, Any]) -> "SynchronisatieConfig":
+        """Zet de opties van het management command om naar een config.
+ 
+        De namen van de commandoregel wijken op één plek af: --alles heet in de
+        config sync_alles. Die vertaling staat hier, zodat het commando zelf
+        niets meer over de config hoeft te weten.
+        """
+        return cls(
+            limiet=opties.get("limiet"),
+            sync_alles=bool(opties.get("alles", False)),
+            dry_run=bool(opties.get("dry_run", False)),
+            terugblik_dagen=opties.get("terugblik_dagen"),
+        )
+ 
+    def is_gezet(self, veld: str) -> bool:
+        """Zegt of je dit veld zelf meegaf, of het op de standaardwaarde staat."""
+        standaard = {veld_info.name: veld_info.default for veld_info in fields(self)}
+        return getattr(self, veld) != standaard[veld]
+ 
 
 
 

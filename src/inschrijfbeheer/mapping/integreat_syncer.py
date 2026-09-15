@@ -4,10 +4,18 @@ Dit is de tegenhanger van de oude laad_*-functies. Het ophalen zit in de
 providers, het omzetten in de mappers, en deze klasse bepaalt enkel de
 volgorde, stelt de context samen en bewaart via Synchronisatie.bewaar().
 
-De providers krijg je via IntegreatProviders binnen, zodat deze klasse niet
-hoeft te weten hoe jouw providerklassen heten. Twee verwachtingen daarover:
-de seminarprovider levert haal_op() op de seminarcode (niet op de oid), en
-de ledenprovider levert haal_op() op het lidnummer.
+Aanmaken doe je met één config:
+
+    IntegreatSyncer(SynchronisatieConfig(terugblik_dagen=30)).voer_uit()
+
+De providers en het bronfilter bouwt de syncer dan zelf op. In een test geef je
+nagemaakte providers mee als sleutelwoord:
+
+    IntegreatSyncer(config, providers=IntegreatProviders(seminars=..., ...))
+
+Twee verwachtingen over die providers: de seminarprovider levert haal_op() op
+de seminarcode (niet op de oid), en de ledenprovider levert haal_op() op het
+lidnummer.
 """
 
 import logging
@@ -31,7 +39,16 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     VraagContext,
     normaliseer_code,
 )
-from inschrijfbeheer.mapping.providers.data_provider import LijstProvider
+from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter, LijstProvider
+from inschrijfbeheer.mapping.providers.integreat_providers import (
+    IntegreatParticipantTypeProvider,
+    IntegreatRegistrationfreefieldProvider,
+    IntegreatRegistrationProvider,
+    IntegreatSeminarFreeFieldProvider,
+    IntegreatSeminarFreeFieldTypeProvider,
+    IntegreatSeminarProvider,
+)
+from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping import (
     Synchronisatie,
     SynchronisatieActie,
@@ -57,7 +74,7 @@ logger = logging.getLogger("inschrijfbeheer")
 
 @dataclass
 class IntegreatProviders:
-    """De providers op de databank "integreat", door de aanroeper samengesteld."""
+    """De providers op de databank "integreat"."""
 
     seminars: Any
     deelnemertypes: LijstProvider
@@ -67,19 +84,61 @@ class IntegreatProviders:
     antwoorden: LijstProvider
     leden: LijstProvider
 
+    @classmethod
+    def standaard(cls) -> "IntegreatProviders":
+        """De echte providers, die IntegreatSyncer gebruikt als je niets meegeeft.
+
+        Ze staan in een aparte methode zodat je in een test dezelfde syncer met
+        nagemaakte providers kan gebruiken.
+        """
+        return cls(
+            seminars=IntegreatSeminarProvider(),
+            deelnemertypes=IntegreatParticipantTypeProvider(),
+            vraagtypes=IntegreatSeminarFreeFieldTypeProvider(),
+            vragen=IntegreatSeminarFreeFieldProvider(),
+            registraties=IntegreatRegistrationProvider(),
+            antwoorden=IntegreatRegistrationfreefieldProvider(),
+            leden=LidProvider(),
+        )
+
 
 class IntegreatSyncer(Synchronisatie):
     """Zet de oude Integreat-records om naar de nieuwe modellen."""
 
+    naam = "integreat"
+    eigen_opties = frozenset({"terugblik_dagen"})
+
     def __init__(
         self,
-        providers: IntegreatProviders,
-        sync_config: SynchronisatieConfig | None = None,
-        bron_filter: Any = None,
+        config: SynchronisatieConfig | None = None,
+        *,
+        providers: IntegreatProviders | None = None,
+        bron_filter: IntegreatFilter | None = None,
     ):
-        super().__init__(sync_config)
-        self.providers = providers
-        self.bron_filter = bron_filter
+        super().__init__(config)
+        self.providers = IntegreatProviders.standaard() if providers is None else providers
+        self.bron_filter = self.__maak_filter() if bron_filter is None else bron_filter
+
+        self.__maak_onderdelen()
+
+    def __maak_filter(self) -> IntegreatFilter:
+        """Vertaalt de config naar het filter waarmee de providers ophalen."""
+        velden: dict[str, Any] = {
+            "sync_alles": self.config.sync_alles,
+            "limiet": self.config.limiet,
+        }
+        if self.config.terugblik_dagen is not None:
+            velden["terugblik_dagen"] = self.config.terugblik_dagen
+
+        return IntegreatFilter(**velden)
+
+    def __maak_onderdelen(self) -> None:
+        """Koppelt elk model aan zijn mapper en provider.
+
+        Dit hangt niet af van wat de gebruiker kiest, dus het staat hier en niet
+        in het management command.
+        """
+        providers = self.providers
 
         self.statussen = SyncOnderdelen(
             model=EvenementStatus, mapper=IntegreatStatusMapper(), enkel_aanmaken=True
