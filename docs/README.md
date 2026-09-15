@@ -85,6 +85,13 @@ Meer info over de webapplicatie is te vinden in [webapplicatie.md](./webapplicat
 Om het synchroniseren en andere grote taken uit te voeren werd gebruik gemaakt van [`procrastinate`](https://procrastinate.readthedocs.io/en/stable/).
 Deze package laat toe om taken te plannen of asynchroon uit te voeren. Meer info over de taken voor synchronisatie kunnen gevonden worden in [Synchronisatie](#synchronisatie).
 
+Voor een worker op te starten die deze taken uitvoert, kan het volgende commando gebruikt worden
+
+```sh
+> cd src/
+> python manage.py procrastinate worker
+```
+
 ## Structuur
 
 ```sh
