@@ -4,12 +4,10 @@ from django.db.models import Q
 from django.contrib import messages
 
 from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
-from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
 from inschrijfbeheer.utils.auth import check_rollen
-from inschrijfbeheer.utils.attesten import genereer_zip_attesten, genereer_deelname_attest
-from inschrijfbeheer.utils.mailer import stuur_attest_mails
+from inschrijfbeheer.utils.attesten import genereer_zip_attesten
 from inschrijfbeheer.utils.paginering import pagineer
-from inschrijfbeheer.utils.tasks import mail_attesten_taak, synchroniseer_evenement_taak
+from inschrijfbeheer.utils.tasks import defer_mail_attesten, defer_synchroniseer_evenement
 
 KOLOMMEN = {
     "id": "ID",
@@ -87,7 +85,7 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
     synchroniseer = request.GET.get("sync", None)
     if synchroniseer is not None and synchroniseer == '1':
-        synchroniseer_evenement_taak.defer(evenement_id=id)
+        defer_synchroniseer_evenement(evenement_id=id)
         return redirect('evenement_detail', id=id)
 
 
@@ -246,7 +244,7 @@ def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id:
     Returns:
         HttpResponse: redirect naar de pagina met inschrijvingen
     """
-    mail_attesten_taak.defer(evenement_id=evenement_id)
+    defer_mail_attesten(evenement_id=evenement_id)
 
     messages.success(request, "Mailen attesten werd gepland.")
     return redirect("evenement_inschrijvingen", id=evenement_id)

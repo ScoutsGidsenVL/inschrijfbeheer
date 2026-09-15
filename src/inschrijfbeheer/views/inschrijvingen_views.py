@@ -12,7 +12,7 @@ from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
-from inschrijfbeheer.utils.tasks import synchroniseer_inschrijvingen_taak
+from inschrijfbeheer.utils.tasks import defer_synchroniseer_inschrijvingen
 from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van
 
@@ -54,7 +54,7 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
         stuur_weezevent_update(inschrijving, form_data)
 
-        synchroniseer_inschrijvingen_taak.defer(evenement_id=inschrijving.evenement.id)
+        defer_synchroniseer_inschrijvingen(evenement_id=inschrijving.evenement.id)
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 
