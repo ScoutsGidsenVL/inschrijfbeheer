@@ -19,6 +19,7 @@ from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deel
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
+from inschrijfbeheer.utils.tasks import synchroniseer_inschrijvingen_taak
 from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van, bepaal_inschrijvingsgegevens, los_lid_op
 
@@ -60,13 +61,7 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
         stuur_weezevent_update(inschrijving, form_data)
 
-        syncer = maak_weez_syncer({"alles": None, "limiet": None})
-
-        with transaction.atomic(), syncer.client:
-            info = syncer.synchroniseer_inschrijvingen(inschrijving.evenement)
-
-        if info.status == SynchronisatieStatus.GESLAAGD:
-            messages.success(request, "Synchronisatie geslaagd")
+        synchroniseer_inschrijvingen_taak.defer(evenement=inschrijving.evenement)
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 
