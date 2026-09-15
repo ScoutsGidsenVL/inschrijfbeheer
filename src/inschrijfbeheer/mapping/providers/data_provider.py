@@ -54,7 +54,7 @@ class IntegreatFilter:
     """
  
     sync_alles: bool = False
-    terugblik_dagen: int = 30
+    terugblik_dagen: int = 14
 
 class DatabaseDataProvider(DataProvider[M, F], ABC):
     """Provider die zijn data uit een databank haalt.
