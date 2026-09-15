@@ -9,6 +9,7 @@ from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_zip_attesten, genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mails
 from inschrijfbeheer.utils.paginering import pagineer
+from inschrijfbeheer.utils.tasks import mail_attesten_taak
 
 KOLOMMEN = {
     "id": "ID",
@@ -245,12 +246,7 @@ def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id:
     Returns:
         HttpResponse: redirect naar de pagina met inschrijvingen
     """
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    mail_attesten_taak.defer(evenement_id=evenement_id)
 
-    maildata = []
-    for inschrijving in inschrijvingen:
-        maildata.append((genereer_deelname_attest(inschrijving.id), inschrijving.lid))
-
-    stuur_attest_mails(maildata)
-    messages.success(request, "Alle attesten werden succesvol verstuurd.")
+    messages.success(request, "Mailen attesten werd gepland.")
     return redirect("evenement_inschrijvingen", id=evenement_id)
