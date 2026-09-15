@@ -1,9 +1,12 @@
 import logging
+import os
+from dotenv import load_dotenv
 
 from django.db import transaction
 from procrastinate import exceptions
 from procrastinate.contrib.django import app
 
+from inschrijfbeheer.mapping.utils.synchronisatie import SynchronisatieConfig
 from inschrijfbeheer.mapping.weez_syncer import WeezSyncer
 from inschrijfbeheer.models import Evenement, Inschrijving
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
@@ -11,6 +14,9 @@ from inschrijfbeheer.utils.mailer import stuur_attest_mails
 from inschrijfbeheer.utils.synchronisatie import synchroniseer_evenement
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
+TERUGBLIK_DAGEN = os.getenv("INTEGREAT_TERUGBLIK_DAGEN")
 
 
 def evenement_lock(evenement_id: str) -> str:
@@ -103,3 +109,52 @@ def defer_synchroniseer_evenement(evenement_id: str) -> int | None:
             extra={"evenement_id": evenement_id},
         )
         return None
+
+
+BRON_LOCK = "synchronisatie:weez"
+
+ 
+@app.periodic(cron="0 * * * *")
+@app.task(
+    name="uurlijkse_synchronisatie",
+    lock=BRON_LOCK,
+    queueing_lock="uurlijkse_synchronisatie",
+    pass_context=False,
+)
+def uurlijkse_synchronisatie_taak(timestamp: int) -> str:
+    """Draait elk uur een volledige synchronisatie bij de bron.
+ 
+    De `lock` houdt twee runs uit elkaar, ook als een run langer duurt dan een
+    uur. De `queueing_lock` zorgt dat er ondertussen hoogstens één run in de
+    wachtrij staat in plaats van een stapel.
+ 
+    De `timestamp` komt van Procrastinate en bevat het geplande uur als
+    unix-timestamp.
+ 
+    Args:
+        timestamp (int): het uur waarvoor deze run gepland stond
+ 
+    Returns:
+        str: de samenvatting van de synchronisatie, zichtbaar in het jobresultaat
+    """
+    config = SynchronisatieConfig(
+        limiet=None,
+        sync_alles=False,
+        dry_run=False,
+        terugblik_dagen=TERUGBLIK_DAGEN,
+    )
+ 
+    syncer = WeezSyncer(config=config)
+ 
+    logger.info(
+        "Start uurlijkse synchronisatie",
+        extra={"timestamp": timestamp, "terugblik_dagen": config.terugblik_dagen},
+    )
+ 
+    with syncer.client:
+        info = syncer.synchroniseer()
+ 
+    logger.info(
+        "Uurlijkse synchronisatie klaar",
+        extra={"timestamp": timestamp, "info": str(info)},
+    )
