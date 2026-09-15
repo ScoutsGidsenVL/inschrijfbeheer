@@ -98,7 +98,7 @@ class Synchronisatie(ABC):
         if actie is None:
             actie = self.synchroniseer
 
-        with transaction.atomic():
+        with self, transaction.atomic():
             info = actie()
             self.log_info()
 
@@ -110,6 +110,13 @@ class Synchronisatie(ABC):
                 )
 
         return info
+
+    def __enter__(self) -> "Synchronisatie":
+        """Opent wat de bron nodig heeft. Een subklasse met een client vult dit in."""
+        return self
+
+    def __exit__(self, *fout) -> bool:
+        return False
 
     @property
     def aanduiding(self) -> str:

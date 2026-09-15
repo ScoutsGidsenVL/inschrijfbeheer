@@ -97,6 +97,24 @@ class WeezSyncer(Synchronisatie):
 
         self.tijdslimiet: str | None = None
         self.__eigen_vraag_ids: dict[str, dict[int, str]] = {}
+        self.__verbindingen = 0
+
+    def __enter__(self) -> "WeezSyncer":
+        """Houdt de Weez-client open zolang je binnen het blok werkt.
+
+        Dit telt hoe vaak je het blok binnengaat, zodat een deelsynchronisatie
+        binnen een volledige synchronisatie de verbinding niet te vroeg sluit.
+        """
+        if self.__verbindingen == 0:
+            self.client.__enter__()
+        self.__verbindingen += 1
+        return self
+
+    def __exit__(self, *fout) -> bool:
+        self.__verbindingen -= 1
+        if self.__verbindingen == 0:
+            self.client.__exit__(*fout)
+        return False
 
     def __maak_onderdelen(self) -> None:
         """Koppelt elk model aan zijn mapper en provider.
@@ -130,7 +148,7 @@ class WeezSyncer(Synchronisatie):
         WeezSynchronisatie.objects.create()  # log dat een synchronisatie is gestart
         self.info.status(SynchronisatieStatus.BEZIG)
 
-        with self.client:
+        with self:
             overzicht = list(self.evenement_provider.haal_alle_op())
             if self.config.limiet is not None:
                 overzicht = overzicht[: self.config.limiet]

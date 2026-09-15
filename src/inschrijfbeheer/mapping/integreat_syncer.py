@@ -181,7 +181,7 @@ class IntegreatSyncer(Synchronisatie):
         self.__synchroniseer_seminars()
         self.synchroniseer_inschrijvingen()
         self.synchroniseer_vragen()
-        self.__synchroniseer_antwoorden()
+        self.synchroniseer_antwoorden()
 
         self.info.status(SynchronisatieStatus.GESLAAGD)
         return self.info
@@ -189,22 +189,36 @@ class IntegreatSyncer(Synchronisatie):
     def synchroniseer_evenement(
         self, evenement_id: str, sync_inschrijvingen: bool = False
     ) -> SynchronisatieInfo:
-        """Synchroniseert één seminar, opgezocht via zijn code."""
-        seminar = self.providers.seminars.haal_op(evenement_id)
+        """Synchroniseert één seminar, opgezocht via zijn code.
+
+        De vragen horen bij het seminar en gaan dus altijd mee. De registraties
+        en hun antwoorden alleen als je erom vraagt.
+        """
+        code = normaliseer_code(evenement_id)
+        seminar = self.providers.seminars.haal_op(code)
         if seminar is None:
-            logger.warning("Geen seminar gevonden met code %s", evenement_id)
+            logger.warning("Geen seminar gevonden met code %s", code)
             self.info.registreer(Evenement, SynchronisatieActie.OVERGESLAGEN)
             return self.info
 
         evenement = self.__bewaar_seminar(seminar)
-        if evenement is not None and sync_inschrijvingen:
+        if evenement is None:
+            return self.info
+
+        self.synchroniseer_vragen(evenement)
+        if sync_inschrijvingen:
             self.synchroniseer_inschrijvingen(evenement)
+            self.synchroniseer_antwoorden(evenement)
 
         return self.info
 
     def synchroniseer_inschrijvingen(self, evenement: Evenement | None = None) -> SynchronisatieInfo:
         """Synchroniseert de registraties, eventueel enkel die van één evenement."""
-        for registratie in self.providers.registraties.haal_alle_op(self.bron_filter):
+        registraties = self.__voor_seminar(
+            self.providers.registraties.haal_alle_op(self.bron_filter), "seminar__code", evenement
+        )
+
+        for registratie in registraties:
             if evenement is not None and self.__seminar_code(registratie) != evenement.id:
                 continue
 
@@ -226,7 +240,11 @@ class IntegreatSyncer(Synchronisatie):
                 "een vraag hoort bij een seminar en niet bij een registratie"
             )
 
-        for vrij_veld in self.providers.vragen.haal_alle_op(self.bron_filter):
+        vrije_velden = self.__voor_seminar(
+            self.providers.vragen.haal_alle_op(self.bron_filter), "seminar__code", evenement
+        )
+
+        for vrij_veld in vrije_velden:
             if evenement is not None and normaliseer_code(
                 getattr(vrij_veld.seminar, "code", None)
             ) != evenement.id:
@@ -236,28 +254,19 @@ class IntegreatSyncer(Synchronisatie):
 
         return self.info
 
-    def __synchroniseer_vraagtypes(self) -> None:
-        for bron in self.providers.vraagtypes.haal_alle_op(self.bron_filter):
-            try:
-                self.bewaar(self.vraagtypes, self.vraagtypes.mapper.map(bron, None))
-            except MappingFout as fout:
-                logger.warning("Vraagtype overgeslagen: %s", fout)
-                self.info.registreer(EvenementVraagType, SynchronisatieActie.OVERGESLAGEN)
+    def synchroniseer_antwoorden(self, evenement: Evenement | None = None) -> SynchronisatieInfo:
+        """Koppelt de antwoorden aan hun vraag en inschrijving.
 
-    def __synchroniseer_deelnemertypes(self) -> None:
-        for bron in self.providers.deelnemertypes.haal_alle_op(self.bron_filter):
-            try:
-                self.bewaar(self.deelnemertypes, self.deelnemertypes.mapper.map(bron, None))
-            except MappingFout as fout:
-                logger.warning("Deelnemertype overgeslagen: %s", fout)
-                self.info.registreer(DeelnemerType, SynchronisatieActie.OVERGESLAGEN)
+        Dit is een eigen stap, want een antwoord hangt zowel van een vraag als
+        van een inschrijving af. Beide moeten er dus al staan.
+        """
+        antwoorden = self.__voor_seminar(
+            self.providers.antwoorden.haal_alle_op(self.bron_filter),
+            "registration__seminar__code",
+            evenement,
+        )
 
-    def __synchroniseer_seminars(self) -> None:
-        for seminar in self.providers.seminars.haal_alle_op(self.bron_filter):
-            self.__bewaar_seminar(seminar)
-
-    def __synchroniseer_antwoorden(self) -> None:
-        for bron in self.providers.antwoorden.haal_alle_op(self.bron_filter):
+        for bron in antwoorden:
             vraag_oid = getattr(bron.field, "oid", None)
             registratie_oid = getattr(bron.registration, "oid", None)
             if vraag_oid is None or registratie_oid is None:
@@ -285,6 +294,39 @@ class IntegreatSyncer(Synchronisatie):
                 logger.warning("Antwoord %s overgeslagen: %s", bron.oid, fout)
                 self.info.registreer(InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN)
 
+        return self.info
+
+    @staticmethod
+    def __voor_seminar(records, pad: str, evenement: Evenement | None):
+        """Beperkt de records tot één seminar, in de databank zelf.
+
+        De code staat met opvulruimte in de bron, dus contains doet het grove
+        werk en de exacte vergelijking gebeurt daarna in Python.
+        """
+        if evenement is None:
+            return records
+        return records.filter(**{f"{pad}__contains": evenement.id})
+
+    def __synchroniseer_vraagtypes(self) -> None:
+        for bron in self.providers.vraagtypes.haal_alle_op(self.bron_filter):
+            try:
+                self.bewaar(self.vraagtypes, self.vraagtypes.mapper.map(bron, None))
+            except MappingFout as fout:
+                logger.warning("Vraagtype overgeslagen: %s", fout)
+                self.info.registreer(EvenementVraagType, SynchronisatieActie.OVERGESLAGEN)
+
+    def __synchroniseer_deelnemertypes(self) -> None:
+        for bron in self.providers.deelnemertypes.haal_alle_op(self.bron_filter):
+            try:
+                self.bewaar(self.deelnemertypes, self.deelnemertypes.mapper.map(bron, None))
+            except MappingFout as fout:
+                logger.warning("Deelnemertype overgeslagen: %s", fout)
+                self.info.registreer(DeelnemerType, SynchronisatieActie.OVERGESLAGEN)
+
+    def __synchroniseer_seminars(self) -> None:
+        for seminar in self.providers.seminars.haal_alle_op(self.bron_filter):
+            self.__bewaar_seminar(seminar)
+
     def __bewaar_seminar(self, seminar) -> Evenement | None:
         try:
             status, _ = self.bewaar(self.statussen, self.statussen.mapper.map(seminar.status, None))
@@ -305,8 +347,7 @@ class IntegreatSyncer(Synchronisatie):
 
     def __bewaar_registratie(self, registratie, evenement: Evenement | None) -> None:
         code = self.__seminar_code(registratie)
-        type_oid = getattr(registratie.deelnemers_type, "oid", None)
-        if not code or type_oid is None or registratie.deelnemer is None:
+        if not code or registratie.deelnemers_type is None or registratie.deelnemer is None:
             logger.warning(
                 "Registratie %s overgeslagen: seminar, deelnemerstype of deelnemer ontbreekt",
                 registratie.oid,
@@ -315,7 +356,7 @@ class IntegreatSyncer(Synchronisatie):
             return
 
         doel_evenement = evenement or Evenement.objects.filter(id=code).first()
-        deelnemertype = DeelnemerType.objects.filter(id=str(type_oid)).first()
+        deelnemertype = self.__deelnemertype(registratie.deelnemers_type)
         if doel_evenement is None or deelnemertype is None:
             logger.warning(
                 "Registratie %s overgeslagen: evenement of deelnemertype nog niet aanwezig",
@@ -345,6 +386,49 @@ class IntegreatSyncer(Synchronisatie):
             logger.warning("Registratie %s overgeslagen: %s", registratie.oid, fout)
             self.info.registreer(Inschrijving, SynchronisatieActie.OVERGESLAGEN)
 
+    def __deelnemertype(self, bron) -> DeelnemerType | None:
+        """Zoekt het deelnemerstype, en maakt het aan als het er nog niet staat.
+
+        Bij een volledige synchronisatie staan de types er al. Synchroniseer je
+        één evenement, dan hangt het type aan de registratie, dus is er geen
+        aparte ophaalstap voor nodig.
+        """
+        type_oid = getattr(bron, "oid", None)
+        if type_oid is None:
+            return None
+
+        bestaand = DeelnemerType.objects.filter(id=str(type_oid)).first()
+        if bestaand is not None:
+            return bestaand
+
+        try:
+            deelnemertype, _ = self.bewaar(
+                self.deelnemertypes, self.deelnemertypes.mapper.map(bron, None)
+            )
+            return deelnemertype
+        except MappingFout as fout:
+            logger.warning("Deelnemertype %s overgeslagen: %s", type_oid, fout)
+            self.info.registreer(DeelnemerType, SynchronisatieActie.OVERGESLAGEN)
+            return None
+
+    def __vraagtype(self, bron) -> EvenementVraagType | None:
+        """Zoekt het vraagtype, en maakt het aan als het er nog niet staat."""
+        type_code = normaliseer_code(getattr(bron, "code", None))
+        if not type_code:
+            return None
+
+        bestaand = EvenementVraagType.objects.filter(naam=type_code).first()
+        if bestaand is not None:
+            return bestaand
+
+        try:
+            vraagtype, _ = self.bewaar(self.vraagtypes, self.vraagtypes.mapper.map(bron, None))
+            return vraagtype
+        except MappingFout as fout:
+            logger.warning("Vraagtype %s overgeslagen: %s", type_code, fout)
+            self.info.registreer(EvenementVraagType, SynchronisatieActie.OVERGESLAGEN)
+            return None
+
     def __bewaar_deelnemer(self, bron) -> Deelnemer | None:
         lidnummer = (bron.lid_id or "").strip()
         if not lidnummer:
@@ -367,16 +451,14 @@ class IntegreatSyncer(Synchronisatie):
 
     def __bewaar_vrij_veld(self, vrij_veld) -> None:
         code = normaliseer_code(getattr(vrij_veld.seminar, "code", None))
-        type_code = normaliseer_code(getattr(vrij_veld.type, "code", None))
 
         evenement = Evenement.objects.filter(id=code).first()
-        vraagtype = EvenementVraagType.objects.filter(naam=type_code).first()
+        vraagtype = self.__vraagtype(vrij_veld.type)
         if evenement is None or vraagtype is None:
             logger.warning(
-                "Vrij veld %s overgeslagen: evenement %r of vraagtype %r niet gevonden",
+                "Vrij veld %s overgeslagen: evenement %r of vraagtype niet gevonden",
                 vrij_veld.oid,
                 code,
-                type_code,
             )
             self.info.registreer(EvenementVraag, SynchronisatieActie.OVERGESLAGEN)
             return
