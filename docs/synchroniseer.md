@@ -57,3 +57,9 @@ def map_alle(self, bronnen: Iterable[T], context: C) -> Iterator[Doelgegevens[N]
 ```
 
 Deze worden ook gebruikt in de `Synchronisatie` klassen die de synchronisatie uitvoeren.
+
+
+### Taken
+
+Om alles op bepaalde ogenblikken te laten synchroniseren wordt gebruik gemaakt van taken die gepland worden met behulp van `procrastinate`.
+Deze taken zijn te vinden in [inschrijfbeheer/utils/tasks.py](../src/inschrijfbeheer/utils/tasks.py).
