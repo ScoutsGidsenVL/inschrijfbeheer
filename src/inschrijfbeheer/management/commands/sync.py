@@ -39,17 +39,6 @@ class Command(BaseCommand):
             help="Voert alles uit maar draait de wijzigingen achteraf terug",
         )
         parser.add_argument(
-            "--limiet",
-            type=int,
-            default=None,
-            help=(
-                "Beperkt het aantal records, handig om te proberen. Bij weez is dat "
-                "het aantal evenementen. Bij integreat geldt de limiet per soort "
-                "record, dus de eerste registraties horen niet noodzakelijk bij de "
-                "eerste seminars en mag je veel overgeslagen records verwachten"
-            ),
-        )
-        parser.add_argument(
             "--alles",
             action="store_true",
             help="Negeert het terugblikvenster en haalt ook oude evenementen op",

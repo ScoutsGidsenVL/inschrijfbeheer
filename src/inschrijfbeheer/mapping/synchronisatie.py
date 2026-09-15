@@ -27,7 +27,7 @@ class Synchronisatie(ABC):
     Een subklasse bouwt haar providers en onderdelen zelf op, zodat je ze met
     niets meer dan een SynchronisatieConfig aanmaakt:
 
-        WeezSyncer(SynchronisatieConfig(limiet=5, dry_run=True)).voer_uit()
+        WeezSyncer(SynchronisatieConfig(dry_run=True)).voer_uit()
     """
 
     logger = logging.getLogger("inschrijfbeheer")

@@ -139,7 +139,6 @@ def uurlijkse_synchronisatie_taak(timestamp: int) -> str:
         str: de samenvatting van de synchronisatie, zichtbaar in het jobresultaat
     """
     config = SynchronisatieConfig(
-        limiet=None,
         sync_alles=False,
         dry_run=False,
         terugblik_dagen=TERUGBLIK_DAGEN,

@@ -150,8 +150,6 @@ class WeezSyncer(Synchronisatie):
 
         with self:
             overzicht = list(self.evenement_provider.haal_alle_op())
-            if self.config.limiet is not None:
-                overzicht = overzicht[: self.config.limiet]
 
             for samenvatting in overzicht:
                 evenement_id = samenvatting.get("id")

@@ -72,7 +72,6 @@ class SynchronisatieConfig:
     elke syncer zelf samen, dus je maakt een syncer met niets meer dan dit.
     """
  
-    limiet: int | None = None
     sync_alles: bool = False
     dry_run: bool = False
     terugblik_dagen: int | None = None
@@ -86,7 +85,6 @@ class SynchronisatieConfig:
         niets meer over de config hoeft te weten.
         """
         return cls(
-            limiet=opties.get("limiet"),
             sync_alles=bool(opties.get("alles", False)),
             dry_run=bool(opties.get("dry_run", False)),
             terugblik_dagen=opties.get("terugblik_dagen"),

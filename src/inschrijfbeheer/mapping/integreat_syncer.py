@@ -125,7 +125,6 @@ class IntegreatSyncer(Synchronisatie):
         """Vertaalt de config naar het filter waarmee de providers ophalen."""
         velden: dict[str, Any] = {
             "sync_alles": self.config.sync_alles,
-            "limiet": self.config.limiet,
         }
         if self.config.terugblik_dagen is not None:
             velden["terugblik_dagen"] = self.config.terugblik_dagen
