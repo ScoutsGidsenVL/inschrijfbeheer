@@ -12,7 +12,7 @@ from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
-from inschrijfbeheer.utils.tasks import defer_synchroniseer_inschrijvingen
+from inschrijfbeheer.tasks import defer_synchroniseer_inschrijvingen
 from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van
 

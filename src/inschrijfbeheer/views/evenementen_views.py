@@ -7,7 +7,7 @@ from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, Insc
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_zip_attesten
 from inschrijfbeheer.utils.paginering import pagineer
-from inschrijfbeheer.utils.tasks import defer_mail_attesten, defer_synchroniseer_evenement
+from inschrijfbeheer.tasks import defer_mail_attesten, defer_synchroniseer_evenement
 
 KOLOMMEN = {
     "id": "ID",
