@@ -87,7 +87,7 @@ Deze package laat toe om taken te plannen of asynchroon uit te voeren. Meer info
 
 ## Structuur
 
-```
+```sh
 ├── docs # documentatie
 └── src
     ├── config # bevat alle algemene configuratie in settings.py
