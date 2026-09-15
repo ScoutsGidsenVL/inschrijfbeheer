@@ -61,7 +61,7 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
         stuur_weezevent_update(inschrijving, form_data)
 
-        synchroniseer_inschrijvingen_taak.defer(evenement=inschrijving.evenement)
+        synchroniseer_inschrijvingen_taak.defer(evenement_id=inschrijving.evenement.id)
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 

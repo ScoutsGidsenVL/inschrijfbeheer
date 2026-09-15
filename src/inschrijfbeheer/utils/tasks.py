@@ -7,11 +7,12 @@ from inschrijfbeheer.models.inschrijfbeheer_models import Evenement
 
 
 @app.task
-def synchroniseer_inschrijvingen_taak(evenement: Evenement):
+def synchroniseer_inschrijvingen_taak(evenement_id: str):
+    evenement = Evenement.objects.get(id=evenement_id)
     syncer = maak_weez_syncer({"alles": None, "limiet": None})
 
     with transaction.atomic(), syncer.client:
-        syncer.synchroniseer_inschrijvingen(evenement)
+        syncer.synchroniseer_inschrijvingen(evenement=evenement)
 
 @app.task
 def mail_attesten_taak():
