@@ -83,33 +83,32 @@ Meer info over de webapplicatie is te vinden in [webapplicatie.md](./webapplicat
 
 ```
 ├── docs # documentatie
-├── src
-│   ├── config # bevat alle algemene configuratie in settings.py
-│   ├── inschrijfbeheer
-│   │   ├── assets # assets die niet bereikbaar zijn via de webapplicatie
-│   │   ├── management
-│   │   │   └── commands # logica voor admin commands (`sync`)
-│   │   ├── mapping
-│   │   │   ├── logic # alle mappers voor de synchronisatie
-│   │   │   │   ├── integreat_mappers
-│   │   │   │   └── weez_mappers
-│   │   │   ├── providers # alle providers voor de synchronisatie
-│   │   │   │   ├── integreat_providers
-│   │   │   │   └── weez_providers
-│   │   ├── models # alle datamodellen
-│   │   ├── templatetags
-│   │   ├── urls
-│   │   ├── utils
-│   │   └── views
-│   ├── static # statische bestanden die via webapplicatie bereikbaar zijn
-│   │   ├── images
-│   │   └── styles
-│   └── templates # HTML templates
-│       ├── deelnemers
-│       ├── evenementen
-│       │   └── vragen
-│       ├── inschrijvingen
-│       ├── logging
-│       └── mails
-└── tests
+└── src
+    ├── config # bevat alle algemene configuratie in settings.py
+    ├── inschrijfbeheer
+    │   ├── assets # assets die niet bereikbaar zijn via de webapplicatie
+    │   ├── management
+    │   │   └── commands # logica voor admin commands (`sync`)
+    │   ├── mapping
+    │   │   ├── logic # alle mappers voor de synchronisatie
+    │   │   │   ├── integreat_mappers
+    │   │   │   └── weez_mappers
+    │   │   ├── providers # alle providers voor de synchronisatie
+    │   │   │   ├── integreat_providers
+    │   │   │   └── weez_providers
+    │   ├── models # alle datamodellen
+    │   ├── templatetags
+    │   ├── urls
+    │   ├── utils
+    │   └── views
+    ├── static # statische bestanden die via webapplicatie bereikbaar zijn
+    │   ├── images
+    │   └── styles
+    └── templates # HTML templates
+        ├── deelnemers
+        ├── evenementen
+        │   └── vragen
+        ├── inschrijvingen
+        ├── logging
+        └── mails
 ```
