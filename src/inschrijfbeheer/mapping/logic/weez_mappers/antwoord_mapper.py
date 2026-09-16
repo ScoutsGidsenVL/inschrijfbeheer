@@ -22,5 +22,5 @@ class WeezAntwoordMapper(Mapper[dict, AntwoordContext, InschrijvingVraagAntwoord
     def map(self, bron: dict, context: AntwoordContext) -> Doelgegevens[InschrijvingVraagAntwoord]:
         return Doelgegevens(
             sleutels={"vraag": context.vraag, "inschrijving": context.inschrijving},
-            velden={"antwoord": bron.get("value")},
+            velden={"antwoord": bron.get("answer")},
         )

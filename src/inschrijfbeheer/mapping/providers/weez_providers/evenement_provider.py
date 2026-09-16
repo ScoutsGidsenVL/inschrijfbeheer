@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Iterable
 from inschrijfbeheer.mapping.providers.data_provider import DataProvider
-from .weez_provider import WeezClient
+from .weez_client import WeezClient
 
 logger = logging.getLogger("inschrijfbeheer")
 
@@ -21,19 +21,26 @@ class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
     per id de details op.
     """
 
+    MODULE = "ticket"
+    RESOURCE = "events"
+ 
     def __init__(self, client: WeezClient):
         self.client = client
-
+ 
     def haal_op(self, identifier: str) -> dict | None:
-        respons = self.client.get(f"event/{identifier}/details")
-        return respons.get("events") or None
-
+        evenement = self.client.get(f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{identifier}")
+        if evenement is None:
+            logger.warning("Geen evenement gevonden bij Weez voor id %s", identifier)
+        return evenement
+ 
     def haal_alle_op(self, filter: EvenementFilter | None = None) -> Iterable[dict]:
         if filter is None:
             filter = EvenementFilter()
+
         respons = self.client.get(
-            "events",
-            parameters={"include_without_sales": "1" if filter.include_without_sales else "0"},
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events",
+            params={"time_status": "terminated"}
         )
-        return respons.get("events") or []
+        logger.debug("%s evenementen opgehaald bij Weez", len(respons))
+        return respons
 

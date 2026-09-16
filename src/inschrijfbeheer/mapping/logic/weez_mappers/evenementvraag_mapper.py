@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 
 from inschrijfbeheer.models import (
 
@@ -7,6 +8,9 @@ from inschrijfbeheer.models import (
 )
 
 from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
+
+logger = logging.getLogger("inschrijfbeheer")
+
 
 def _normaliseer(waarde) -> str:
     return "" if waarde is None else str(waarde).strip()
@@ -100,24 +104,11 @@ class WeezEvenementVraagMapper(Mapper[dict, VraagContext, EvenementVraag]):
     """
 
     def map(self, bron: dict, context: VraagContext) -> Doelgegevens[EvenementVraag]:
-        label = bron.get("label")
-        if not label:
-            raise MappingFout("vraag zonder label")
-
-        if alias_van_label(label):
-            return Doelgegevens(
-                sleutels={"evenement": context.evenement, "vraag": label},
-                velden={"volgorde": context.volgorde},
-            )
-
-        if not context.weez_vraag_id:
-            raise MappingFout(f"geen Weez-vraag-id gevonden voor eigen vraag {label}")
-
         return Doelgegevens(
-            sleutels={"id": context.weez_vraag_id},
+            sleutels={"id": bron.get("weez_id")},
             velden={
                 "evenement": context.evenement,
-                "vraag": label,
+                "vraag": bron.get("question"),
                 "volgorde": context.volgorde,
             },
         )

@@ -34,10 +34,6 @@ from .integreat_mapper import (
     normaliseer_code,
 )
 
-from .status_mapper import (
-    IntegreatStatusMapper,
-)
-
 from .vraagtype_mapper import (
     IntegreatVraagTypeMapper,
 )

@@ -39,7 +39,6 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     IntegreatEvenementMapper,
     IntegreatEvenementVraagMapper,
     IntegreatInschrijvingMapper,
-    IntegreatStatusMapper,
     IntegreatVraagTypeMapper,
     VraagContext,
     normaliseer_code,
@@ -67,7 +66,6 @@ from inschrijfbeheer.models import (
     Deelnemer,
     DeelnemerType,
     Evenement,
-    EvenementStatus,
     EvenementVraag,
     EvenementVraagType,
     Inschrijving,
@@ -143,10 +141,6 @@ class IntegreatSyncer(Synchronisatie):
         in het management command.
         """
         providers = self.providers
-
-        self.statussen = SyncOnderdelen(
-            model=EvenementStatus, mapper=IntegreatStatusMapper(), enkel_aanmaken=True
-        )
         self.categorieen = SyncOnderdelen(model=Categorie, mapper=IntegreatCategorieMapper())
         self.evenementen = SyncOnderdelen(
             model=Evenement, mapper=IntegreatEvenementMapper(), provider=providers.seminars
