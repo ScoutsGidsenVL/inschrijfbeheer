@@ -169,6 +169,7 @@ class Inschrijving(models.Model):
     tijdstip = models.DateTimeField(null=True, blank=True)
     annulatie = models.DateTimeField(null=True, blank=True)
     annulatie_reden = models.TextField(null=True, blank=True)
+    registratie = models.BooleanField(default=False)
     is_weez = models.BooleanField(default=False, blank=True)
 
     class Meta:
