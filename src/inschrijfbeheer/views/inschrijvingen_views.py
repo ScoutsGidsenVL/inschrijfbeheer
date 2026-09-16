@@ -46,15 +46,16 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
     vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
 
     if request.method == "POST":
-        form_data = {}
-        for vraag_antwoord in vraag_antwoorden:
-            nieuw_antwoord = request.POST.get(f"antwoord_{vraag_antwoord.id}", "").strip()
-            vraag_antwoord.antwoord = nieuw_antwoord
-            form_data[weez_sleutel_van(vraag_antwoord.vraag)] = nieuw_antwoord
+        if inschrijving.evenement.is_weez:
+            form_data = {}
+            for vraag_antwoord in vraag_antwoorden:
+                nieuw_antwoord = request.POST.get(f"antwoord_{vraag_antwoord.id}", "").strip()
+                vraag_antwoord.antwoord = nieuw_antwoord
+                form_data[weez_sleutel_van(vraag_antwoord.vraag)] = nieuw_antwoord
 
-        stuur_weezevent_update(inschrijving, form_data)
+            stuur_weezevent_update(inschrijving, form_data)
 
-        defer_synchroniseer_inschrijvingen(evenement_id=inschrijving.evenement.id)
+            defer_synchroniseer_inschrijvingen(evenement_id=inschrijving.evenement.id)
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 

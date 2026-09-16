@@ -18,9 +18,15 @@
             <tr>
                 <td>{{ vraag_antwoord.vraag.vraag }}</td>
                 <td>{{ vraag_antwoord.vraag.type.naam|default:"-" }}</td>
-                <td>
-                    <input type="text" name="antwoord_{{ vraag_antwoord.id }}" value="{{ vraag_antwoord.antwoord|default:"" }}">
-                </td>
+                {% if inschrijving.evenement.is_weez %}
+                    <td>
+                        <input type="text" name="antwoord_{{ vraag_antwoord.id }}" value="{{ vraag_antwoord.antwoord|default:"" }}">
+                    </td>
+                {% else %}
+                    <td>
+                        {{ vraag_antwoord.antwoord|default:"" }}
+                    </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
