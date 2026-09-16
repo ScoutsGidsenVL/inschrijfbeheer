@@ -130,30 +130,7 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
 
     pagina, querystring = pagineer(request, queryset)
 
-    inschrijvingen = []
-    for instantie in pagina:
-
-        annulatie = ""
-        aanwezig = True
-        if instantie.annulatie:
-            annulatie = instantie.annulatie
-            aanwezig = False
-        elif instantie.lid.foutboodschap:
-            annulatie = instantie.lid.foutboodschap
-            aanwezig = False
-
-        inschrijvingen.append({
-            "instantie": instantie,
-            "waarden": [
-                instantie.id,
-                instantie.lid,
-                str(instantie.deelnemertype),
-                instantie.tijdstip,
-                instantie.prijs,
-                annulatie,
-                aanwezig,
-            ],
-        })
+    inschrijvingen = pagina
  
     return render(request, "evenementen/evenementen_inschrijvingen.html", {
         "kolommen": kolommen,
@@ -223,7 +200,13 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
     Returns:
         HttpResponse: HTML document dat een zip bevat met alle attesten
     """
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(evenement=evenement_id, annulatie__isnull=True, lid__foutboodschap__isnull=True)
+    inschrijvingen = Inschrijving.objects.select_related("lid", "evenement").filter(
+        evenement=evenement_id,
+        annulatie__isnull=True,
+        registratie=True,
+        lid__foutboodschap__isnull=True,
+        evenement__foutboodschap__isnull=True
+    )
     buffer = genereer_zip_attesten(inschrijvingen)
 
     response = HttpResponse(buffer, content_type="application/zip")

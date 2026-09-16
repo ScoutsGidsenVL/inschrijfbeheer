@@ -40,10 +40,12 @@ def synchroniseer_inschrijvingen_taak(evenement_id: str):
 
 @app.task(name="mail_attesten")
 def mail_attesten_taak(evenement_id: str):
-    inschrijvingen = Inschrijving.objects.select_related("lid").filter(
+    inschrijvingen = Inschrijving.objects.select_related("lid", "evenement").filter(
         evenement=evenement_id,
         annulatie__isnull=True,
+        registratie=True,
         lid__foutboodschap__isnull=True,
+        evenement__foutboodschap__isnull=True
     )
 
     maildata = []
