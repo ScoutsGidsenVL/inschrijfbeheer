@@ -35,7 +35,9 @@ from inschrijfbeheer.mapping.logic.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
+from inschrijfbeheer.mapping.logic.weez_mappers.antwoord_mapper import AntwoordContext, WeezAntwoordMapper
 from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
+from inschrijfbeheer.mapping.logic.weez_mappers.evenementvraag_mapper import VraagContext, WeezEvenementVraagMapper
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.providers import (
     InschrijvingFilter,
@@ -60,7 +62,7 @@ from inschrijfbeheer.models import (
     Inschrijving,
     WeezSynchronisatie,
 )
-from inschrijfbeheer.models.inschrijfbeheer_models import DeelnemerType
+from inschrijfbeheer.models.inschrijfbeheer_models import DeelnemerType, EvenementVraag, InschrijvingVraagAntwoord
 
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
@@ -135,6 +137,12 @@ class WeezSyncer(Synchronisatie):
             model=DeelnemerType,
             mapper=WeezDeelnemerTypeMapper(),
             provider=self.tarieven_provider,
+        )
+        self.vragen = SyncOnderdelen(
+            model=EvenementVraag, mapper=WeezEvenementVraagMapper(), enkel_aanmaken=False
+        )
+        self.antwoorden = SyncOnderdelen(
+            model=InschrijvingVraagAntwoord, mapper=WeezAntwoordMapper(), enkel_aanmaken=False
         )
 
     def synchroniseer(self) -> SynchronisatieInfo:
@@ -211,6 +219,7 @@ class WeezSyncer(Synchronisatie):
 
 
         bronnen = self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement))
+        vraag_index: dict[str, EvenementVraag] | None = None
 
         for bron in bronnen:
             vragen = bron.get("form") or []
@@ -219,6 +228,9 @@ class WeezSyncer(Synchronisatie):
             if not alle_verplichte_vragen:
                 self.__geen_verplichte_vraag(evenement, rest)
                 break
+
+            if vraag_index is None:
+                vraag_index = self.__bewaar_vragen(evenement, vragen)
 
             gegevens = bepaal_inschrijvingsgegevens(vragen)
             if gegevens is None:
@@ -237,13 +249,17 @@ class WeezSyncer(Synchronisatie):
                 context = InschrijvingContext(
                     evenement=evenement, deelnemer=deelnemer, deelnemertypes=deelnemertypes
                 )
-                self.bewaar(self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context))
+                inschrijving, _ = self.bewaar(self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context))
+
+
             except MappingFout as fout:
                 logger.warning(
                     "Inschrijving overgeslagen op evenement %s: %s", evenement.id, fout
                 )
                 self.info.registreer(Inschrijving, SynchronisatieActie.OVERGESLAGEN)
                 continue
+
+            self.__bewaar_antwoorden(inschrijving, vragen, vraag_index)
 
         return self.info
 
@@ -309,3 +325,37 @@ class WeezSyncer(Synchronisatie):
             "inschrijvingen worden niet gesynchroniseerd"
         )
         evenement.save()
+
+    def __bewaar_vragen(self, evenement: Evenement, vragen: list[dict]) -> dict[str, EvenementVraag]:
+        """Bewaart het formulier van het evenement en geeft de vragen terug per Weez-id."""
+        index: dict[str, EvenementVraag] = {}
+        for volgorde, bron in enumerate(vragen):
+            try:
+                vraag, _ = self.bewaar(
+                    self.vragen,
+                    self.vragen.mapper.map(bron, VraagContext(evenement=evenement, volgorde=volgorde)),
+                )
+            except MappingFout as fout:
+                logger.warning("Vraag overgeslagen op evenement %s: %s", evenement.id, fout)
+                self.info.registreer(EvenementVraag, SynchronisatieActie.OVERGESLAGEN)
+                continue
+            index[str(bron.get("weez_id"))] = vraag
+        return index
+
+    def __bewaar_antwoorden(
+        self, inschrijving: Inschrijving, vragen: list[dict], vraag_index: dict[str, EvenementVraag]
+    ) -> None:
+        for bron in vragen:
+            vraag = vraag_index.get(str(bron.get("weez_id")))
+            if vraag is None:
+                logger.warning("Antwoord zonder gekende vraag op inschrijving %s", inschrijving.id)
+                self.info.registreer(InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN)
+                continue
+            try:
+                self.bewaar(
+                    self.antwoorden,
+                    self.antwoorden.mapper.map(bron, AntwoordContext(inschrijving=inschrijving, vraag=vraag)),
+                )
+            except MappingFout as fout:
+                logger.warning("Antwoord overgeslagen op inschrijving %s: %s", inschrijving.id, fout)
+                self.info.registreer(InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN)
