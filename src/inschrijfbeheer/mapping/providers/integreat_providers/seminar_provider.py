@@ -21,4 +21,4 @@ class IntegreatSeminarProvider(IntegreatProvider[IntegreatSeminar]):
  
         drempel = timezone.now() - timedelta(days=filter.terugblik_dagen)
         queryset = queryset.filter(eindtijd__gte=drempel)
-        return super().pas_filter_toe(queryset=queryset, filter=filter)
+        return queryset

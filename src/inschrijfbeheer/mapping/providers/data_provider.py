@@ -41,7 +41,7 @@ class LijstProvider(Generic[T, F], ABC):
 class DataProvider(ObjectProvider[T], LijstProvider[T, F], ABC):
     """Voor bronnen die zowel één object als een lijst kunnen leveren."""
 
-@dataclass(frozen=True)
+@dataclass
 class IntegreatFilter:
     """Filter voor de Integreat-providers.
  
@@ -54,8 +54,11 @@ class IntegreatFilter:
     """
  
     sync_alles: bool = False
-    terugblik_dagen: int = 30
-    limiet: int | None = None
+    terugblik_dagen: int = 14
+
+@dataclass
+class EvenementFilter(IntegreatFilter):
+    evenement_id: str | None = None
 
 class DatabaseDataProvider(DataProvider[M, F], ABC):
     """Provider die zijn data uit een databank haalt.

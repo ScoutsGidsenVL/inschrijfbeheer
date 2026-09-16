@@ -3,6 +3,13 @@
 Deze klasse haalt zelf niets op en mapt zelf niets. Ze bepaalt de volgorde,
 stelt de context voor de mappers samen, bewaart via Synchronisatie.bewaar() en
 registreert wat overgeslagen werd.
+
+Aanmaken doe je met één config:
+
+    WeezSyncer(SynchronisatieConfig(limiet=5, dry_run=True)).voer_uit()
+
+De client, de ledenprovider en de onderdelen bouwt de syncer zelf op. In een
+test geef je een nagemaakte client of ledenprovider mee als sleutelwoord.
 """
 
 import logging
@@ -27,7 +34,7 @@ from inschrijfbeheer.mapping.logic.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
     koppel_eigen_vragen,
-    alias_van_label
+    alias_van_label,
 )
 from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
@@ -38,7 +45,7 @@ from inschrijfbeheer.mapping.providers import (
     WeezInschrijvingProvider,
     WeezTariefProvider,
     FormFilter,
-    WeezFormProvider
+    WeezFormProvider,
 )
 from inschrijfbeheer.mapping import (
     Synchronisatie,
@@ -56,22 +63,27 @@ from inschrijfbeheer.models import (
     Inschrijving,
     InschrijvingVraagAntwoord,
     WeezSynchronisatie,
-    DeelnemerType
+    DeelnemerType,
 )
 
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
 
+
 class WeezSyncer(Synchronisatie):
     """Haalt evenementen, inschrijvingen en vragen op bij Weez."""
 
+    naam = "weez"
+    eigen_opties = frozenset()
+
     def __init__(
         self,
-        sync_config: SynchronisatieConfig | None = None,
+        config: SynchronisatieConfig | None = None,
+        *,
         client: WeezClient | None = None,
         lid_provider: LidProvider | None = None,
     ):
-        super().__init__(sync_config)
+        super().__init__(config)
 
         self.client = WeezClient() if client is None else client
         self.lid_provider = LidProvider() if lid_provider is None else lid_provider
@@ -81,6 +93,35 @@ class WeezSyncer(Synchronisatie):
         self.tarief_provider = WeezTariefProvider(self.client)
         self.form_provider = WeezFormProvider(self.client)
 
+        self.__maak_onderdelen()
+
+        self.tijdslimiet: str | None = None
+        self.__eigen_vraag_ids: dict[str, dict[int, str]] = {}
+        self.__verbindingen = 0
+
+    def __enter__(self) -> "WeezSyncer":
+        """Houdt de Weez-client open zolang je binnen het blok werkt.
+
+        Dit telt hoe vaak je het blok binnengaat, zodat een deelsynchronisatie
+        binnen een volledige synchronisatie de verbinding niet te vroeg sluit.
+        """
+        if self.__verbindingen == 0:
+            self.client.__enter__()
+        self.__verbindingen += 1
+        return self
+
+    def __exit__(self, *fout) -> bool:
+        self.__verbindingen -= 1
+        if self.__verbindingen == 0:
+            self.client.__exit__(*fout)
+        return False
+
+    def __maak_onderdelen(self) -> None:
+        """Koppelt elk model aan zijn mapper en provider.
+
+        Dit hangt niet af van wat de gebruiker kiest, dus het staat hier en niet
+        in het management command.
+        """
         self.categorieen = SyncOnderdelen(
             model=Categorie, mapper=WeezCategorieMapper(), enkel_aanmaken=True
         )
@@ -92,16 +133,13 @@ class WeezSyncer(Synchronisatie):
             model=Inschrijving,
             mapper=WeezInschrijvingMapper(),
             provider=self.inschrijving_provider,
-            enkel_aanmaken=False
+            enkel_aanmaken=False,
         )
         self.vragen = SyncOnderdelen(model=EvenementVraag, mapper=WeezEvenementVraagMapper())
         self.antwoorden = SyncOnderdelen(
             model=InschrijvingVraagAntwoord, mapper=WeezAntwoordMapper()
         )
         self.deelnemertypes = SyncOnderdelen(model=DeelnemerType, mapper=WeezDeelnemerTypeMapper())
-
-        self.tijdslimiet: str | None = None
-        self.__eigen_vraag_ids: dict[str, dict[int, str]] = {}
 
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez-evenementen op en zet ze om naar Evenement-modellen."""
@@ -110,10 +148,8 @@ class WeezSyncer(Synchronisatie):
         WeezSynchronisatie.objects.create()  # log dat een synchronisatie is gestart
         self.info.status(SynchronisatieStatus.BEZIG)
 
-        with self.client:
+        with self:
             overzicht = list(self.evenement_provider.haal_alle_op())
-            if self.config.limiet is not None:
-                overzicht = overzicht[: self.config.limiet]
 
             for samenvatting in overzicht:
                 evenement_id = samenvatting.get("id")
@@ -166,12 +202,12 @@ class WeezSyncer(Synchronisatie):
         tarieven = self.tarief_provider.haal_tarieven_op(evenement.id)
         deelnemertypes = {}
         for tarief in tarieven:
-            deelnemertype, _ = self.bewaar(self.deelnemertypes, self.deelnemertypes.mapper.map(tarief))
+            deelnemertype, _ = self.bewaar(
+                self.deelnemertypes, self.deelnemertypes.mapper.map(tarief)
+            )
             deelnemertypes[tarief["id"]] = {"prijs": tarief["prijs"], "type": deelnemertype}
 
-        bronnen = self.inschrijving_provider.haal_alle_op(
-            InschrijvingFilter(evenement_id=evenement.id, sinds=self.tijdslimiet, sync_alles=self.config.sync_alles)
-        )
+        bronnen = self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement))
 
         for bron in bronnen:
             vragen = bron.get("answers") or []
@@ -224,11 +260,7 @@ class WeezSyncer(Synchronisatie):
         if evenement is None:
             raise ValueError("synchroniseer_vragen heeft een evenement nodig")
 
-        filter = InschrijvingFilter(
-            evenement_id=evenement.id, sinds=self.tijdslimiet, sync_alles=self.config.sync_alles
-        )
-        
-        for bron in self.inschrijving_provider.haal_alle_op(filter):
+        for bron in self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement)):
             vragen = bron.get("answers") or []
             eigen_ids = self.__haal_eigen_vraag_ids(evenement, bron)
 
@@ -245,6 +277,14 @@ class WeezSyncer(Synchronisatie):
                     self.info.registreer(EvenementVraag, SynchronisatieActie.OVERGESLAGEN)
 
         return self.info
+
+    def __inschrijving_filter(self, evenement: Evenement) -> InschrijvingFilter:
+        """Stelt het filter samen waarmee je inschrijvingen ophaalt."""
+        return InschrijvingFilter(
+            evenement_id=evenement.id,
+            sinds=self.tijdslimiet,
+            sync_alles=self.config.sync_alles,
+        )
 
     def __bepaal_tijdslimiet(self) -> str | None:
         """Bepaalt vanaf welk tijdstip er opnieuw opgehaald wordt.

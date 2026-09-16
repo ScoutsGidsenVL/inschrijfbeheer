@@ -14,6 +14,7 @@ Alle dependencies zijn te vinden in [requirements.txt](../requirements.txt). Het
 > cd src
 > python manage.py makemigrations
 > python manage.py migrate
+> python manage.py migrate procrastinate
 ```
 
 [settings.py](../src/inschrijfbeheer/settings.py) verwacht een aantal environment variables, dus een bestand met naam `.env` moet aangemaakt worden in de root van het project.
@@ -62,7 +63,7 @@ Voor het uitvoeren van een migratie van de data van Integreat naar de databank v
 
 ```shell
 > cd src
-> python manage.py sync <weez|integreat> [--dry-run] [--limiet LIMIET] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
+> python manage.py sync <weez|integreat> [--dry-run] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
 > python manage.py sync --help # meer info
 ```
 
@@ -79,37 +80,48 @@ Dit opent de applicatie op [http://localhost:2197](http://localhost:2197)
 
 Meer info over de webapplicatie is te vinden in [webapplicatie.md](./webapplicatie.md)
 
+### Taken
+
+Om het synchroniseren en andere grote taken uit te voeren werd gebruik gemaakt van [`procrastinate`](https://procrastinate.readthedocs.io/en/stable/).
+Deze package laat toe om taken te plannen of asynchroon uit te voeren. Meer info over de taken voor synchronisatie kunnen gevonden worden in [Synchronisatie](#synchronisatie).
+
+Voor een worker op te starten die deze taken uitvoert, kan het volgende commando gebruikt worden
+
+```sh
+> cd src/
+> python manage.py procrastinate worker
+```
+
 ## Structuur
 
-```
+```sh
 ├── docs # documentatie
-├── src
-│   ├── config # bevat alle algemene configuratie in settings.py
-│   ├── inschrijfbeheer
-│   │   ├── assets # assets die niet bereikbaar zijn via de webapplicatie
-│   │   ├── management
-│   │   │   └── commands # logica voor admin commands (`sync`)
-│   │   ├── mapping
-│   │   │   ├── logic # alle mappers voor de synchronisatie
-│   │   │   │   ├── integreat_mappers
-│   │   │   │   └── weez_mappers
-│   │   │   ├── providers # alle providers voor de synchronisatie
-│   │   │   │   ├── integreat_providers
-│   │   │   │   └── weez_providers
-│   │   ├── models # alle datamodellen
-│   │   ├── templatetags
-│   │   ├── urls
-│   │   ├── utils
-│   │   └── views
-│   ├── static # statische bestanden die via webapplicatie bereikbaar zijn
-│   │   ├── images
-│   │   └── styles
-│   └── templates # HTML templates
-│       ├── deelnemers
-│       ├── evenementen
-│       │   └── vragen
-│       ├── inschrijvingen
-│       ├── logging
-│       └── mails
-└── tests
+└── src
+    ├── config # bevat alle algemene configuratie in settings.py
+    ├── inschrijfbeheer
+    │   ├── assets # assets die niet bereikbaar zijn via de webapplicatie
+    │   ├── management
+    │   │   └── commands # logica voor admin commands (`sync`)
+    │   ├── mapping
+    │   │   ├── logic # alle mappers voor de synchronisatie
+    │   │   │   ├── integreat_mappers
+    │   │   │   └── weez_mappers
+    │   │   ├── providers # alle providers voor de synchronisatie
+    │   │   │   ├── integreat_providers
+    │   │   │   └── weez_providers
+    │   ├── models # alle datamodellen
+    │   ├── templatetags
+    │   ├── urls
+    │   ├── utils
+    │   └── views
+    ├── static # statische bestanden die via webapplicatie bereikbaar zijn
+    │   ├── images
+    │   └── styles
+    └── templates # HTML templates
+        ├── deelnemers
+        ├── evenementen
+        │   └── vragen
+        ├── inschrijvingen
+        ├── logging
+        └── mails
 ```

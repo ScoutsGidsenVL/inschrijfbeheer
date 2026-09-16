@@ -6,74 +6,20 @@ De bestandsnaam bepaalt de naam van het commando:
     manage.py sync weez
     manage.py sync integreat --alles
     manage.py sync weez integreat --dry-run
+
+Dit commando kent alleen de commandoregel. Het zet je opties om naar een
+SynchronisatieConfig en geeft die aan de syncer. Welke providers en onderdelen
+daarbij horen, regelt elke syncer zelf.
 """
 
-import logging
-from typing import Callable
-
 from django.core.management.base import BaseCommand
-from django.db import transaction
 
-from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter
-from inschrijfbeheer.mapping.providers.integreat_providers import (
-    IntegreatParticipantTypeProvider,
-    IntegreatRegistrationfreefieldProvider,
-    IntegreatRegistrationProvider,
-    IntegreatSeminarFreeFieldProvider,
-    IntegreatSeminarFreeFieldTypeProvider,
-    IntegreatSeminarProvider,
-)
-from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
-from inschrijfbeheer.mapping.integreat_syncer import IntegreatProviders, IntegreatSyncer
+from inschrijfbeheer.mapping.integreat_syncer import IntegreatSyncer
 from inschrijfbeheer.mapping.synchronisatie import Synchronisatie, SynchronisatieConfig
 from inschrijfbeheer.mapping.weez_syncer import WeezSyncer
 
-logger = logging.getLogger("inschrijfbeheer")
-
-INTEGREAT_OPTIES = ("terugblik_dagen")
-
-
-def maak_integreat_providers() -> IntegreatProviders:
-    """Stelt de providers samen.
-
-    Dit hoort hier en niet in IntegreatSyncer, zodat je in een test dezelfde
-    syncer met nagemaakte providers kan gebruiken.
-    """
-    return IntegreatProviders(
-        seminars=IntegreatSeminarProvider(),
-        deelnemertypes=IntegreatParticipantTypeProvider(),
-        vraagtypes=IntegreatSeminarFreeFieldTypeProvider(),
-        vragen=IntegreatSeminarFreeFieldProvider(),
-        registraties=IntegreatRegistrationProvider(),
-        antwoorden=IntegreatRegistrationfreefieldProvider(),
-        leden=LidProvider(),
-    )
-
-
-def maak_weez_syncer(opties: dict) -> Synchronisatie:
-    if opties["alles"]:
-        config = SynchronisatieConfig(limiet=opties["limiet"], sync_alles=True)
-    else:
-        config = SynchronisatieConfig(limiet=opties["limiet"], sync_alles=False)
-    return WeezSyncer(config)
-
-
-def maak_integreat_syncer(opties: dict) -> Synchronisatie:
-    filter_velden = {"sync_alles": opties["alles"], "limiet": opties["limiet"]}
-    if opties["terugblik_dagen"] is not None:
-        filter_velden["terugblik_dagen"] = opties["terugblik_dagen"]
-
-    return IntegreatSyncer(
-        providers=maak_integreat_providers(),
-        sync_config=SynchronisatieConfig(limiet=opties["limiet"]),
-        bron_filter=IntegreatFilter(**filter_velden),
-    )
-
-
-# Databronnen, indien er ooit één bijkomt een regel toevoegen
-BRONNEN: dict[str, Callable[[dict], Synchronisatie]] = {
-    "weez": maak_weez_syncer,
-    "integreat": maak_integreat_syncer,
+BRONNEN: dict[str, type[Synchronisatie]] = {
+    syncer.naam: syncer for syncer in (WeezSyncer, IntegreatSyncer)
 }
 
 
@@ -93,20 +39,9 @@ class Command(BaseCommand):
             help="Voert alles uit maar draait de wijzigingen achteraf terug",
         )
         parser.add_argument(
-            "--limiet",
-            type=int,
-            default=None,
-            help=(
-                "Beperkt het aantal records, handig om te proberen. Bij weez is dat "
-                "het aantal evenementen. Bij integreat geldt de limiet per soort "
-                "record, dus de eerste registraties horen niet noodzakelijk bij de "
-                "eerste seminars en mag je veel overgeslagen records verwachten"
-            ),
-        )
-        parser.add_argument(
             "--alles",
             action="store_true",
-            help="Alleen voor integreat: negeert het terugblikvenster en haalt ook oude seminars op",
+            help="Negeert het terugblikvenster en haalt ook oude evenementen op",
         )
         parser.add_argument(
             "--terugblik-dagen",
@@ -120,40 +55,36 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bronnen = list(dict.fromkeys(options["bron"]))
-        self.__waarschuw_over_ongebruikte_opties(bronnen, options)
+        config = SynchronisatieConfig.van_opties(options)
+
+        self.__waarschuw_over_ongebruikte_opties(bronnen, config)
 
         for bron in bronnen:
-            self.__synchroniseer(bron, options)
+            BRONNEN[bron](config).voer_uit()
 
         if len(bronnen) > 1:
             self.stdout.write(self.style.SUCCESS(f"Alle bronnen klaar: {', '.join(bronnen)}"))
 
-    def __synchroniseer(self, bron: str, opties: dict) -> None:
-        dry_run = opties["dry_run"]
-        aanduiding = f"[{bron.upper()} SYNC]"
+    def __waarschuw_over_ongebruikte_opties(
+        self, bronnen: list[str], config: SynchronisatieConfig
+    ) -> None:
+        """Zegt het wanneer je een optie meegeeft die voor geen enkele gekozen bron telt.
 
-        syncer = BRONNEN[bron](opties)
+        Elke syncer somt in eigen_opties op welke configvelden alleen hij
+        gebruikt. Zo hoeft dit commando niets over de bronnen zelf te weten.
+        """
+        gebruikt = set().union(*(BRONNEN[bron].eigen_opties for bron in bronnen))
+        van_anderen = set().union(*(syncer.eigen_opties for syncer in BRONNEN.values()))
 
-        # transactie per bron zodat falen van één bron geen effect heeft op de rest
-        with transaction.atomic():
-            syncer.synchroniseer()
-            syncer.log_info()
-
-            if dry_run:
-                transaction.set_rollback(True)
-                logger.info(
-                    f"{aanduiding} Dry-run: alle wijzigingen teruggedraaid, niets opgeslagen."
-                )
-
-
-    def __waarschuw_over_ongebruikte_opties(self, bronnen: list[str], opties: dict) -> None:
-        """Zegt het wanneer je een Integreat-optie meegeeft zonder Integreat te synchroniseren."""
-        if "integreat" in bronnen:
+        meegegeven = sorted(
+            veld for veld in van_anderen - gebruikt if config.is_gezet(veld)
+        )
+        if not meegegeven:
             return
 
-        meegegeven = [naam for naam in INTEGREAT_OPTIES if opties.get(naam)]
-        if meegegeven:
-            namen = ", ".join("--" + naam.replace("_", "-") for naam in meegegeven)
-            self.stderr.write(
-                self.style.WARNING(f"{namen} geldt enkel voor integreat en wordt genegeerd")
+        namen = ", ".join("--" + veld.replace("_", "-") for veld in meegegeven)
+        self.stderr.write(
+            self.style.WARNING(
+                f"{namen} geldt niet voor {', '.join(bronnen)} en wordt genegeerd"
             )
+        )

@@ -6,21 +6,15 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse, Http404
 from django.contrib import messages
-from django.db import transaction
 import logging
-from typing import Iterable
 
-from inschrijfbeheer.management.commands.sync import maak_weez_syncer
-from inschrijfbeheer.mapping.logic.weez_mappers.deelnemer_mapper import WeezDeelnemerMapper
-from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import LidResultaat
-from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
-from inschrijfbeheer.mapping.utils.synchronisatie import SynchronisatieStatus
-from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord, Deelnemer
+from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
+from inschrijfbeheer.tasks import defer_synchroniseer_inschrijvingen
 from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
-from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van, bepaal_inschrijvingsgegevens, los_lid_op
+from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van
 
 logger = logging.getLogger("inschrijfbeheer")
 
@@ -60,13 +54,7 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
         stuur_weezevent_update(inschrijving, form_data)
 
-        syncer = maak_weez_syncer({"alles": None, "limiet": None})
-
-        with transaction.atomic(), syncer.client:
-            info = syncer.synchroniseer_inschrijvingen(inschrijving.evenement)
-
-        if info.status == SynchronisatieStatus.GESLAAGD:
-            messages.success(request, "Synchronisatie geslaagd")
+        defer_synchroniseer_inschrijvingen(evenement_id=inschrijving.evenement.id)
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 
@@ -74,90 +62,6 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
         "vraag_antwoorden": vraag_antwoorden,
         "inschrijving": inschrijving,
     })
-
-
-@transaction.atomic
-def herbepaal_deelnemer(
-    inschrijving: Inschrijving,
-    vraag_antwoorden: Iterable[InschrijvingVraagAntwoord],
-    provider: LidProvider | None = None,
-) -> LidResultaat:
-    """Bepaalt de deelnemer van een inschrijving opnieuw uit de huidige antwoorden.
-
-    Draait dezelfde controle als de synchronisatie. Levert de opzoeking nu een
-    lid op, dan verhuist de inschrijving naar de deelnemer van dat lid, die al
-    kan bestaan. Klopt ze niet meer, dan komt er een deelnemer met een
-    foutboodschap en verhuist de inschrijving daarnaartoe. Blijft de deelnemer
-    dezelfde, dan wordt enkel de foutboodschap bijgewerkt.
-
-    Args:
-        inschrijving (Inschrijving): inschrijving waarvan de deelnemer herbepaald wordt
-        vraag_antwoorden (Iterable[InschrijvingVraagAntwoord]): antwoorden van de
-            deelnemer, met hun vraag ingeladen
-        provider (LidProvider | None, optional): bron voor de ledengegevens.
-
-    Returns:
-        LidResultaat: uitkomst van de opzoeking, met een lege foutboodschap als
-            de deelnemer nu wel klopt
-    """
-    vragen = [
-        {"label": vraag_antwoord.vraag.vraag, "value": vraag_antwoord.antwoord}
-        for vraag_antwoord in vraag_antwoorden
-    ]
-
-    gegevens = bepaal_inschrijvingsgegevens(vragen)
-    if gegevens is None:
-        resultaat = LidResultaat(
-            foutboodschap="Onvolledige ledengegevens, vul lidnummer, naam, voornaam, mailadres en geboortedatum in"
-        )
-        _bewaar_foutboodschap(inschrijving.lid, resultaat.foutboodschap)
-        return resultaat
-
-    try:
-        resultaat = los_lid_op(provider or LidProvider(), gegevens)
-    except ValueError:
-        resultaat = LidResultaat(
-            foutboodschap=f"Onleesbare geboortedatum: {gegevens.geboortedatum}"
-        )
-
-    doel = WeezDeelnemerMapper().map(gegevens, resultaat)
-    deelnemer, _ = Deelnemer.objects.update_or_create(**doel.sleutels, defaults=doel.velden)
-    _bewaar_foutboodschap(deelnemer, resultaat.foutboodschap)
-
-    oude_deelnemer = inschrijving.lid
-    if deelnemer.pk != oude_deelnemer.pk:
-        inschrijving.lid = deelnemer
-        inschrijving.save(update_fields=["lid"])
-        logger.info(
-            "Inschrijving %s verhangen van deelnemer %s naar %s",
-            inschrijving.id, oude_deelnemer.pk, deelnemer.pk,
-        )
-        _ruim_deelnemer_op(oude_deelnemer)
-
-    return resultaat
-
-
-def _bewaar_foutboodschap(deelnemer: Deelnemer, foutboodschap: str) -> None:
-    """Zet de foutboodschap enkel weg als ze verandert."""
-    if (deelnemer.foutboodschap or "") != foutboodschap:
-        deelnemer.foutboodschap = foutboodschap
-        deelnemer.save(update_fields=["foutboodschap"])
-
-
-def _ruim_deelnemer_op(deelnemer: Deelnemer) -> None:
-    """Verwijdert een achtergebleven deelnemer die enkel een foutboodschap was.
-
-    Een deelnemer die aan een lid hangt blijft staan, want dat model bestaat
-    net om SOAP-calls naar de GA uit te sparen. Een rij die alleen ontstond
-    omdat de opzoeking mislukte, heeft zonder inschrijving geen nut meer.
-    """
-    if not deelnemer.foutboodschap:
-        return
-    if Inschrijving.objects.filter(lid=deelnemer).exists():
-        return
-
-    logger.info("Deelnemer %s verwijderd, geen inschrijving verwijst er nog naar", deelnemer.pk)
-    deelnemer.delete()
 
 
 def stuur_weezevent_update(inschrijving: Inschrijving, antwoorden: dict[str, str]) -> None:
