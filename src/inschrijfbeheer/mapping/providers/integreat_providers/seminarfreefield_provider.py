@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 from .integreat_provider import IntegreatProvider
-from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter
+from inschrijfbeheer.mapping.providers.data_provider import EvenementFilter
 from inschrijfbeheer.models import IntegreatSeminarFreeField
 
 class IntegreatSeminarFreeFieldProvider(IntegreatProvider[IntegreatSeminarFreeField]):
@@ -15,11 +15,10 @@ class IntegreatSeminarFreeFieldProvider(IntegreatProvider[IntegreatSeminarFreeFi
     def pas_filter_toe(
         self,
         queryset: QuerySet[IntegreatSeminarFreeField],
-        filter: IntegreatFilter,
+        filter: EvenementFilter,
     ) -> QuerySet[IntegreatSeminarFreeField]:
-        if filter.sync_alles:
+        if filter.sync_alles or filter.evenement_id is None:
             return queryset
  
-        drempel = timezone.now() - timedelta(days=filter.terugblik_dagen)
-        queryset = queryset.filter(seminar__eindtijd__gte=drempel)
-        return super().pas_filter_toe(queryset=queryset, filter=filter)
+        queryset = queryset.filter(seminar__code=filter.evenement_id)
+        return queryset

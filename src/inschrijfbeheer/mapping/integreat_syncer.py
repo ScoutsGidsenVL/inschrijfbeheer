@@ -44,7 +44,7 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     VraagContext,
     normaliseer_code,
 )
-from inschrijfbeheer.mapping.providers.data_provider import IntegreatFilter, LijstProvider
+from inschrijfbeheer.mapping.providers.data_provider import EvenementFilter, IntegreatFilter, LijstProvider
 from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatParticipantTypeProvider,
     IntegreatRegistrationfreefieldProvider,
@@ -186,18 +186,19 @@ class IntegreatSyncer(Synchronisatie):
         oud is.
         """
         self.info.status(SynchronisatieStatus.BEZIG)
-        try:
-            self.__synchroniseer_vraagtypes()
-            self.__synchroniseer_deelnemertypes()
+        # try:
+        self.__synchroniseer_vraagtypes()
+        self.__synchroniseer_deelnemertypes()
 
-            for seminar in self.__haal_seminars_op():
-                self.__synchroniseer_seminar(seminar, met_inschrijvingen=True)
+        for seminar in self.__haal_seminars_op():
+            self.__synchroniseer_seminar(seminar, met_inschrijvingen=True)
 
-            self.info.status(SynchronisatieStatus.GESLAAGD)
-        except:
-            self.info.status(SynchronisatieStatus.FOUTIEF)
-        finally:
-            return self.info
+        self.info.status(SynchronisatieStatus.GESLAAGD)
+        # except Exception as e:
+        # logger.error(f"Error opgeworpen bij synchronisatie: {e}")
+        # self.info.status(SynchronisatieStatus.FOUTIEF)
+        # finally:
+        return self.info
 
     def synchroniseer_evenement(
         self, evenement_id: str, sync_inschrijvingen: bool = False
@@ -315,30 +316,27 @@ class IntegreatSyncer(Synchronisatie):
 
     def __haal_registraties_op(self, evenement: Evenement):
         """De registraties van één evenement.
-
-        TODO: laat de provider zelf op het evenement filteren. Voorlopig haalt
-        hij alles op en knijpt __voor_seminar() het in de databank samen.
         """
+        filter = EvenementFilter(evenement_id=evenement.id)
+
         return self.__voor_seminar(
-            self.providers.registraties.haal_alle_op(self.bron_filter), "seminar__code", evenement
+            self.providers.registraties.haal_alle_op(filter=filter), "seminar__code", evenement
         )
 
     def __haal_vragen_op(self, evenement: Evenement):
         """De vrije velden van één evenement.
-
-        TODO: idem, dit hoort een ophaling per evenement te worden.
         """
+        filter = EvenementFilter(evenement_id=evenement.id)
         return self.__voor_seminar(
-            self.providers.vragen.haal_alle_op(self.bron_filter), "seminar__code", evenement
+            self.providers.vragen.haal_alle_op(filter=filter), "seminar__code", evenement
         )
 
     def __haal_antwoorden_op(self, evenement: Evenement):
         """De antwoorden van één evenement.
-
-        TODO: idem, dit hoort een ophaling per evenement te worden.
         """
+        filter = EvenementFilter(evenement_id=evenement.id)
         return self.__voor_seminar(
-            self.providers.antwoorden.haal_alle_op(self.bron_filter),
+            self.providers.antwoorden.haal_alle_op(filter=filter),
             "registration__seminar__code",
             evenement,
         )
