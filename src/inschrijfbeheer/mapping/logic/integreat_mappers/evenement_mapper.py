@@ -5,7 +5,6 @@ from django.utils import timezone
 from inschrijfbeheer.models import (
     Categorie,
     Evenement,
-    EvenementStatus,
     IntegreatSeminar,
 )
 
@@ -16,7 +15,6 @@ from .integreat_mapper import normaliseer_code, tekst
 class EvenementContext:
     """De status en de categorie zijn al bewaard voor het evenement gemapt wordt."""
 
-    status: EvenementStatus
     categorie: Categorie
 
 
@@ -40,7 +38,7 @@ class IntegreatEvenementMapper(Mapper[IntegreatSeminar, EvenementContext, Evenem
             velden={
                 "titel": tekst(bron.naam),
                 "beschrijving": tekst(bron.onderwerp),
-                "status": context.status,
+                "status": bron.status.code,
                 "categorie": context.categorie,
                 "locatie_naam": bron.locatie_naam,
                 "locatie_straat": bron.locatie_straat,

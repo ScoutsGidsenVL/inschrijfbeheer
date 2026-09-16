@@ -2,7 +2,6 @@
 
 ## Classes:
     **Deelnemer:** deelnemer, gebruikt voor snellere zoekmethoden
-    **EvenementStatus:** beschrijft de status van een evenement
     **Categorie:** beschrijft de categorie van een evenement
     **Evenement:** beschrijft een evenement/vorming
     **DeelnemerType:** beschrijft de rol van een deelnemer op een evenement/vorming
@@ -52,17 +51,6 @@ class Deelnemer(models.Model):
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
 
-class EvenementStatus(models.Model):
-    id = models.AutoField(primary_key=True)
-    beschrijving = models.CharField()
-
-    class Meta:
-        app_label = "inschrijfbeheer"
-        db_table = "evenement_status"
-
-    def __str__(self):
-        return self.beschrijving
-
 class Categorie(models.Model):
     """Categorie van een evenement
 
@@ -91,7 +79,7 @@ class Evenement(models.Model):
         id (str): id van het evenement
         titel (str): titel/naam van het evenement
         beschrijving (str): beschrijving van het evenement
-        status (EvenementStatus): status van het evenement. Nullable
+        status (str): status van het evenement. Nullable
         locatie_naam (str): naam van de locatie van het evenement. Nullable
         locatie_straat (str): straat van de locatie van het evenement. Nullable
         locatie_stad (str): stad van de locatie van het evenement. Nullable
@@ -106,7 +94,6 @@ class Evenement(models.Model):
     id = models.CharField(primary_key=True)
     titel = models.CharField()
     beschrijving = models.CharField()
-    status = models.ForeignKey(EvenementStatus, on_delete=models.SET_NULL, null=True, db_column="status")
     locatie_naam = models.CharField(null=True, blank=True)
     locatie_straat = models.CharField(null=True, blank=True)
     locatie_stad = models.CharField(null=True, blank=True)
@@ -117,6 +104,7 @@ class Evenement(models.Model):
     is_weez = models.BooleanField(default=False, blank=True)
     laatste_sync = models.DateTimeField(auto_now=True)
     foutboodschap = models.TextField(null=True, blank=True)
+    status = models.CharField(null=True, blank=True)
 
     class Meta:
         app_label = "inschrijfbeheer"

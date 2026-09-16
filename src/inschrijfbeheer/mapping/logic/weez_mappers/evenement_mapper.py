@@ -39,6 +39,7 @@ class WeezEvenementMapper(Mapper[dict, Categorie | None, Evenement]):
                 "locatie_postcode": locatie.get("zip_code"),
                 "categorie": context,
                 "is_weez": True,
-                "laatste_sync": timezone.now(), 
+                "laatste_sync": timezone.now(),
+                "status": bron.get("status") 
             },
         )
