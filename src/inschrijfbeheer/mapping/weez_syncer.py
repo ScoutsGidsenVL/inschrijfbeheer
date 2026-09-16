@@ -35,12 +35,15 @@ from inschrijfbeheer.mapping.logic.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
+from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.providers import (
     InschrijvingFilter,
     WeezClient,
     WeezEvenementProvider,
     WeezInschrijvingProvider,
+    WeezTariefProvider,
+    TariefFilter
 )
 from inschrijfbeheer.mapping import (
     Synchronisatie,
@@ -57,6 +60,7 @@ from inschrijfbeheer.models import (
     Inschrijving,
     WeezSynchronisatie,
 )
+from inschrijfbeheer.models.inschrijfbeheer_models import DeelnemerType
 
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
@@ -84,6 +88,7 @@ class WeezSyncer(Synchronisatie):
 
         self.evenement_provider = WeezEvenementProvider(self.client)
         self.inschrijving_provider = WeezInschrijvingProvider(self.client)
+        self.tarieven_provider = WeezTariefProvider(self.client)
 
         self.__maak_onderdelen()
 
@@ -126,6 +131,11 @@ class WeezSyncer(Synchronisatie):
             provider=self.inschrijving_provider,
             enkel_aanmaken=False,
         )
+        self.tarieven = SyncOnderdelen(
+            model=DeelnemerType,
+            mapper=WeezDeelnemerTypeMapper(),
+            provider=self.tarieven_provider,
+        )
 
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez-evenementen op en zet ze om naar Evenement-modellen."""
@@ -158,7 +168,7 @@ class WeezSyncer(Synchronisatie):
             return self.info
 
         try:
-            categorie = self.__bewaar_categorie(bron.get("category") or {})
+            categorie = self.__bewaar_categorie(bron or {})
             evenement, _ = self.bewaar(
                 self.evenementen, self.evenementen.mapper.map(bron, categorie)
             )
@@ -188,6 +198,18 @@ class WeezSyncer(Synchronisatie):
         if evenement is None:
             raise ValueError("synchroniseer_inschrijvingen heeft een evenement nodig")
 
+        tarieven_bron = self.tarieven_provider.haal_alle_op(
+            TariefFilter(evenement_id=evenement.id)
+        )
+        deelnemertypes = {}
+        for tarief in tarieven_bron:
+            deelnemertype, _ = self.bewaar(
+                self.tarieven,
+                self.tarieven.mapper.map(tarief)
+            )
+            deelnemertypes[deelnemertype.id] = deelnemertype
+
+
         bronnen = self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement))
 
         for bron in bronnen:
@@ -213,7 +235,7 @@ class WeezSyncer(Synchronisatie):
 
             try:
                 context = InschrijvingContext(
-                    evenement=evenement, deelnemer=deelnemer, deelnemertypes={}
+                    evenement=evenement, deelnemer=deelnemer, deelnemertypes=deelnemertypes
                 )
                 self.bewaar(self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context))
             except MappingFout as fout:

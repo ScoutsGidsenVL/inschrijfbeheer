@@ -21,11 +21,13 @@ class WeezCategorieMapper(Mapper[dict, None, Categorie]):
         if bron.get("id") is None:
             raise MappingFout("categorie zonder id")
 
-        naam = bron.get("name", "")
+        naam = bron.get("type", "")
         return Doelgegevens(
-            sleutels={"id": str(bron["id"])},
+            sleutels={
+                "naam": naam,
+            },
             velden={
-                "naam": naam.split('.')[-1],
+                "id": bron.get("id"),
                 "alt_naam": naam,
                 "is_weez": True
             },
