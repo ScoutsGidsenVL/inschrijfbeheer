@@ -4,6 +4,11 @@ Deze klasse haalt zelf niets op en mapt zelf niets. Ze bepaalt de volgorde,
 stelt de context voor de mappers samen, bewaart via Synchronisatie.bewaar() en
 registreert wat overgeslagen werd.
 
+Voorlopig gaat het enkel om evenementen en inschrijvingen. Categorie en
+Deelnemer blijven, want de evenement- en inschrijvingsmapper hebben ze nodig.
+Tarieven, deelnemertypes, vragen en antwoorden vallen weg tot ze op de nieuwe
+API opnieuw aan de beurt komen.
+
 Aanmaken doe je met één config:
 
     WeezSyncer(SynchronisatieConfig(limiet=5, dry_run=True)).voer_uit()
@@ -20,32 +25,22 @@ from dotenv import load_dotenv
 
 from inschrijfbeheer.mapping.logic.mapper import MappingFout
 from inschrijfbeheer.mapping.logic.weez_mappers import (
-    AntwoordContext,
     InschrijvingContext,
     InschrijvingsGegevens,
-    VraagContext,
-    WeezAntwoordMapper,
     WeezCategorieMapper,
     WeezDeelnemerMapper,
     WeezEvenementMapper,
-    WeezEvenementVraagMapper,
     WeezInschrijvingMapper,
     bepaal_inschrijvingsgegevens,
     check_verplichte_vragen,
     los_lid_op,
-    koppel_eigen_vragen,
-    alias_van_label,
 )
-from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 from inschrijfbeheer.mapping.providers import (
     InschrijvingFilter,
     WeezClient,
     WeezEvenementProvider,
     WeezInschrijvingProvider,
-    WeezTariefProvider,
-    FormFilter,
-    WeezFormProvider,
 )
 from inschrijfbeheer.mapping import (
     Synchronisatie,
@@ -59,19 +54,18 @@ from inschrijfbeheer.models import (
     Categorie,
     Deelnemer,
     Evenement,
-    EvenementVraag,
     Inschrijving,
-    InschrijvingVraagAntwoord,
     WeezSynchronisatie,
-    DeelnemerType,
 )
 
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
 
+STANDAARD_OVERLAP_UREN = 1
+
 
 class WeezSyncer(Synchronisatie):
-    """Haalt evenementen, inschrijvingen en vragen op bij Weez."""
+    """Haalt evenementen en inschrijvingen op bij Weez."""
 
     naam = "weez"
     eigen_opties = frozenset()
@@ -90,13 +84,10 @@ class WeezSyncer(Synchronisatie):
 
         self.evenement_provider = WeezEvenementProvider(self.client)
         self.inschrijving_provider = WeezInschrijvingProvider(self.client)
-        self.tarief_provider = WeezTariefProvider(self.client)
-        self.form_provider = WeezFormProvider(self.client)
 
         self.__maak_onderdelen()
 
         self.tijdslimiet: str | None = None
-        self.__eigen_vraag_ids: dict[str, dict[int, str]] = {}
         self.__verbindingen = 0
 
     def __enter__(self) -> "WeezSyncer":
@@ -135,17 +126,12 @@ class WeezSyncer(Synchronisatie):
             provider=self.inschrijving_provider,
             enkel_aanmaken=False,
         )
-        self.vragen = SyncOnderdelen(model=EvenementVraag, mapper=WeezEvenementVraagMapper())
-        self.antwoorden = SyncOnderdelen(
-            model=InschrijvingVraagAntwoord, mapper=WeezAntwoordMapper()
-        )
-        self.deelnemertypes = SyncOnderdelen(model=DeelnemerType, mapper=WeezDeelnemerTypeMapper())
 
     def synchroniseer(self) -> SynchronisatieInfo:
         """Haalt alle Weez-evenementen op en zet ze om naar Evenement-modellen."""
         if not self.config.sync_alles:
             self.tijdslimiet = self.__bepaal_tijdslimiet()
-        WeezSynchronisatie.objects.create()  # log dat een synchronisatie is gestart
+        WeezSynchronisatie.objects.create()
         self.info.status(SynchronisatieStatus.BEZIG)
 
         with self:
@@ -189,6 +175,9 @@ class WeezSyncer(Synchronisatie):
     def synchroniseer_inschrijvingen(self, evenement: Evenement | None = None) -> SynchronisatieInfo:
         """Synchroniseert alle deelnemers voor een bepaald evenement van Weez.
 
+        De antwoorden op het inschrijvingsformulier worden gelezen om de
+        deelnemer te kunnen samenstellen, maar voorlopig niet bewaard.
+
         Args:
             evenement (Evenement | None, optional): het evenement waarvan de
                 inschrijvingen gesynchroniseerd worden.
@@ -199,19 +188,10 @@ class WeezSyncer(Synchronisatie):
         if evenement is None:
             raise ValueError("synchroniseer_inschrijvingen heeft een evenement nodig")
 
-        tarieven = self.tarief_provider.haal_tarieven_op(evenement.id)
-        deelnemertypes = {}
-        for tarief in tarieven:
-            deelnemertype, _ = self.bewaar(
-                self.deelnemertypes, self.deelnemertypes.mapper.map(tarief)
-            )
-            deelnemertypes[tarief["id"]] = {"prijs": tarief["prijs"], "type": deelnemertype}
-
         bronnen = self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement))
 
         for bron in bronnen:
-            vragen = bron.get("answers") or []
-            eigen_ids = self.__haal_eigen_vraag_ids(evenement, bron)
+            vragen = bron.get("form") or []
 
             alle_verplichte_vragen, rest = check_verplichte_vragen(vragen)
             if not alle_verplichte_vragen:
@@ -233,11 +213,9 @@ class WeezSyncer(Synchronisatie):
 
             try:
                 context = InschrijvingContext(
-                    evenement=evenement, deelnemer=deelnemer, deelnemertypes=deelnemertypes
+                    evenement=evenement, deelnemer=deelnemer, deelnemertypes={}
                 )
-                inschrijving, _ = self.bewaar(
-                    self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context)
-                )
+                self.bewaar(self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context))
             except MappingFout as fout:
                 logger.warning(
                     "Inschrijving overgeslagen op evenement %s: %s", evenement.id, fout
@@ -245,38 +223,10 @@ class WeezSyncer(Synchronisatie):
                 self.info.registreer(Inschrijving, SynchronisatieActie.OVERGESLAGEN)
                 continue
 
-            self.__synchroniseer_antwoorden(evenement, inschrijving, vragen, eigen_ids)
-
         return self.info
 
-    def synchroniseer_vragen(
-        self, evenement: Evenement | None = None, inschrijving: Inschrijving | None = None
-    ) -> SynchronisatieInfo:
-        if inschrijving is not None:
-            raise NotImplementedError(
-                "Vragen per inschrijving vereist een weez_id-veld op Inschrijving"
-            )
-
-        if evenement is None:
-            raise ValueError("synchroniseer_vragen heeft een evenement nodig")
-
-        for bron in self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement)):
-            vragen = bron.get("answers") or []
-            eigen_ids = self.__haal_eigen_vraag_ids(evenement, bron)
-
-            for volgorde, vraag_bron in enumerate(vragen):
-                context = VraagContext(
-                    evenement=evenement,
-                    volgorde=volgorde,
-                    weez_vraag_id=eigen_ids.get(volgorde),
-                )
-                try:
-                    self.bewaar(self.vragen, self.vragen.mapper.map(vraag_bron, context))
-                except MappingFout as fout:
-                    logger.warning("Vraag overgeslagen op evenement %s: %s", evenement.id, fout)
-                    self.info.registreer(EvenementVraag, SynchronisatieActie.OVERGESLAGEN)
-
-        return self.info
+    def synchroniseer_vragen(self, evenement=None, inschrijving=None):
+        return super().synchroniseer_vragen(evenement, inschrijving)
 
     def __inschrijving_filter(self, evenement: Evenement) -> InschrijvingFilter:
         """Stelt het filter samen waarmee je inschrijvingen ophaalt."""
@@ -296,7 +246,7 @@ class WeezSyncer(Synchronisatie):
         if laatste_sync is None:
             return None
 
-        overlap = int(os.getenv("WEEZ_SCRAPE_OVERLAP"))
+        overlap = int(os.getenv("WEEZ_SCRAPE_OVERLAP") or STANDAARD_OVERLAP_UREN)
         return (laatste_sync.tijdstip - timedelta(hours=overlap)).strftime("%Y-%m-%d %H:%M:%S")
 
     def __bewaar_categorie(self, bron: dict) -> Categorie | None:
@@ -325,99 +275,15 @@ class WeezSyncer(Synchronisatie):
             self.info.registreer(Deelnemer, SynchronisatieActie.OVERGESLAGEN)
             return None
 
-    def __bewaar_vraag(
-        self,
-        evenement: Evenement,
-        volgorde: int,
-        bron: dict,
-        weez_vraag_id: str | None = None,
-    ) -> EvenementVraag | None:
-        try:
-            vraag, _ = self.bewaar(
-                self.vragen,
-                self.vragen.mapper.map(
-                    bron,
-                    VraagContext(
-                        evenement=evenement,
-                        volgorde=volgorde,
-                        weez_vraag_id=weez_vraag_id,
-                    ),
-                ),
-            )
-            return vraag
-        except MappingFout as fout:
-            logger.warning("Vraag overgeslagen op evenement %s: %s", evenement.id, fout)
-            self.info.registreer(EvenementVraag, SynchronisatieActie.OVERGESLAGEN)
-            return None
-
-    def __synchroniseer_antwoorden(
-        self,
-        evenement: Evenement,
-        inschrijving: Inschrijving,
-        vragen: list[dict],
-        eigen_ids: dict[int, str],
-    ) -> None:
-        for volgorde, bron in enumerate(vragen):
-            vraag = self.__bewaar_vraag(evenement, volgorde, bron, eigen_ids.get(volgorde))
-            if vraag is None:
-                self.info.registreer(
-                    InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN
-                )
-                continue
-
-            try:
-                self.bewaar(
-                    self.antwoorden,
-                    self.antwoorden.mapper.map(
-                        bron, AntwoordContext(vraag=vraag, inschrijving=inschrijving)
-                    ),
-                )
-            except MappingFout as fout:
-                logger.warning("Antwoord overgeslagen op vraag %s: %s", vraag.vraag, fout)
-                self.info.registreer(
-                    InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN
-                )
-
     def __geen_verplichte_vraag(self, evenement: Evenement, rest: set) -> None:
-        self.logger.warning(
-            f"Evenement {evenement.titel} ({evenement.id}) mist volgende verplichte vragen: {','.join(rest)}"
+        logger.warning(
+            "Evenement %s (%s) mist volgende verplichte vragen: %s",
+            evenement.titel,
+            evenement.id,
+            ", ".join(rest),
         )
         evenement.foutboodschap = (
-            f"Evenement mist volgende verplichte vragen: {', '.join(rest)}, inschrijvingen worden niet gesynchroniseerd"
+            f"Evenement mist volgende verplichte vragen: {', '.join(rest)}, "
+            "inschrijvingen worden niet gesynchroniseerd"
         )
         evenement.save()
-
-    def __haal_eigen_vraag_ids(self, evenement: Evenement, bron: dict) -> dict[int, str]:
-        """Bepaalt per positie in de antwoordenlijst het Weez-vraag-id.
-
-        Het formulier hangt bij Weez aan het deelnemertype, dus het resultaat
-        geldt voor elke deelnemer met datzelfde type. Een onvolledige
-        koppeling wordt niet bewaard, zodat een volgende deelnemer het opnieuw
-        mag proberen.
-
-        Args:
-            evenement (Evenement): evenement dat gesynchroniseerd wordt
-            bron (dict): deelnemer zoals de oude API die levert
-
-        Returns:
-            dict[int, str]: positie in de antwoordenlijst naar Weez-vraag-id
-        """
-        id_ticket = str(bron.get("id_ticket"))
-        vragen = bron.get("answers") or []
-        aantal_eigen = sum(
-            1 for vraag in vragen if alias_van_label(vraag.get("label")) is None
-        )
-
-        bewaard = self.__eigen_vraag_ids.get(id_ticket)
-        if bewaard is not None:
-            return bewaard
-
-        form = self.form_provider.haal_op(
-            FormFilter(evenement_id=evenement.id, deelnemer_id=str(bron["id_participant"]))
-        )
-        gekoppeld = koppel_eigen_vragen(vragen, form)
-
-        if len(gekoppeld) == aantal_eigen:
-            self.__eigen_vraag_ids[id_ticket] = gekoppeld
-
-        return gekoppeld

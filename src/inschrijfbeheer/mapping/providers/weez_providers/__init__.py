@@ -1,7 +1,7 @@
 """Package die alle data providers voor Weez geeft
 """
 
-from .weez_provider import WeezClient
+from .weez_client import WeezClient
 
 from .evenement_provider import (
     EvenementFilter,

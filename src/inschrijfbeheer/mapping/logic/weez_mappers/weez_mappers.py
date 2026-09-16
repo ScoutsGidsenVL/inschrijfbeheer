@@ -20,7 +20,7 @@ from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
 logger = logging.getLogger("inschrijfbeheer")
 
 EVENT_TIJDZONE = ZoneInfo("Europe/Brussels")
-VERPLICHTE_VRAGEN = {"lidnummer", "nom", "prenom", "email", "date_de_naissance"}
+VERPLICHTE_VRAGEN = {"last name", "first name", "email", "lidnummer", "date of birth"}
 
 
 def parse_datetime(waarde: str | None) -> datetime | None:
@@ -28,10 +28,12 @@ def parse_datetime(waarde: str | None) -> datetime | None:
     if not waarde:
         return None
     try:
-        tijdstip = datetime.strptime(waarde, "%Y-%m-%d %H:%M:%S")
+        tijdstip = datetime.fromisoformat(waarde.replace("Z", "+00:00"))
     except ValueError:
         return None
-    return timezone.make_aware(tijdstip, EVENT_TIJDZONE)
+    if timezone.is_naive(tijdstip):
+        return timezone.make_aware(tijdstip, EVENT_TIJDZONE)
+    return tijdstip
 
 
 @dataclass
@@ -48,9 +50,9 @@ class InschrijvingsGegevens:
 def check_verplichte_vragen(vragen: list[dict] | None) -> tuple[bool, set]:
     """Controleert of het formulier alle verplichte vragen bevat."""
     labels = {
-        (vraag.get("label") or "").lower()
+        (vraag.get("question") or "").lower()
         for vraag in vragen or []
-        if vraag.get("label")
+        if vraag.get("question")
     }
     return VERPLICHTE_VRAGEN.issubset(labels), VERPLICHTE_VRAGEN.difference(labels)
 
@@ -65,24 +67,24 @@ def bepaal_inschrijvingsgegevens(vragen: list[dict] | None) -> InschrijvingsGege
     aantal = 0
 
     for vraag in vragen or []:
-        waarde = vraag.get("value")
+        waarde = vraag.get("answer")
         if not waarde:
             continue
 
-        match (vraag.get("label") or "").lower():
+        match (vraag.get("question") or "").lower():
             case "lidnummer":
                 gegevens.lidnummer = waarde
                 aantal += 1
-            case "nom":
+            case "last name":
                 gegevens.achternaam = waarde
                 aantal += 1
-            case "prenom":
+            case "first name":
                 gegevens.voornaam = waarde
                 aantal += 1
             case "email":
                 gegevens.mailadres = waarde
                 aantal += 1
-            case "date_de_naissance":
+            case "date of birth":
                 gegevens.geboortedatum = waarde
                 aantal += 1
 

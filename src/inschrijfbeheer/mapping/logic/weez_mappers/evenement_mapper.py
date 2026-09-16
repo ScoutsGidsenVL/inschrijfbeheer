@@ -20,22 +20,21 @@ class WeezEvenementMapper(Mapper[dict, Categorie | None, Evenement]):
         if bron.get("id") is None:
             raise MappingFout("evenement zonder id")
 
-        periode = bron.get("period") or {}
-        start = parse_datetime(periode.get("start"))
+        start = parse_datetime(bron.get("start_date"))
         if start is None:
             raise MappingFout(f"evenement {bron['id']} heeft geen bruikbare starttijd")
-        einde = parse_datetime(periode.get("end")) or start
+        einde = parse_datetime(bron.get("end_date")) or start
 
-        locatie = bron.get("venue") or {}
+        locatie = bron.get("address") or {}
         return Doelgegevens(
             sleutels={"id": str(bron["id"])},
             velden={
-                "titel": bron.get("title", ""),
+                "titel": bron.get("name", ""),
                 "beschrijving": bron.get("description", ""),
                 "starttijd": start,
                 "eindtijd": einde,
                 "locatie_naam": locatie.get("name"),
-                "locatie_straat": locatie.get("address"),
+                "locatie_straat": locatie.get("address1"),
                 "locatie_stad": locatie.get("city"),
                 "locatie_postcode": locatie.get("zip_code"),
                 "categorie": context,

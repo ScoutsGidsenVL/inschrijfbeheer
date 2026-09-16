@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Iterable
 from dataclasses import dataclass
-from .weez_provider import WeezClient
+from .weez_client import WeezClient
 from inschrijfbeheer.mapping.providers.data_provider import LijstProvider
 
 
