@@ -159,6 +159,7 @@ class Inschrijving(models.Model):
         tijdstip (datetime): tijdstip van inschrijving
         annulatie (datetime): tijdstip van annulatie. Nullable, null als niet geannuleerd
         annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
+        registratie (bool): geeft aan of een deelnemer aanwezig was
         is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
     """
     id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
