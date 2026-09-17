@@ -21,6 +21,8 @@ Alle dependencies zijn te vinden in [requirements.txt](../requirements.txt). Het
 Dit bestand moet de volgende attributen bevatten.
 
 ```shell
+DEBUG=false
+
 DJANGO_KEY=
 
 # attributen voor de nieuwe databank
