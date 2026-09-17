@@ -1,11 +1,12 @@
+import hashlib
+import logging
 import time
-import requests
+
 import jwt
+import requests
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
-import hashlib
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,6 @@ class KeycloakOIDCBackend(OIDCAuthenticationBackend):
         cache.set(JWKS_STALE_CACHE_KEY, jwks, JWKS_STALE_TIMEOUT)
         return jwks
 
-
     def get_userinfo(self, access_token, id_token, payload):
         # payload bevat de al geverifieerde claims uit het ID token.
         if payload and payload.get("email"):
@@ -79,9 +79,7 @@ class KeycloakOIDCBackend(OIDCAuthenticationBackend):
         return self._userinfo_met_cache(access_token, id_token, payload)
 
     def _userinfo_met_cache(self, access_token, id_token, payload):
-        sleutel = "keycloak_userinfo_" + hashlib.sha256(
-            access_token.encode("utf-8")
-        ).hexdigest()
+        sleutel = "keycloak_userinfo_" + hashlib.sha256(access_token.encode("utf-8")).hexdigest()
 
         info = cache.get(sleutel)
         if info is not None:

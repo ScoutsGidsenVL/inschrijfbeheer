@@ -2,14 +2,15 @@ from dataclasses import dataclass
 
 from django.utils import timezone
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     Categorie,
     Evenement,
     IntegreatSeminar,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .integreat_mapper import normaliseer_code, tekst
+
 
 @dataclass(frozen=True)
 class EvenementContext:
@@ -19,8 +20,7 @@ class EvenementContext:
 
 
 class IntegreatEvenementMapper(Mapper[IntegreatSeminar, EvenementContext, Evenement]):
-    """Evenement uit een seminar.
-    """
+    """Evenement uit een seminar."""
 
     def map(self, bron: IntegreatSeminar, context: EvenementContext) -> Doelgegevens[Evenement]:
         code = normaliseer_code(bron.code)
@@ -46,6 +46,6 @@ class IntegreatEvenementMapper(Mapper[IntegreatSeminar, EvenementContext, Evenem
                 "locatie_postcode": locatie_postcode,
                 "starttijd": bron.starttijd,
                 "eindtijd": bron.eindtijd,
-                "laatste_sync": timezone.now(), 
-            }
+                "laatste_sync": timezone.now(),
+            },
         )

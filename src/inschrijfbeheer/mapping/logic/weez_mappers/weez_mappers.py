@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
+
 from django.utils import timezone
 
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
@@ -50,9 +51,7 @@ class InschrijvingsGegevens:
 def check_verplichte_vragen(vragen: list[dict] | None) -> tuple[bool, set]:
     """Controleert of het formulier alle verplichte vragen bevat."""
     labels = {
-        (vraag.get("question") or "").lower()
-        for vraag in vragen or []
-        if vraag.get("question")
+        (vraag.get("question") or "").lower() for vraag in vragen or [] if vraag.get("question")
     }
     return VERPLICHTE_VRAGEN.issubset(labels), VERPLICHTE_VRAGEN.difference(labels)
 

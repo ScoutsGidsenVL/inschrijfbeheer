@@ -1,10 +1,9 @@
-"""Deze module bevat de logica om lidgegevens op te vragen van de Groepsadministratie aan de hand van SOAP
-"""
+"""Deze module bevat de logica om lidgegevens op te vragen van de Groepsadministratie"""
 
-from dataclasses import dataclass, field
 import os
-from dotenv import load_dotenv
+from dataclasses import dataclass, field
 
+from dotenv import load_dotenv
 from zeep import Client
 from zeep.transports import Transport
 
@@ -19,7 +18,7 @@ WEB_NAMESPACE = os.getenv("WEB_NAMESPACE")
 @dataclass
 class Functie:
     """Eén functie binnen een groep, bv. Groepsleiding of Webmaster."""
- 
+
     code: str = ""
     beschrijving: str = ""
     groep: str = ""
@@ -27,12 +26,12 @@ class Functie:
     edatum: str = ""
     gewicht: int = 0
     actief: bool = False
- 
- 
+
+
 @dataclass
 class Groep:
     """Eén groep waar het lid aan verbonden is, met de functies daarbinnen."""
- 
+
     naam: str = ""
     groepsnummer: str = ""
     gewicht: int = 0
@@ -43,17 +42,19 @@ class Groep:
 @dataclass
 class Adres:
     """Eén adres van de persoon"""
+
     straat: str = ""
     nummer: str = ""
     bus: str | None = None
     postcode: str = ""
     gemeente: str = ""
     postadres: bool = False
- 
+
+
 @dataclass
 class LidGegevens:
     """Alle lidgegevens uit een LidGegevensV3Response, in een handige vorm."""
- 
+
     id: str = ""
     lidnummer: str = ""
     klantnummer: str = ""
@@ -67,11 +68,11 @@ class LidGegevens:
     groepen: list = field(default_factory=list)
     rekeningnummer: str = ""
     adressen: list = field(default_factory=list)
- 
+
     @property
     def volledige_naam(self):
         return f"{self.voornaam} {self.naam}".strip()
- 
+
     @classmethod
     def van_respons(cls, resultaat):
         """
@@ -79,7 +80,7 @@ class LidGegevens:
         LidGegevens-object. zeep geeft de respons terug als een object met
         attributen die overeenkomen met de XML-elementen, bv.
         resultaat.groepen.groep is de lijst van <groep>-elementen.
- 
+
         Data (bv. geboortedatum, bdatum) komt van zeep terug als
         datetime.date; die wordt hier omgezet naar een ISO-string
         (jjjj-mm-dd) zodat de template er zonder extra filters mee kan werken.
@@ -100,16 +101,17 @@ class LidGegevens:
                 )
             )
 
-
         groepen = []
         groepen_container = getattr(resultaat, "groepen", None)
         ruwe_groepen = getattr(groepen_container, "groep", None) if groepen_container else None
- 
+
         for ruwe_groep in ruwe_groepen or []:
             functies = []
             functies_container = getattr(ruwe_groep, "functies", None)
-            ruwe_functies = getattr(functies_container, "functie", None) if functies_container else None
- 
+            ruwe_functies = (
+                getattr(functies_container, "functie", None) if functies_container else None
+            )
+
             for ruwe_functie in ruwe_functies or []:
                 functies.append(
                     Functie(
@@ -122,7 +124,7 @@ class LidGegevens:
                         actief=bool(getattr(ruwe_functie, "actief", False)),
                     )
                 )
- 
+
             groepen.append(
                 Groep(
                     naam=getattr(ruwe_groep, "naam", "") or "",
@@ -132,7 +134,7 @@ class LidGegevens:
                     functies=functies,
                 )
             )
- 
+
         return cls(
             id=getattr(resultaat, "id", "") or "",
             lidnummer=getattr(resultaat, "lidnummer", "") or "",
@@ -148,8 +150,8 @@ class LidGegevens:
             rekeningnummer=getattr(resultaat, "rekeningnummer", "") or "",
             adressen=adressen,
         )
- 
- 
+
+
 def _datum_naar_string(datumwaarde):
     """
     zeep geeft xsd:date-velden terug als datetime.date. Deze helper zet dat
@@ -158,18 +160,18 @@ def _datum_naar_string(datumwaarde):
     if datumwaarde is None:
         return ""
     return datumwaarde.isoformat() if hasattr(datumwaarde, "isoformat") else str(datumwaarde)
- 
- 
+
+
 def _maak_client(wsdl_url=WSDL_URL, transport=None):
     """Bouwt een zeep-client op basis van de WSDL."""
     return Client(wsdl=wsdl_url, transport=transport or Transport())
- 
- 
+
+
 def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAAM) -> LidGegevens:
     """
     Vraagt de lidgegevens (LidGegevensV3) op voor het lid met het gegeven
     identificatie, en geeft die terug als een LidGegevens-object.
- 
+
     Parameters
     ----------
     gebruikersnaam : str
@@ -179,7 +181,7 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
         Herbruikbare zeep-client. Wordt aangemaakt als er geen wordt meegegeven.
     applicatie_naam : str
         Waarde voor de SOAP-header <Applicatie>. Standaard "test-plain".
- 
+
     Returns
     -------
     LidGegevens
@@ -187,21 +189,22 @@ def haal_lidgegevens(gebruikersnaam, client=None, applicatie_naam=APPLICATIE_NAA
         en de lijst van groepen/functies.
     """
     client = client or _maak_client()
- 
+
     scope_type = client.get_type(f"{{{WEB_NAMESPACE}}}LidDataV3Keuze")
     scope = scope_type(
         basis={},
         functies={"actief": True},
         adressen={},
     )
- 
+
     resultaat = client.service.LidGegevensV3(
         gebruikersnaam=gebruikersnaam,
         scope=scope,
         _soapheaders={"applicatie": applicatie_naam},
     )
-     
+
     return LidGegevens.van_respons(resultaat)
+
 
 def haal_lidnaam(lid_id, client=None, applicatie_naam=APPLICATIE_NAAM):
     """

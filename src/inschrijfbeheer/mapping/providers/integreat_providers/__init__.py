@@ -1,10 +1,9 @@
 from .integreat_provider import IntegreatProvider
-
-from .registrationfreefield_provider import IntegreatRegistrationfreefieldProvider
 from .participanttype_provider import IntegreatParticipantTypeProvider
-from .seminar_provider import IntegreatSeminarProvider
-from .seminarstatus_provider import IntegreatSeminarStatusProvider
-from .seminartype_provider import IntegreatSeminarTypeProvider
 from .registration_provider import IntegreatRegistrationProvider
+from .registrationfreefield_provider import IntegreatRegistrationfreefieldProvider
+from .seminar_provider import IntegreatSeminarProvider
 from .seminarfreefield_provider import IntegreatSeminarFreeFieldProvider
 from .seminarfreefieldtype_provider import IntegreatSeminarFreeFieldTypeProvider
+from .seminarstatus_provider import IntegreatSeminarStatusProvider
+from .seminartype_provider import IntegreatSeminarTypeProvider

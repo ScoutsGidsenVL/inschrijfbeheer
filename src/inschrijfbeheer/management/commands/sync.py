@@ -76,15 +76,11 @@ class Command(BaseCommand):
         gebruikt = set().union(*(BRONNEN[bron].eigen_opties for bron in bronnen))
         van_anderen = set().union(*(syncer.eigen_opties for syncer in BRONNEN.values()))
 
-        meegegeven = sorted(
-            veld for veld in van_anderen - gebruikt if config.is_gezet(veld)
-        )
+        meegegeven = sorted(veld for veld in van_anderen - gebruikt if config.is_gezet(veld))
         if not meegegeven:
             return
 
         namen = ", ".join("--" + veld.replace("_", "-") for veld in meegegeven)
         self.stderr.write(
-            self.style.WARNING(
-                f"{namen} geldt niet voor {', '.join(bronnen)} en wordt genegeerd"
-            )
+            self.style.WARNING(f"{namen} geldt niet voor {', '.join(bronnen)} en wordt genegeerd")
         )

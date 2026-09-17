@@ -5,18 +5,17 @@ De views in deze module worden gebruikt voor het pad `/deelnemers/*`
 ## Functies:
     **deelnemers_lijst:** Geeft een view voor het oplijsten van alle deelnemers
     **deelnemers_detail:** Geeft een view voor het tonen van details over een deelnemer
-    **deelnemers_inschrijvingen:** Geeft een view voor het tonen van de inschrijvingen van een deelnemer
+    **deelnemers_inschrijvingen:** View voor inshrijvingen van een deelnemer
 """
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
+
 from django.db.models import Q
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 
-from inschrijfbeheer.models import Inschrijving, Deelnemer
-
-from inschrijfbeheer.utils.soap import haal_lidgegevens
+from inschrijfbeheer.models import Deelnemer, Inschrijving
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.paginering import pagineer
-
+from inschrijfbeheer.utils.soap import haal_lidgegevens
 
 
 @check_rollen
@@ -32,7 +31,7 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: HTML document dat de pagina voorstelt
     """
-    zoekterm = request.GET.get("q", '')
+    zoekterm = request.GET.get("q", "")
     deelnemers = Deelnemer.objects.filter(
         Q(id__icontains=zoekterm)
         | Q(voornaam__icontains=zoekterm)
@@ -42,11 +41,14 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
 
     deelnemers, querystring = pagineer(request, deelnemers)
 
-    return render(request, "deelnemers/deelnemers_lijst.html", {
-        "deelnemers": deelnemers,
-        "querystring": querystring,
-    })
-
+    return render(
+        request,
+        "deelnemers/deelnemers_lijst.html",
+        {
+            "deelnemers": deelnemers,
+            "querystring": querystring,
+        },
+    )
 
 
 @check_rollen
@@ -63,19 +65,27 @@ def deelnemers_detail(request: HttpRequest, id: str) -> HttpResponse:
     """
     deelnemer = Deelnemer.objects.get(id=id)
     if deelnemer.foutboodschap is not None:
-        return render(request, "deelnemers/deelnemers_ongeldig.html", {
-            "deelnemer": deelnemer,
-        })
+        return render(
+            request,
+            "deelnemers/deelnemers_ongeldig.html",
+            {
+                "deelnemer": deelnemer,
+            },
+        )
 
     try:
         gegevens = haal_lidgegevens(id)
-    except:
+    except Exception:
         gegevens = None
 
-    return render(request, "deelnemers/deelnemers_detail.html", {
-        "deelnemer": deelnemer,
-        "gegevens": gegevens,
-    })
+    return render(
+        request,
+        "deelnemers/deelnemers_detail.html",
+        {
+            "deelnemer": deelnemer,
+            "gegevens": gegevens,
+        },
+    )
 
 
 @check_rollen
@@ -83,7 +93,9 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     """View die alle inschrijvingen voor een deelnemer oplijst.
     Deze view wordt gebruikt voor /deelnemers/<id>/inschrijvingen.
 
-    De pagina laat filtering toe op basis van de naam of het id van een evenement en de aanwezigheid van de deelnemer.
+    De pagina laat filtering toe op basis van:
+     - de naam of het id van een evenement
+     - de aanwezigheid van de deelnemer
 
     Args:
         request (HttpRequest): HTTP request voor de pagina
@@ -93,27 +105,30 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
         HttpResponse: HTML document dat de pagina voorstelt
     """
     deelnemer = Deelnemer.objects.get(id=id)
-    zoekterm = request.GET.get('q', '')
-    aanwezig_filter = request.GET.get("aanwezig", '')
+    zoekterm = request.GET.get("q", "")
+    aanwezig_filter = request.GET.get("aanwezig", "")
 
     inschrijvingen = Inschrijving.objects.filter(lid=id).select_related("evenement")
 
     if zoekterm:
         inschrijvingen = inschrijvingen.filter(
-            Q(evenement__id__icontains=zoekterm)
-            | Q(evenement__titel__icontains=zoekterm)
+            Q(evenement__id__icontains=zoekterm) | Q(evenement__titel__icontains=zoekterm)
         )
 
-    if aanwezig_filter == '1':
+    if aanwezig_filter == "1":
         inschrijvingen = inschrijvingen.filter(annulatie__isnull=True)
-    elif aanwezig_filter == '0':
+    elif aanwezig_filter == "0":
         inschrijvingen = inschrijvingen.exclude(annulatie__isnull=True)
 
     pagina, querystring = pagineer(request, inschrijvingen)
 
-    return render(request, "deelnemers/deelnemers_inschrijvingen.html", {
-        "inschrijvingen": pagina,
-        "deelnemer": deelnemer,
-        "querystring": querystring,
-        "pagina": pagina,
-    })
+    return render(
+        request,
+        "deelnemers/deelnemers_inschrijvingen.html",
+        {
+            "inschrijvingen": pagina,
+            "deelnemer": deelnemer,
+            "querystring": querystring,
+            "pagina": pagina,
+        },
+    )

@@ -35,27 +35,33 @@ from inschrijfbeheer.mapping.logic.weez_mappers import (
     check_verplichte_vragen,
     los_lid_op,
 )
-from inschrijfbeheer.mapping.logic.weez_mappers.antwoord_mapper import AntwoordContext, WeezAntwoordMapper
+from inschrijfbeheer.mapping.logic.weez_mappers.antwoord_mapper import (
+    AntwoordContext,
+    WeezAntwoordMapper,
+)
 from inschrijfbeheer.mapping.logic.weez_mappers.deelnemertype_mapper import WeezDeelnemerTypeMapper
-from inschrijfbeheer.mapping.logic.weez_mappers.evenementvraag_mapper import VraagContext, WeezEvenementVraagMapper
-from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
+from inschrijfbeheer.mapping.logic.weez_mappers.evenementvraag_mapper import (
+    VraagContext,
+    WeezEvenementVraagMapper,
+)
 from inschrijfbeheer.mapping.providers import (
     InschrijvingFilter,
+    TariefFilter,
     WeezClient,
     WeezEvenementProvider,
     WeezInschrijvingProvider,
     WeezTariefProvider,
-    TariefFilter
 )
-from inschrijfbeheer.mapping import (
-    Synchronisatie,
+from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
+from inschrijfbeheer.mapping.providers.weez_providers.evenement_provider import EvenementFilter
+from inschrijfbeheer.mapping.synchronisatie import Synchronisatie
+from inschrijfbeheer.mapping.utils import (
     SynchronisatieActie,
     SynchronisatieConfig,
     SynchronisatieInfo,
     SynchronisatieStatus,
     SyncOnderdelen,
 )
-from inschrijfbeheer.mapping.providers.weez_providers.evenement_provider import EvenementFilter
 from inschrijfbeheer.models import (
     Categorie,
     Deelnemer,
@@ -63,7 +69,11 @@ from inschrijfbeheer.models import (
     Inschrijving,
     WeezSynchronisatie,
 )
-from inschrijfbeheer.models.inschrijfbeheer_models import DeelnemerType, EvenementVraag, InschrijvingVraagAntwoord
+from inschrijfbeheer.models.inschrijfbeheer_models import (
+    DeelnemerType,
+    EvenementVraag,
+    InschrijvingVraagAntwoord,
+)
 
 logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
@@ -154,9 +164,9 @@ class WeezSyncer(Synchronisatie):
         self.info.status(SynchronisatieStatus.BEZIG)
 
         with self:
-            overzicht = list(self.evenement_provider.haal_alle_op(
-                EvenementFilter(alles=self.config.sync_alles)
-            ))
+            overzicht = list(
+                self.evenement_provider.haal_alle_op(EvenementFilter(alles=self.config.sync_alles))
+            )
 
             for samenvatting in overzicht:
                 evenement_id = samenvatting.get("id")
@@ -193,7 +203,9 @@ class WeezSyncer(Synchronisatie):
 
         return self.info
 
-    def synchroniseer_inschrijvingen(self, evenement: Evenement | None = None) -> SynchronisatieInfo:
+    def synchroniseer_inschrijvingen(
+        self, evenement: Evenement | None = None
+    ) -> SynchronisatieInfo:
         """Synchroniseert alle deelnemers voor een bepaald evenement van Weez.
 
         De antwoorden op het inschrijvingsformulier worden gelezen om de
@@ -204,22 +216,16 @@ class WeezSyncer(Synchronisatie):
                 inschrijvingen gesynchroniseerd worden.
 
         Returns:
-            SynchronisatieInfo: geeft aan hoeveel objecten werden aangemaakt, gewijzigd en overgeslagen
+            SynchronisatieInfo: geeft info over synchronisatie
         """
         if evenement is None:
             raise ValueError("synchroniseer_inschrijvingen heeft een evenement nodig")
 
-        tarieven_bron = self.tarieven_provider.haal_alle_op(
-            TariefFilter(evenement_id=evenement.id)
-        )
+        tarieven_bron = self.tarieven_provider.haal_alle_op(TariefFilter(evenement_id=evenement.id))
         deelnemertypes = {}
         for tarief in tarieven_bron:
-            deelnemertype, _ = self.bewaar(
-                self.tarieven,
-                self.tarieven.mapper.map(tarief)
-            )
+            deelnemertype, _ = self.bewaar(self.tarieven, self.tarieven.mapper.map(tarief))
             deelnemertypes[deelnemertype.id] = deelnemertype
-
 
         bronnen = self.inschrijving_provider.haal_alle_op(self.__inschrijving_filter(evenement))
         vraag_index: dict[str, EvenementVraag] | None = None
@@ -252,13 +258,12 @@ class WeezSyncer(Synchronisatie):
                 context = InschrijvingContext(
                     evenement=evenement, deelnemer=deelnemer, deelnemertypes=deelnemertypes
                 )
-                inschrijving, _ = self.bewaar(self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context))
-
+                inschrijving, _ = self.bewaar(
+                    self.inschrijvingen, self.inschrijvingen.mapper.map(bron, context)
+                )
 
             except MappingFout as fout:
-                logger.warning(
-                    "Inschrijving overgeslagen op evenement %s: %s", evenement.id, fout
-                )
+                logger.warning("Inschrijving overgeslagen op evenement %s: %s", evenement.id, fout)
                 self.info.registreer(Inschrijving, SynchronisatieActie.OVERGESLAGEN)
                 continue
 
@@ -329,14 +334,18 @@ class WeezSyncer(Synchronisatie):
         )
         evenement.save()
 
-    def __bewaar_vragen(self, evenement: Evenement, vragen: list[dict]) -> dict[str, EvenementVraag]:
+    def __bewaar_vragen(
+        self, evenement: Evenement, vragen: list[dict]
+    ) -> dict[str, EvenementVraag]:
         """Bewaart het formulier van het evenement en geeft de vragen terug per Weez-id."""
         index: dict[str, EvenementVraag] = {}
         for volgorde, bron in enumerate(vragen):
             try:
                 vraag, _ = self.bewaar(
                     self.vragen,
-                    self.vragen.mapper.map(bron, VraagContext(evenement=evenement, volgorde=volgorde)),
+                    self.vragen.mapper.map(
+                        bron, VraagContext(evenement=evenement, volgorde=volgorde)
+                    ),
                 )
             except MappingFout as fout:
                 logger.warning("Vraag overgeslagen op evenement %s: %s", evenement.id, fout)
@@ -357,8 +366,12 @@ class WeezSyncer(Synchronisatie):
             try:
                 self.bewaar(
                     self.antwoorden,
-                    self.antwoorden.mapper.map(bron, AntwoordContext(inschrijving=inschrijving, vraag=vraag)),
+                    self.antwoorden.mapper.map(
+                        bron, AntwoordContext(inschrijving=inschrijving, vraag=vraag)
+                    ),
                 )
             except MappingFout as fout:
-                logger.warning("Antwoord overgeslagen op inschrijving %s: %s", inschrijving.id, fout)
+                logger.warning(
+                    "Antwoord overgeslagen op inschrijving %s: %s", inschrijving.id, fout
+                )
                 self.info.registreer(InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN)

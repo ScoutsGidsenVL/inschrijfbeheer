@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
     EvenementVraag,
     Inschrijving,
     InschrijvingVraagAntwoord,
     IntegreatRegistrationfreefield,
 )
-
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 
 
 @dataclass(frozen=True)

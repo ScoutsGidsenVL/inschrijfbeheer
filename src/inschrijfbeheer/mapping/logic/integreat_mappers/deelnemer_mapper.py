@@ -1,12 +1,13 @@
 from typing import Any
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     Deelnemer,
     IntegreatParticipant,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .integreat_mapper import tekst
+
 
 class IntegreatDeelnemerMapper(Mapper[IntegreatParticipant, Any, Deelnemer]):
     """Deelnemer uit een Integreat-deelnemer plus de ledenopzoeking.
@@ -32,5 +33,3 @@ class IntegreatDeelnemerMapper(Mapper[IntegreatParticipant, Any, Deelnemer]):
                 "mailadres": tekst(context.emailadres),
             },
         )
-
-

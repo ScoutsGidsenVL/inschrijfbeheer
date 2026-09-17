@@ -1,13 +1,11 @@
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
-
     Evenement,
     EvenementVraag,
 )
-
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 
 logger = logging.getLogger("inschrijfbeheer")
 
@@ -16,15 +14,40 @@ def _normaliseer(waarde) -> str:
     return "" if waarde is None else str(waarde).strip()
 
 
-STANDAARD_ALIASSEN = frozenset({
-    "adresse", "adressedelivraison", "adresse_societe", "billet_prix", "blog",
-    "choix_place", "civilite", "codepostaldelivraison", "code_postal",
-    "code_postal_societe", "commentaires", "date_de_naissance", "email",
-    "email_pro", "fonction", "member_code", "nom", "pays", "paysdelivraison",
-    "pays_societe", "portable", "portable_societe", "prenom", "site_internet",
-    "societe", "telephone", "validity_date_start", "ville", "villedelivraison",
-    "ville_societe",
-})
+STANDAARD_ALIASSEN = frozenset(
+    {
+        "adresse",
+        "adressedelivraison",
+        "adresse_societe",
+        "billet_prix",
+        "blog",
+        "choix_place",
+        "civilite",
+        "codepostaldelivraison",
+        "code_postal",
+        "code_postal_societe",
+        "commentaires",
+        "date_de_naissance",
+        "email",
+        "email_pro",
+        "fonction",
+        "member_code",
+        "nom",
+        "pays",
+        "paysdelivraison",
+        "pays_societe",
+        "portable",
+        "portable_societe",
+        "prenom",
+        "site_internet",
+        "societe",
+        "telephone",
+        "validity_date_start",
+        "ville",
+        "villedelivraison",
+        "ville_societe",
+    }
+)
 
 
 def alias_van_label(label: str) -> str | None:
@@ -41,6 +64,7 @@ def weez_sleutel_van(vraag: EvenementVraag) -> str:
     """Geeft de sleutel waarmee Weez deze vraag aanspreekt in het form-veld."""
     return alias_van_label(vraag.vraag) or vraag.id
 
+
 def koppel_eigen_vragen(antwoorden: list[dict], form: dict) -> dict[int, str]:
     """Bepaalt het Weez-vraag-id van elke eigen vraag.
 
@@ -56,7 +80,8 @@ def koppel_eigen_vragen(antwoorden: list[dict], form: dict) -> dict[int, str]:
         dict[int, str]: positie in de antwoordenlijst naar Weez-vraag-id
     """
     posities = [
-        positie for positie, antwoord in enumerate(antwoorden)
+        positie
+        for positie, antwoord in enumerate(antwoorden)
         if alias_van_label(antwoord.get("label")) is None
     ]
     ids = [sleutel for sleutel in form if sleutel not in STANDAARD_ALIASSEN]
@@ -66,7 +91,8 @@ def koppel_eigen_vragen(antwoorden: list[dict], form: dict) -> dict[int, str]:
 
     logger.warning(
         "Weez gaf %s eigen vragen en %s eigen antwoorden, koppeling valt terug op de waarde",
-        len(ids), len(posities),
+        len(ids),
+        len(posities),
     )
 
     gekoppeld = {}
@@ -74,7 +100,8 @@ def koppel_eigen_vragen(antwoorden: list[dict], form: dict) -> dict[int, str]:
     for positie in posities:
         gezocht = _normaliseer(antwoorden[positie].get("value"))
         kandidaten = [
-            vraag_id for vraag_id, waarde in beschikbaar.items()
+            vraag_id
+            for vraag_id, waarde in beschikbaar.items()
             if waarde == gezocht and waarde != ""
         ]
         if len(kandidaten) == 1:

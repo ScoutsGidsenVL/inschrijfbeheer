@@ -1,12 +1,11 @@
-from dataclasses import dataclass
-
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     EvenementVraagType,
     IntegreatSeminarFreeFieldType,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .integreat_mapper import normaliseer_code
+
 
 class IntegreatVraagTypeMapper(Mapper[IntegreatSeminarFreeFieldType, None, EvenementVraagType]):
     """EvenementVraagType, ontdubbeld op naam.

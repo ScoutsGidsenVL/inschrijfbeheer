@@ -26,15 +26,15 @@ import time
 from typing import Any, Iterator, Mapping, Sequence
 
 import requests
+from dotenv import load_dotenv
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
-from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger(__name__)
 
 TOKEN_URL = os.getenv("ACCOUNTS_URL")
+
 
 class WeezError(Exception):
     """Basisfout voor alles wat misloopt in deze client."""
@@ -70,7 +70,7 @@ class WeezClient:
         timeout: float = 30.0,
         max_retries: int = 3,
         expiry_margin: int = 60,
-        organisatie: str = ""
+        organisatie: str = "",
     ) -> None:
         self.client_id = client_id or os.environ.get("WEEZ_ACCESS_CLIENT_ID")
         self.client_secret = client_secret or os.environ.get("WEEZ_ACCESS_CLIENT_SECRET")
@@ -138,7 +138,9 @@ class WeezClient:
             raise WeezAuthError(f"Geen access_token in het antwoord: {payload!r}")
 
         self._token = token
-        self._token_expires_at = time.time() + int(payload.get("expires_in", 300)) - self.expiry_margin
+        self._token_expires_at = (
+            time.time() + int(payload.get("expires_in", 300)) - self.expiry_margin
+        )
         logger.debug("Token geldig tot %s", self._token_expires_at)
 
     def invalidate_token(self) -> None:
@@ -148,7 +150,7 @@ class WeezClient:
             self._token_expires_at = 0.0
 
     def _url(self, path: str) -> str:
-        if  not path.startswith(("http://", "https://")):
+        if not path.startswith(("http://", "https://")):
             raise ValueError("Pad moet beginnen met http(s)://")
         return path
 

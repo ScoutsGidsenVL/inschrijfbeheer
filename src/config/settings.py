@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+
 from django.urls import reverse_lazy
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,93 +26,93 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_KEY')
+SECRET_KEY = os.getenv("DJANGO_KEY")
 
 DEBUG = True if os.getenv("DEBUG") == "true" else False
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'mozilla_django_oidc',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "mozilla_django_oidc",
     "procrastinate.contrib.django",
-    'debug_toolbar',
-    'inschrijfbeheer',
+    "debug_toolbar",
+    "inschrijfbeheer",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "mozilla_django_oidc.middleware.SessionRefresh",
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = 60
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_name'),
-        'HOST': os.getenv("DB_host"),
-        'USER': os.getenv("DB_username"),
-        'PASSWORD': os.getenv('DB_password'),
-        'PORT': '5432'
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_name"),
+        "HOST": os.getenv("DB_host"),
+        "USER": os.getenv("DB_username"),
+        "PASSWORD": os.getenv("DB_password"),
+        "PORT": "5432",
     },
-    'integreat': {
-        'ENGINE': 'mssql',
-        'NAME': os.getenv('INTEGREAT_DB_NAME'),
-        'HOST': os.getenv('INTEGREAT_DB_HOST'),
-        'PORT': '1433',
-        'USER': os.getenv('INTEGREAT_DB_USER'),
-        'PASSWORD': os.getenv('INTEGREAT_DB_PASSWORD'),
-        'OPTIONS': {
-            'driver': 'FreeTDS',
-            'host_is_server': True,
-            'extra_params': 'TDS_Version=7.4;TrustServerCertificate=yes;',
-        }
+    "integreat": {
+        "ENGINE": "mssql",
+        "NAME": os.getenv("INTEGREAT_DB_NAME"),
+        "HOST": os.getenv("INTEGREAT_DB_HOST"),
+        "PORT": "1433",
+        "USER": os.getenv("INTEGREAT_DB_USER"),
+        "PASSWORD": os.getenv("INTEGREAT_DB_PASSWORD"),
+        "OPTIONS": {
+            "driver": "FreeTDS",
+            "host_is_server": True,
+            "extra_params": "TDS_Version=7.4;TrustServerCertificate=yes;",
+        },
     },
-    'logging': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_name'),
-        'HOST': os.getenv("DB_host"),
-        'USER': os.getenv("DB_username"),
-        'PASSWORD': os.getenv('DB_password'),
-        'PORT': '5432',
+    "logging": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_name"),
+        "HOST": os.getenv("DB_host"),
+        "USER": os.getenv("DB_username"),
+        "PASSWORD": os.getenv("DB_password"),
+        "PORT": "5432",
     },
 }
 
@@ -132,7 +134,7 @@ OIDC_OP_USER_ENDPOINT = f"{KEYCLOAK_REALM_URL}/protocol/openid-connect/userinfo"
 OIDC_OP_JWKS_ENDPOINT = f"{KEYCLOAK_REALM_URL}/protocol/openid-connect/certs"
 OIDC_RP_SIGN_ALGO = "RS256"
 
-LOGIN_URL = reverse_lazy('oidc_authentication_init')
+LOGIN_URL = reverse_lazy("oidc_authentication_init")
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -142,16 +144,16 @@ LOGOUT_REDIRECT_URL = "/"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -159,9 +161,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -171,11 +173,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static/",
-    BASE_DIR / '..' / 'docs',
+    BASE_DIR / ".." / "docs",
 ]
 
 
@@ -183,11 +185,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-        "OPTIONS": {
-        }
-    },
+    "default": {"BACKEND": "django.core.mail.backends.smtp.EmailBackend", "OPTIONS": {}},
 }
 
 EMAIL_HOST = os.getenv("MAIL_RELAY_HOST")

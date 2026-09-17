@@ -1,10 +1,11 @@
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
     DeelnemerType,
     IntegreatParticipantType,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from .integreat_mapper import tekst
+
 
 class IntegreatDeelnemerTypeMapper(Mapper[IntegreatParticipantType, None, DeelnemerType]):
     """DeelnemerType uit een Integreat-deelnemerstype.
@@ -15,9 +16,7 @@ class IntegreatDeelnemerTypeMapper(Mapper[IntegreatParticipantType, None, Deelne
     quota wiste en de inschrijvingsperiode naar het huidige moment opschoof.
     """
 
-    def map(self, bron: IntegreatParticipantType, context: None = None) -> Doelgegevens[DeelnemerType]:
-        return Doelgegevens(
-            sleutels={"id": str(bron.oid)},
-            velden={"naam": tekst(bron.naam)}
-        )
-
+    def map(
+        self, bron: IntegreatParticipantType, context: None = None
+    ) -> Doelgegevens[DeelnemerType]:
+        return Doelgegevens(sleutels={"id": str(bron.oid)}, velden={"naam": tekst(bron.naam)})

@@ -27,7 +27,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from inschrijfbeheer.mapping.logic.mapper import MappingFout
 from inschrijfbeheer.mapping.logic.integreat_mappers import (
     AntwoordContext,
     EvenementContext,
@@ -43,7 +42,12 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     VraagContext,
     normaliseer_code,
 )
-from inschrijfbeheer.mapping.providers.data_provider import EvenementFilter, IntegreatFilter, LijstProvider
+from inschrijfbeheer.mapping.logic.mapper import MappingFout
+from inschrijfbeheer.mapping.providers.data_provider import (
+    EvenementFilter,
+    IntegreatFilter,
+    LijstProvider,
+)
 from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatParticipantTypeProvider,
     IntegreatRegistrationfreefieldProvider,
@@ -53,8 +57,8 @@ from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatSeminarProvider,
 )
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
-from inschrijfbeheer.mapping import (
-    Synchronisatie,
+from inschrijfbeheer.mapping.synchronisatie import Synchronisatie
+from inschrijfbeheer.mapping.utils import (
     SynchronisatieActie,
     SynchronisatieConfig,
     SynchronisatieInfo,
@@ -180,7 +184,6 @@ class IntegreatSyncer(Synchronisatie):
         oud is.
         """
         self.info.status(SynchronisatieStatus.BEZIG)
-        # try:
         self.__synchroniseer_vraagtypes()
         self.__synchroniseer_deelnemertypes()
 
@@ -188,10 +191,6 @@ class IntegreatSyncer(Synchronisatie):
             self.__synchroniseer_seminar(seminar, met_inschrijvingen=True)
 
         self.info.status(SynchronisatieStatus.GESLAAGD)
-        # except Exception as e:
-        # logger.error(f"Error opgeworpen bij synchronisatie: {e}")
-        # self.info.status(SynchronisatieStatus.FOUTIEF)
-        # finally:
         return self.info
 
     def synchroniseer_evenement(
@@ -309,8 +308,7 @@ class IntegreatSyncer(Synchronisatie):
         return self.providers.seminars.haal_alle_op(self.bron_filter)
 
     def __haal_registraties_op(self, evenement: Evenement):
-        """De registraties van één evenement.
-        """
+        """De registraties van één evenement."""
         filter = EvenementFilter(evenement_id=evenement.id)
 
         return self.__voor_seminar(
@@ -318,16 +316,14 @@ class IntegreatSyncer(Synchronisatie):
         )
 
     def __haal_vragen_op(self, evenement: Evenement):
-        """De vrije velden van één evenement.
-        """
+        """De vrije velden van één evenement."""
         filter = EvenementFilter(evenement_id=evenement.id)
         return self.__voor_seminar(
             self.providers.vragen.haal_alle_op(filter=filter), "seminar__code", evenement
         )
 
     def __haal_antwoorden_op(self, evenement: Evenement):
-        """De antwoorden van één evenement.
-        """
+        """De antwoorden van één evenement."""
         filter = EvenementFilter(evenement_id=evenement.id)
         return self.__voor_seminar(
             self.providers.antwoorden.haal_alle_op(filter=filter),
@@ -367,9 +363,7 @@ class IntegreatSyncer(Synchronisatie):
             )
             evenement, _ = self.bewaar(
                 self.evenementen,
-                self.evenementen.mapper.map(
-                    seminar, EvenementContext(categorie=categorie)
-                ),
+                self.evenementen.mapper.map(seminar, EvenementContext(categorie=categorie)),
             )
             return evenement
         except MappingFout as fout:
@@ -451,7 +445,6 @@ class IntegreatSyncer(Synchronisatie):
             logger.warning("Deelnemer overgeslagen: %s", fout)
             self.info.registreer(Deelnemer, SynchronisatieActie.OVERGESLAGEN)
             return None
-
 
     def __deelnemertype(self, bron) -> DeelnemerType | None:
         """Zoekt het deelnemerstype, en maakt het aan als het er nog niet staat.

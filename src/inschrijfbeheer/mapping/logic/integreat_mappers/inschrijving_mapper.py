@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
     Deelnemer,
     DeelnemerType,
@@ -7,8 +8,6 @@ from inschrijfbeheer.models import (
     Inschrijving,
     IntegreatRegistration,
 )
-
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 
 
 @dataclass(frozen=True)
@@ -28,7 +27,9 @@ class IntegreatInschrijvingMapper(Mapper[IntegreatRegistration, InschrijvingCont
     en er een tweede rij met dezelfde primaire sleutel aangemaakt werd.
     """
 
-    def map(self, bron: IntegreatRegistration, context: InschrijvingContext) -> Doelgegevens[Inschrijving]:
+    def map(
+        self, bron: IntegreatRegistration, context: InschrijvingContext
+    ) -> Doelgegevens[Inschrijving]:
         return Doelgegevens(
             sleutels={"id": bron.oid},
             velden={
@@ -39,6 +40,6 @@ class IntegreatInschrijvingMapper(Mapper[IntegreatRegistration, InschrijvingCont
                 "prijs": bron.price,
                 "annulatie": bron.annulatie,
                 "annulatie_reden": bron.canceledmotivation,
-                "registratie": not bron.cancelation
+                "registratie": not bron.cancelation,
             },
         )

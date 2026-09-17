@@ -1,11 +1,10 @@
-from .synchronisatie import (
-    SynchronisatieActie,
-    SynchronisatieStatus,
-    SynchronisatieConfig,
-    SynchronisatieInfo,
-    SyncOnderdelen,
-)
-
 from .databank_interface import (
     InschrijfbeheerDatabank,
+)
+from .synchronisatie import (
+    SynchronisatieActie,
+    SynchronisatieConfig,
+    SynchronisatieInfo,
+    SynchronisatieStatus,
+    SyncOnderdelen,
 )

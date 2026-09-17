@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from typing import Any
-from django.utils import timezone
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
     Deelnemer,
     Evenement,
     Inschrijving,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .weez_mappers import parse_datetime
+
 
 @dataclass(frozen=True)
 class InschrijvingContext:
@@ -28,7 +28,6 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
     """
 
     def map(self, bron: dict, context: InschrijvingContext) -> Doelgegevens[Inschrijving]:
-
         annulatie_tijdstip = bron.get("removed", None)
         annulatie = None
         if annulatie_tijdstip is not None:
@@ -47,7 +46,7 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
                 "is_weez": True,
                 "annulatie": annulatie,
                 "annulatie_reden": "Inschrijving verwijderd uit Weez" if annulatie else None,
-                "registratie": bron.get("scanned", False)
+                "registratie": bron.get("scanned", False),
             },
             vervang_bestaande=True,
             vervang_sleutels={

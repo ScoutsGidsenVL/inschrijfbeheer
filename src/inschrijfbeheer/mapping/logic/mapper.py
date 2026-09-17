@@ -10,8 +10,7 @@ N = TypeVar("N")  # doelmodel
 
 
 class MappingFout(Exception):
-    """De brondata kan niet omgezet worden naar het doelmodel.
-    """
+    """De brondata kan niet omgezet worden naar het doelmodel."""
 
 
 @dataclass(frozen=True)

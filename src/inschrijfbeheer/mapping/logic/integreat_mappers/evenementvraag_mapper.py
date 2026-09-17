@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     Evenement,
     EvenementVraag,
@@ -7,7 +8,6 @@ from inschrijfbeheer.models import (
     IntegreatSeminarFreeField,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .integreat_mapper import tekst
 
 
@@ -19,10 +19,14 @@ class VraagContext:
     type: EvenementVraagType
 
 
-class IntegreatEvenementVraagMapper(Mapper[IntegreatSeminarFreeField, VraagContext, EvenementVraag]):
+class IntegreatEvenementVraagMapper(
+    Mapper[IntegreatSeminarFreeField, VraagContext, EvenementVraag]
+):
     """EvenementVraag uit een vrij veld van een seminar."""
 
-    def map(self, bron: IntegreatSeminarFreeField, context: VraagContext) -> Doelgegevens[EvenementVraag]:
+    def map(
+        self, bron: IntegreatSeminarFreeField, context: VraagContext
+    ) -> Doelgegevens[EvenementVraag]:
         vraag = tekst(bron.question)
         if not vraag:
             raise MappingFout(f"vrij veld {bron.oid} zonder vraagtekst")
@@ -38,4 +42,3 @@ class IntegreatEvenementVraagMapper(Mapper[IntegreatSeminarFreeField, VraagConte
                 "volgorde": bron.sortorder,
             },
         )
-

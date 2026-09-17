@@ -1,4 +1,3 @@
-from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
@@ -7,7 +6,6 @@ from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.paginering import pagineer
 
 TEKST_VELDEN = ["logger_name", "message", "module", "function", "user_identifier", "trace"]
-
 
 
 @check_rollen
@@ -46,9 +44,13 @@ def log_lijst(request: HttpRequest) -> HttpResponse:
 
     pagina, querystring = pagineer(request, logs)
 
-    return render(request, "logging/log_lijst.html", {
-        "pagina": pagina,
-        "levels": LogLevel.choices,
-        "filters": {**filters, "level": level_filter, "van": van, "tot": tot},
-        "querystring": querystring,
-    })
+    return render(
+        request,
+        "logging/log_lijst.html",
+        {
+            "pagina": pagina,
+            "levels": LogLevel.choices,
+            "filters": {**filters, "level": level_filter, "van": van, "tot": tot},
+            "querystring": querystring,
+        },
+    )
