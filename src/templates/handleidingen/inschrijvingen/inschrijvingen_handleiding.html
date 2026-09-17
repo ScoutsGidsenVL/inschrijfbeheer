@@ -1,0 +1,27 @@
+{% extends "handleidingen/base.html" %}
+
+{% block nav_inschrijvingen %}geselecteerd{% endblock nav_inschrijvingen %}
+
+{% block handleiding_titel %}Inschrijvingen{% endblock handleiding_titel %}
+
+{% block handleiding_content %}
+<p>Je komt op deze pagina via de inschrijvingenlijst van een <a href="/handleidingen/evenementen/detail">evenement</a> of een <a href="/handleidingen/deelnemers/detail">deelnemer</a>. Ze bestaat uit twee tabbladen.</p>
+
+<nav class="handleiding-tabblad-lijst">
+    <a href="#algemeen">Algemeen</a>
+    <a href="#vragen">Vragen</a>
+</nav>
+
+<p>Komt de inschrijving uit Weez, dan zie je ook het Weez-logo. Klik erop om naar die inschrijving in Weez te gaan.</p>
+
+<h2 id="algemeen">Algemeen</h2>
+<p>Dit tabblad toont algemene informatie over de inschrijving. Je downloadt hier ook het deelname-attest, of mailt het naar de deelnemer.</p>
+
+<h2 id="vragen">Vragen</h2>
+<p>Dit tabblad lijst alle antwoorden op vragen op. Gaat het om een Weez-inschrijving, dan pas je die antwoorden hier ook aan.</p>
+
+<div class="waarschuwing">
+    <div class="waarschuwing-icoon">!</div>
+    <div class="waarschuwing-tekst">Pas je een antwoord aan, dan synchroniseren alle inschrijvingen van het evenement opnieuw. Mogelijk moeten meerdere deelnemers aangepast worden, dus dit is een kostelijke handeling.</div>
+</div>
+{% endblock handleiding_content %}

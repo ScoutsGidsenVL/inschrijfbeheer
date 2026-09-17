@@ -1,0 +1,25 @@
+{% extends "handleidingen/base.html" %}
+
+{% block nav_deelnemers_detail %}geselecteerd{% endblock nav_deelnemers_detail %}
+
+{% block handleiding_titel %}Deelnemers detailpagina{% endblock handleiding_titel %}
+
+{% block handleiding_content %}
+<p>Deze pagina bestaat uit twee tabbladen.</p>
+
+<nav class="handleiding-tabblad-lijst">
+    <a href="#algemeen">Algemeen</a>
+    <a href="#inschrijvingen">Inschrijvingen</a>
+</nav>
+
+<h2 id="algemeen">Algemeen</h2>
+<p>Dit tabblad toont algemene informatie over de deelnemer.</p>
+
+<h2 id="inschrijvingen">Inschrijvingen</h2>
+<p>Dit tabblad toont alle evenementen waaraan de deelnemer deelnam. Je filtert op:</p>
+<ul>
+    <li>Naam of ID van het evenement</li>
+    <li>Aanwezigheid van de deelnemer</li>
+</ul>
+<p>Klik op een rij om naar de <a href="/handleidingen/inschrijvingen">detailpagina van die inschrijving</a> te gaan.</p>
+{% endblock handleiding_content %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_headers %}
+    <link rel="stylesheet" href="{% static "styles/handleidingen.css" %}">
+    {% block extra_handleiding_headers %}{% endblock extra_handleiding_headers %}
+{% endblock extra_headers %}
+
+{% block content %}
+<div class="handleiding-layout">
+    <nav class="handleiding-nav">
+        <h2 class="handleiding-nav-titel">Handleidingen</h2>
+        <a href="{% url 'handleiding_overzicht' %}" class="handleiding-nav-titel {% block nav_overzicht %}{% endblock nav_overzicht %}">Handleidingen</a>
+        <a href="{% url 'handleiding_evenementen' %}" class="{% block nav_evenementen %}{% endblock nav_evenementen %}">Evenementen</a>
+        <a href="{% url 'handleiding_evenementen_detail' %}" class="{% block nav_evenementen_detail %}{% endblock nav_evenementen_detail %}">Evenementen detailpagina</a>
+        <a href="{% url 'handleiding_deelnemers' %}" class="{% block nav_deelnemers %}{% endblock nav_deelnemers %}">Deelnemers</a>
+        <a href="{% url 'handleiding_deelnemers_detail' %}" class="{% block nav_deelnemers_detail %}{% endblock nav_deelnemers_detail %}">Deelnemers detailpagina</a>
+        <a href="{% url 'handleiding_inschrijvingen' %}" class="{% block nav_inschrijvingen %}{% endblock nav_inschrijvingen %}">Inschrijvingen</a>
+    </nav>
+
+    <article class="handleiding-inhoud">
+        <h1 class="handleiding-titel">{% block handleiding_titel %}{% endblock handleiding_titel %}</h1>
+        {% block handleiding_content %}
+        {% endblock handleiding_content %}
+    </article>
+</div>
+{% endblock content %}

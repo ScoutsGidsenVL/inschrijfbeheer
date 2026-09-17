@@ -1,0 +1,32 @@
+{% extends "handleidingen/base.html" %}
+
+{% block nav_overzicht %}geselecteerd{% endblock nav_overzicht %}
+
+{% block handleiding_titel %}Handleidingen{% endblock handleiding_titel %}
+
+{% block handleiding_content %}
+<p>Hier vind je uitleg bij elk onderdeel van de applicatie. Kies hieronder een pagina.</p>
+
+<ul class="handleiding-overzicht-lijst">
+    <li>
+        <a href="{% url 'handleiding_evenementen' %}">Evenementen</a>
+        <p>De lijst met alle evenementen: zoeken, filteren en sorteren.</p>
+    </li>
+    <li>
+        <a href="{% url 'handleiding_evenementen_detail' %}">Evenementen detailpagina</a>
+        <p>Alle informatie over één evenement: algemeen, inschrijvingen en vragen.</p>
+    </li>
+    <li>
+        <a href="{% url 'handleiding_deelnemers' %}">Deelnemers</a>
+        <p>De lijst met alle deelnemers: zoeken en filteren.</p>
+    </li>
+    <li>
+        <a href="{% url 'handleiding_deelnemers_detail' %}">Deelnemers detailpagina</a>
+        <p>Alle informatie over één deelnemer: algemeen en inschrijvingen.</p>
+    </li>
+    <li>
+        <a href="{% url 'handleiding_inschrijvingen' %}">Inschrijvingen</a>
+        <p>Alle informatie over één inschrijving: algemeen en vragen.</p>
+    </li>
+</ul>
+{% endblock handleiding_content %}

@@ -1,4 +1,4 @@
-# Inschrijfbeheer
+# Inschrijvingsbeheer
 
 ## Opzet
 
@@ -21,6 +21,8 @@ Alle dependencies zijn te vinden in [requirements.txt](../requirements.txt). Het
 Dit bestand moet de volgende attributen bevatten.
 
 ```shell
+DEBUG=false
+
 DJANGO_KEY=
 
 # attributen voor de nieuwe databank
@@ -51,21 +53,42 @@ DEELNAME_ATTEST_PDF=<pad naar template voor attest>
 MAIL_RELAY_HOST=
 MAIL_RELAY_PORT=
 FROM_MAIL_ADRESS=<mailadres waarvan de mails zullen uitgestuurd worden>
+
+MAIL_RELAY_HOST=<Host om mails te versturen>
+MAIL_RELAY_PORT=25
+FROM_MAIL_ADDRESS=<mailadres waarvan de mails moeten verstuurd worden>
+
+GA_RESTAPI_URL=https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/
+
+INTEGREAT_TERUGBLIK_DAGEN=14
+
+ACCOUNTS_URL="https://accounts.weezevent.com/realms/accounts/protocol/openid-connect/token"
+WEEZ_ORGANISATIE_ID=<ID van de organisatie in Weez>
+WEEZ_ACCESS_CLIENT_ID=
+WEEZ_ACCESS_CLIENT_SECRET=
 ```
 
 ## Uitvoeren
 
 ### Synchronisatie
 
+> [!IMPORTANT]
+> De eerste synchronisatie dient manueel uitgevoerd te worden met optie `--alles` voor beide databronnen
+> Dit zorgt dat alle evenementen gesynchroniseerd worden, de synchronisatietaak voert enkel incrementele synchronisaties.
+
 Doordat de functionaliteit van Inschrijfbeheer uit meerdere onderdelen bestaat dienen migratie van de gegevens en het uitvoeren van de webapplicatie apart gedaan te worden.
 
-Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer dient het commando [`sync`](./synchroniseer.md) uitgevoerd te worden.
+Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer kan het commando [`sync`](./synchroniseer.md) uitgevoerd te worden.
+Verder is er een taak die ieder uur een synchronisatie uitvoert van beide databronnen.
 
 ```shell
 > cd src
 > python manage.py sync <weez|integreat> [--dry-run] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
 > python manage.py sync --help # meer info
 ```
+
+> [!WARNING]
+> Voor het updaten van vragen van een formulier wordt een oude endpoint gebruikt, indien deze dus ooit verdwijnt kan deze functionaliteit niet gegarandeerd worden.
 
 ### Webapplicatie
 
@@ -125,3 +148,9 @@ Voor een worker op te starten die deze taken uitvoert, kan het volgende commando
         ├── logging
         └── mails
 ```
+
+## Toekomstig werk
+
+ - [ ] Registreren in Weez via Inschrijvingsbeheer
+ - [ ] Excels genereren van de antwoorden op vragen
+ - [ ] Toevoegen voor ondersteuning attest van vorming (met KAVO ID)

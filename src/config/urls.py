@@ -21,4 +21,5 @@ urlpatterns = [
     path("evenementen/", include("inschrijfbeheer.urls.evenementen_urls")),
     path("deelnemers/", include("inschrijfbeheer.urls.deelnemers_urls")),
     path("inschrijvingen/", include("inschrijfbeheer.urls.inschrijvingen_urls")),
+    path("handleidingen/", include("inschrijfbeheer.urls.handleidingen_urls")),
 ] + debug_toolbar_urls()

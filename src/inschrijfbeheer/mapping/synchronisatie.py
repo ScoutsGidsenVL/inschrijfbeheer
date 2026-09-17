@@ -35,7 +35,6 @@ class Synchronisatie(ABC):
     #: naam op de commandoregel, ook het voorvoegsel in de logs
     naam: ClassVar[str] = ""
 
-    #: configvelden die alleen deze bron gebruikt, voor de waarschuwing in het commando
     eigen_opties: ClassVar[frozenset[str]] = frozenset()
 
     def __init__(self, sync_config: SynchronisatieConfig | None = None):

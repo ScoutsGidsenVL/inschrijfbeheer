@@ -1,0 +1,28 @@
+{% extends "handleidingen/base.html" %}
+
+{% block nav_evenementen %}geselecteerd{% endblock nav_evenementen %}
+
+{% block handleiding_titel %}Evenementen{% endblock handleiding_titel %}
+
+{% block handleiding_content %}
+<p>Op deze pagina zie je alle evenementen. Je krijgt ze standaard per 50 te zien.</p>
+
+<h2>Filteren</h2>
+<p>Je filtert de lijst op:</p>
+<ul>
+    <li>ID of naam, via het zoekveld</li>
+    <li>Categorie</li>
+    <li>Herkomst: Weez of Inis</li>
+</ul>
+
+<h2>Sorteren</h2>
+<p>Je sorteert elke kolom alfabetisch door op de kolomtitel te klikken.</p>
+
+<h2>Naar een evenement</h2>
+<p>Je klikt op een rij om naar de <a href="/handleidingen/evenementen/detail">detailpagina van dat evenement</a> te gaan.</p>
+
+<div class="handleiding-info">
+    <div class="handleiding-info-icoon">💡</div>
+    <div class="handleiding-info-tekst">Een rode rij betekent dat het evenement een foutboodschap heeft. Zweef met je muis over de rij om de foutboodschap te lezen.</div>
+</div>
+{% endblock handleiding_content %}
