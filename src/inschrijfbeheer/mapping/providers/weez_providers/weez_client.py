@@ -34,9 +34,7 @@ from dotenv import load_dotenv
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-TOKEN_URL = "https://accounts.weezevent.com/realms/accounts/protocol/openid-connect/token"
-DEFAULT_BASE_URL = "https://api.weezevent.com"
-
+TOKEN_URL = os.getenv("ACCOUNTS_URL")
 
 class WeezError(Exception):
     """Basisfout voor alles wat misloopt in deze client."""
@@ -82,7 +80,6 @@ class WeezClient:
                 "of geef ze mee aan WeezClient(...)."
             )
 
-        self.base_url = (base_url or os.environ.get("WEEZ_API_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
         self.organisatie = organisatie or os.getenv("WEEZ_ORGANISATIE_ID")
         self.token_url = token_url
         self.timeout = timeout
@@ -151,9 +148,9 @@ class WeezClient:
             self._token_expires_at = 0.0
 
     def _url(self, path: str) -> str:
-        if path.startswith(("http://", "https://")):
-            return path
-        return f"{self.base_url}/{path.lstrip('/')}"
+        if  not path.startswith(("http://", "https://")):
+            raise ValueError("Pad moet beginnen met http(s)://")
+        return path
 
     def request(
         self,

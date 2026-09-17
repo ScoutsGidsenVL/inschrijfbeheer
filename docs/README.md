@@ -51,6 +51,19 @@ DEELNAME_ATTEST_PDF=<pad naar template voor attest>
 MAIL_RELAY_HOST=
 MAIL_RELAY_PORT=
 FROM_MAIL_ADRESS=<mailadres waarvan de mails zullen uitgestuurd worden>
+
+MAIL_RELAY_HOST=<Host om mails te versturen>
+MAIL_RELAY_PORT=25
+FROM_MAIL_ADDRESS=<mailadres waarvan de mails moeten verstuurd worden>
+
+GA_RESTAPI_URL=https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/
+
+INTEGREAT_TERUGBLIK_DAGEN=14
+
+ACCOUNTS_URL="https://accounts.weezevent.com/realms/accounts/protocol/openid-connect/token"
+WEEZ_ORGANISATIE_ID=<ID van de organisatie in Weez>
+WEEZ_ACCESS_CLIENT_ID=
+WEEZ_ACCESS_CLIENT_SECRET=
 ```
 
 ## Uitvoeren
