@@ -74,8 +74,7 @@
     color: #000;
 }
 
-.handleiding-info,
-.handleiding-waarschuwing {
+.handleiding-info {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -86,15 +85,6 @@
 
 .handleiding-info {
     background-color: #eef7fb;
-}
-
-.handleiding-waarschuwing {
-    background-color: #fdf3e3;
-}
-
-.handleiding-waarschuwing-icoon {
-    font-weight: bold;
-    color: #b9770e;
 }
 
 @media (max-width: 700px) {
