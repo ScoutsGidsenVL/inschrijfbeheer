@@ -1,4 +1,4 @@
-# Inschrijfbeheer
+# Inschrijvingsbeheer
 
 ## Opzet
 
