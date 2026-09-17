@@ -11,7 +11,15 @@
     **InschrijvingVraagAntwoord:** antwoorden van de deelnemers op de vragen
 """
 
+from datetime import timedelta
+import os
+from dotenv import load_dotenv
+
 from django.db import models, connection
+from django.utils import timezone
+
+load_dotenv()
+TERUGBLIK_DAGEN = int(os.getenv("INTEGREAT_TERUGBLIK_DAGEN"))
 
 
 def volgende_deelnemer_id():
@@ -112,6 +120,12 @@ class Evenement(models.Model):
 
     def __str__(self):
         return self.titel
+
+    @property
+    def auto_sync(self):
+        if self.is_weez:
+            return self.eindtijd > timezone.now()
+        return self.eindtijd + timedelta(days=TERUGBLIK_DAGEN) > timezone.now()
 
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
