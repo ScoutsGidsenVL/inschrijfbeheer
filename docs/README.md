@@ -57,9 +57,15 @@ FROM_MAIL_ADRESS=<mailadres waarvan de mails zullen uitgestuurd worden>
 
 ### Synchronisatie
 
+> [!IMPORTANT]
+> De eerste synchronisatie dient manueel uitgevoerd te worden met optie `--alles` voor beide databronnen
+> Dit zorgt dat alle evenementen gesynchroniseerd worden, de synchronisatietaak voert enkel incrementele synchronisaties.
+
 Doordat de functionaliteit van Inschrijfbeheer uit meerdere onderdelen bestaat dienen migratie van de gegevens en het uitvoeren van de webapplicatie apart gedaan te worden.
 
-Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer dient het commando [`sync`](./synchroniseer.md) uitgevoerd te worden.
+Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer kan het commando [`sync`](./synchroniseer.md) uitgevoerd te worden.
+
+Momenteel is er een taak die ieder uur een synchronisatie uitvoert van beide databronnen.
 
 ```shell
 > cd src
