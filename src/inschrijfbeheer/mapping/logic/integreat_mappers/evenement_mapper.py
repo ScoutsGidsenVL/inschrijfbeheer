@@ -38,7 +38,7 @@ class IntegreatEvenementMapper(Mapper[IntegreatSeminar, EvenementContext, Evenem
             velden={
                 "titel": tekst(bron.naam),
                 "beschrijving": tekst(bron.onderwerp),
-                "status": bron.status.code,
+                "status": bron.status.beschrijving,
                 "categorie": context.categorie,
                 "locatie_naam": bron.locatie_naam,
                 "locatie_straat": bron.locatie_straat,
