@@ -10,6 +10,13 @@
 <div class="evenement-hoofding">
     <div class="evenement-titel-rij">
         <button class="evenement-terug-knop" onclick="history.back()">Back</button>
+
+        {% if inschrijving.is_weez %}
+            <a href="https://admin.weezevent.com/ticket/O464400/E{{ inschrijving.evenement.id }}/manager/attendees/{{ inschrijving.id }}">
+                <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="evenement-icoon">
+            </a>
+        {% endif %}
+
         <h1 class="evenement-titel">{{ inschrijving.evenement }} - {{ inschrijving.lid }}</h1>
     </div>
     {% if inschrijving.evenement.foutboodschap %}
