@@ -362,14 +362,13 @@ class IntegreatSyncer(Synchronisatie):
 
     def __bewaar_seminar(self, seminar) -> Evenement | None:
         try:
-            status, _ = self.bewaar(self.statussen, self.statussen.mapper.map(seminar.status, None))
             categorie, _ = self.bewaar(
                 self.categorieen, self.categorieen.mapper.map(seminar.type, None)
             )
             evenement, _ = self.bewaar(
                 self.evenementen,
                 self.evenementen.mapper.map(
-                    seminar, EvenementContext(status=status, categorie=categorie)
+                    seminar, EvenementContext(categorie=categorie)
                 ),
             )
             return evenement
