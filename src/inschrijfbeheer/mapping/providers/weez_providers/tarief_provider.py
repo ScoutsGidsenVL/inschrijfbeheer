@@ -31,5 +31,7 @@ class WeezTariefProvider(LijstProvider[dict, TariefFilter]):
         if filter is None:
             raise ValueError("TariefFilter met een evenement_id is verplicht")
 
-        respons = self.client.get(f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{filter.evenement_id}/rates")
+        respons = self.client.get(
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{filter.evenement_id}/rates"
+        )
         return respons

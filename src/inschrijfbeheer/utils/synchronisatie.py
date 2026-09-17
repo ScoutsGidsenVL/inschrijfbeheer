@@ -56,4 +56,6 @@ def synchroniseer_evenement(evenement: Evenement) -> SynchronisatieInfo:
     """
     syncer = maak_syncer(evenement)
 
-    return syncer.voer_uit(partial(syncer.synchroniseer_evenement, str(evenement.id), sync_inschrijvingen=True))
+    return syncer.voer_uit(
+        partial(syncer.synchroniseer_evenement, str(evenement.id), sync_inschrijvingen=True)
+    )

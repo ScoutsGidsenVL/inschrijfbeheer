@@ -1,4 +1,4 @@
-"""Deze module bevat de logica om lidgegevens op te vragen van de Groepsadministratie aan de hand van SOAP"""
+"""Deze module bevat de logica om lidgegevens op te vragen van de Groepsadministratie"""
 
 import os
 from dataclasses import dataclass, field
@@ -108,7 +108,9 @@ class LidGegevens:
         for ruwe_groep in ruwe_groepen or []:
             functies = []
             functies_container = getattr(ruwe_groep, "functies", None)
-            ruwe_functies = getattr(functies_container, "functie", None) if functies_container else None
+            ruwe_functies = (
+                getattr(functies_container, "functie", None) if functies_container else None
+            )
 
             for ruwe_functie in ruwe_functies or []:
                 functies.append(

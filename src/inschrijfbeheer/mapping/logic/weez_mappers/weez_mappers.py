@@ -50,7 +50,9 @@ class InschrijvingsGegevens:
 
 def check_verplichte_vragen(vragen: list[dict] | None) -> tuple[bool, set]:
     """Controleert of het formulier alle verplichte vragen bevat."""
-    labels = {(vraag.get("question") or "").lower() for vraag in vragen or [] if vraag.get("question")}
+    labels = {
+        (vraag.get("question") or "").lower() for vraag in vragen or [] if vraag.get("question")
+    }
     return VERPLICHTE_VRAGEN.issubset(labels), VERPLICHTE_VRAGEN.difference(labels)
 
 
@@ -124,12 +126,15 @@ def los_lid_op(provider: LidProvider, gegevens: InschrijvingsGegevens) -> LidRes
             lidgegevens.voornaam == gegevens.voornaam,
             lidgegevens.naam == gegevens.achternaam,
             lidgegevens.emailadres == gegevens.mailadres,
-            datetime.strptime(lidgegevens.geboortedatum, "%Y-%m-%d") == datetime.strptime(gegevens.geboortedatum, "%d/%m/%Y"),
+            datetime.strptime(lidgegevens.geboortedatum, "%Y-%m-%d")
+            == datetime.strptime(gegevens.geboortedatum, "%d/%m/%Y"),
             lidgegevens.lidnummer == gegevens.lidnummer,
         ]
     )
 
     if aantal_overeenkomsten < 3:
-        return LidResultaat(foutboodschap=f"Onvoldoende matchende velden in inschrijving: {gegevens.lidnummer}")
+        return LidResultaat(
+            foutboodschap=f"Onvoldoende matchende velden in inschrijving: {gegevens.lidnummer}"
+        )
 
     return LidResultaat(lidgegevens=lidgegevens)

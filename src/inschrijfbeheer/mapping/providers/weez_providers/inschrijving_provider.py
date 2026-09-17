@@ -33,11 +33,16 @@ class WeezInschrijvingProvider(LijstProvider[dict, InschrijvingFilter]):
 
     def haal_op(self, identifier: str, evenement_id: str) -> dict | None:
         deelnemer = self.client.get(
-            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}" f"/events/{evenement_id}/attendees/{identifier}"
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}"
+            f"/events/{evenement_id}/attendees/{identifier}"
         )
 
         if not deelnemer:
-            logger.warning("Geen deelnemer gevonden bij Weez voor id %s in evenement %s", identifier, evenement_id)
+            logger.warning(
+                "Geen deelnemer gevonden bij Weez voor id %s in evenement %s",
+                identifier,
+                evenement_id,
+            )
             return None
         return deelnemer
 
@@ -50,10 +55,13 @@ class WeezInschrijvingProvider(LijstProvider[dict, InschrijvingFilter]):
             parameters["modified__gt"] = filter.sinds
 
         respons = self.client.get(
-            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}" f"/events/{filter.evenement_id}/attendees",
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}"
+            f"/events/{filter.evenement_id}/attendees",
             params=parameters,
         )
         if self.TEST:
             self.TEST = False
-        logger.debug("%s deelnemers opgehaald bij Weez voor evenement %s", len(respons), filter.evenement_id)
+        logger.debug(
+            "%s deelnemers opgehaald bij Weez voor evenement %s", len(respons), filter.evenement_id
+        )
         return respons

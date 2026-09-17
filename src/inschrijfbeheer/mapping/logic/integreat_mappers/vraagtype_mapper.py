@@ -15,7 +15,9 @@ class IntegreatVraagTypeMapper(Mapper[IntegreatSeminarFreeFieldType, None, Evene
     naam aanmaakte. Nu zijn ze gewone velden.
     """
 
-    def map(self, bron: IntegreatSeminarFreeFieldType, context: None = None) -> Doelgegevens[EvenementVraagType]:
+    def map(
+        self, bron: IntegreatSeminarFreeFieldType, context: None = None
+    ) -> Doelgegevens[EvenementVraagType]:
         naam = normaliseer_code(bron.code)
         if not naam:
             raise MappingFout("vraagtype zonder code")

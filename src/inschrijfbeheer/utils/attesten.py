@@ -36,7 +36,14 @@ def genereer_deelname_attest(inschrijving_id: str):
     overlay_buffer = BytesIO()
     pdf = canvas.Canvas(overlay_buffer, pagesize=(breedte, hoogte))
 
-    pdf.drawString(300, 545, f"{inschrijving.evenement.starttijd.strftime("%d/%m/%Y")} - {inschrijving.evenement.eindtijd.strftime("%d/%m/%Y")}")
+    start_format = inschrijving.evenement.starttijd.strftime("%d/%m/%Y")
+    eind_format = inschrijving.evenement.eindtijd.strftime("%d/%m/%Y")
+
+    pdf.drawString(
+        300,
+        545,
+        f"{start_format} - {eind_format}",
+    )
     pdf.drawString(300, 525, inschrijving.evenement.locatie_naam)
     pdf.drawString(300, 505, f"€ {'{0:.2f}'.format(inschrijving.prijs)}")
     pdf.drawString(300, 455, str(lidgegevens.lidnummer))

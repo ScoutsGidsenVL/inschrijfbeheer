@@ -19,10 +19,14 @@ class VraagContext:
     type: EvenementVraagType
 
 
-class IntegreatEvenementVraagMapper(Mapper[IntegreatSeminarFreeField, VraagContext, EvenementVraag]):
+class IntegreatEvenementVraagMapper(
+    Mapper[IntegreatSeminarFreeField, VraagContext, EvenementVraag]
+):
     """EvenementVraag uit een vrij veld van een seminar."""
 
-    def map(self, bron: IntegreatSeminarFreeField, context: VraagContext) -> Doelgegevens[EvenementVraag]:
+    def map(
+        self, bron: IntegreatSeminarFreeField, context: VraagContext
+    ) -> Doelgegevens[EvenementVraag]:
         vraag = tekst(bron.question)
         if not vraag:
             raise MappingFout(f"vrij veld {bron.oid} zonder vraagtekst")

@@ -79,7 +79,11 @@ def koppel_eigen_vragen(antwoorden: list[dict], form: dict) -> dict[int, str]:
     Returns:
         dict[int, str]: positie in de antwoordenlijst naar Weez-vraag-id
     """
-    posities = [positie for positie, antwoord in enumerate(antwoorden) if alias_van_label(antwoord.get("label")) is None]
+    posities = [
+        positie
+        for positie, antwoord in enumerate(antwoorden)
+        if alias_van_label(antwoord.get("label")) is None
+    ]
     ids = [sleutel for sleutel in form if sleutel not in STANDAARD_ALIASSEN]
 
     if len(posities) == len(ids):
@@ -95,7 +99,11 @@ def koppel_eigen_vragen(antwoorden: list[dict], form: dict) -> dict[int, str]:
     beschikbaar = {vraag_id: _normaliseer(form[vraag_id]) for vraag_id in ids}
     for positie in posities:
         gezocht = _normaliseer(antwoorden[positie].get("value"))
-        kandidaten = [vraag_id for vraag_id, waarde in beschikbaar.items() if waarde == gezocht and waarde != ""]
+        kandidaten = [
+            vraag_id
+            for vraag_id, waarde in beschikbaar.items()
+            if waarde == gezocht and waarde != ""
+        ]
         if len(kandidaten) == 1:
             vraag_id = kandidaten.pop()
             gekoppeld[positie] = vraag_id

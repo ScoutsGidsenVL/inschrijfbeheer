@@ -50,7 +50,7 @@ def check_rollen(func):
     """Functie die een decorator teruggeeft voor een bepaalde rol die gecheckt moet worden
 
     Args:
-        rol (str, optional): de rol die de persoon moet hebben binnen X1207G. Defaults to "personeel".
+        func (function): view waarvoor gecontroleerd moet worden
     """
 
     @wraps(func)
@@ -58,7 +58,12 @@ def check_rollen(func):
         try:
             profiel = haal_groepen(request)
         except (requests.RequestException, ValueError, AttributeError):
-            logger.exception("check_rollen faalde voor gebruiker %s op %s %s", request.user, request.method, request.path)
+            logger.exception(
+                "check_rollen faalde voor gebruiker %s op %s %s",
+                request.user,
+                request.method,
+                request.path,
+            )
             raise Http404()
 
         for groep in profiel.get("groepen", []):
@@ -67,7 +72,12 @@ def check_rollen(func):
                     if verantwoordelijkheid == "personeel":
                         return func(request, *args, **kwargs)
 
-        logger.warning("Gebruiker %s heeft geen toegang via X1027G/personeel (%s %s)", request.user, request.method, request.path)
+        logger.warning(
+            "Gebruiker %s heeft geen toegang via X1027G/personeel (%s %s)",
+            request.user,
+            request.method,
+            request.path,
+        )
         raise Http404()
 
     return login_required(wrapper)

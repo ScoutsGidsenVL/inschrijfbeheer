@@ -18,7 +18,9 @@ from inschrijfbeheer.mapping.integreat_syncer import IntegreatSyncer
 from inschrijfbeheer.mapping.synchronisatie import Synchronisatie, SynchronisatieConfig
 from inschrijfbeheer.mapping.weez_syncer import WeezSyncer
 
-BRONNEN: dict[str, type[Synchronisatie]] = {syncer.naam: syncer for syncer in (WeezSyncer, IntegreatSyncer)}
+BRONNEN: dict[str, type[Synchronisatie]] = {
+    syncer.naam: syncer for syncer in (WeezSyncer, IntegreatSyncer)
+}
 
 
 class Command(BaseCommand):
@@ -45,7 +47,10 @@ class Command(BaseCommand):
             "--terugblik-dagen",
             type=int,
             default=None,
-            help=("Alleen voor integreat: hoeveel dagen na de eindtijd van een seminar " "er nog gesynchroniseerd wordt"),
+            help=(
+                "Alleen voor integreat: hoeveel dagen na de eindtijd van een seminar "
+                "er nog gesynchroniseerd wordt"
+            ),
         )
 
     def handle(self, *args, **options):
@@ -60,7 +65,9 @@ class Command(BaseCommand):
         if len(bronnen) > 1:
             self.stdout.write(self.style.SUCCESS(f"Alle bronnen klaar: {', '.join(bronnen)}"))
 
-    def __waarschuw_over_ongebruikte_opties(self, bronnen: list[str], config: SynchronisatieConfig) -> None:
+    def __waarschuw_over_ongebruikte_opties(
+        self, bronnen: list[str], config: SynchronisatieConfig
+    ) -> None:
         """Zegt het wanneer je een optie meegeeft die voor geen enkele gekozen bron telt.
 
         Elke syncer somt in eigen_opties op welke configvelden alleen hij
@@ -74,4 +81,6 @@ class Command(BaseCommand):
             return
 
         namen = ", ".join("--" + veld.replace("_", "-") for veld in meegegeven)
-        self.stderr.write(self.style.WARNING(f"{namen} geldt niet voor {', '.join(bronnen)} en wordt genegeerd"))
+        self.stderr.write(
+            self.style.WARNING(f"{namen} geldt niet voor {', '.join(bronnen)} en wordt genegeerd")
+        )

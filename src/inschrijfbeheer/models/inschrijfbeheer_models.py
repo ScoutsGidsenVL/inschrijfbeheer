@@ -113,7 +113,9 @@ class Evenement(models.Model):
     locatie_postcode = models.CharField(null=True, blank=True)
     starttijd = models.DateTimeField(null=True)
     eindtijd = models.DateTimeField(null=True)
-    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie")
+    categorie = models.ForeignKey(
+        Categorie, on_delete=models.SET_NULL, null=True, db_column="categorie"
+    )
     is_weez = models.BooleanField(default=False, blank=True)
     laatste_sync = models.DateTimeField(auto_now=True)
     foutboodschap = models.TextField(null=True, blank=True)
@@ -147,7 +149,6 @@ class DeelnemerType(models.Model):
 
 def volgend_inschrijving_id():
     """Functie die een uniek ID genereert voor een Inschrijving.
-    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor inschrijvingen, dus deze moeten ingevuld worden.
 
     Returns:
         str: een uniek ID
@@ -176,7 +177,9 @@ class Inschrijving(models.Model):
     id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.ForeignKey(Deelnemer, db_column="lid", on_delete=models.RESTRICT)
-    deelnemertype = models.ForeignKey(DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True)
+    deelnemertype = models.ForeignKey(
+        DeelnemerType, db_column="type", on_delete=models.SET_NULL, null=True
+    )
     prijs = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     tijdstip = models.DateTimeField(null=True, blank=True)
     annulatie = models.DateTimeField(null=True, blank=True)
@@ -193,7 +196,12 @@ class Inschrijving(models.Model):
 
     @property
     def aanwezig(self):
-        return not self.annulatie and self.registratie and not self.lid.foutboodschap and not self.evenement.foutboodschap
+        return (
+            not self.annulatie
+            and self.registratie
+            and not self.lid.foutboodschap
+            and not self.evenement.foutboodschap
+        )
 
 
 class EvenementVraagType(models.Model):
@@ -216,7 +224,6 @@ class EvenementVraagType(models.Model):
 
 def volgend_evenement_vraag_id():
     """Functie die een uniek ID genereert voor een EvenementVraag.
-    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor vragen, dus deze moeten ingevuld worden.
 
     Returns:
         str: een uniek ID
@@ -233,7 +240,7 @@ class EvenementVraag(models.Model):
         id (str): id. Defaults to volgende nummer in een sequentie voor Weezevent
         type (EvenementVraagType): type van de vraag. Nullable
         vraag (str): vraag.
-        items (str): mogelijke antwoorden op de vraag (bij meerdere opties gescheiden door ';'). Nullable
+        items (str): mogelijke antwoorden op de vraag. Nullable
         evenement (Evenement): seminar waarvoor de vraag moet gesteld worden
         vereist (bool): geeft aan of de vraag vereist is. Nullable
         volgorde (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
@@ -254,7 +261,6 @@ class EvenementVraag(models.Model):
 
 def volgend_inschrijving_vraagantwoord_id() -> str:
     """Functie die een uniek ID genereert voor een InschrijvingVraagAntwoord.
-    Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor vragen, dus deze moeten ingevuld worden.
 
     Returns:
         str: een uniek ID

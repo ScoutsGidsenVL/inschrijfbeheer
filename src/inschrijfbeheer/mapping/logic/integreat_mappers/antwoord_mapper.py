@@ -17,10 +17,14 @@ class AntwoordContext:
     inschrijving: Inschrijving
 
 
-class IntegreatAntwoordMapper(Mapper[IntegreatRegistrationfreefield, AntwoordContext, InschrijvingVraagAntwoord]):
+class IntegreatAntwoordMapper(
+    Mapper[IntegreatRegistrationfreefield, AntwoordContext, InschrijvingVraagAntwoord]
+):
     """InschrijvingVraagAntwoord uit een antwoord op een vrij veld."""
 
-    def map(self, bron: IntegreatRegistrationfreefield, context: AntwoordContext) -> Doelgegevens[InschrijvingVraagAntwoord]:
+    def map(
+        self, bron: IntegreatRegistrationfreefield, context: AntwoordContext
+    ) -> Doelgegevens[InschrijvingVraagAntwoord]:
         return Doelgegevens(
             sleutels={"id": bron.oid},
             velden={

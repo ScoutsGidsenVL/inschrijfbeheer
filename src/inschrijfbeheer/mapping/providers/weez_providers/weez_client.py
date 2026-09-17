@@ -75,7 +75,10 @@ class WeezClient:
         self.client_id = client_id or os.environ.get("WEEZ_ACCESS_CLIENT_ID")
         self.client_secret = client_secret or os.environ.get("WEEZ_ACCESS_CLIENT_SECRET")
         if not self.client_id or not self.client_secret:
-            raise WeezAuthError("Zet WEEZ_ACCESS_CLIENT_ID en WEEZ_ACCESS_CLIENT_SECRET in je omgeving " "of geef ze mee aan WeezClient(...).")
+            raise WeezAuthError(
+                "Zet WEEZ_ACCESS_CLIENT_ID en WEEZ_ACCESS_CLIENT_SECRET in je omgeving "
+                "of geef ze mee aan WeezClient(...)."
+            )
 
         self.organisatie = organisatie or os.getenv("WEEZ_ORGANISATIE_ID")
         self.token_url = token_url
@@ -125,7 +128,8 @@ class WeezClient:
 
         if response.status_code != 200:
             raise WeezAuthError(
-                f"Token ophalen mislukte met status {response.status_code}. " f"Controleer je client id en secret. Antwoord: {response.text}"
+                f"Token ophalen mislukte met status {response.status_code}. "
+                f"Controleer je client id en secret. Antwoord: {response.text}"
             )
 
         payload = response.json()
@@ -134,7 +138,9 @@ class WeezClient:
             raise WeezAuthError(f"Geen access_token in het antwoord: {payload!r}")
 
         self._token = token
-        self._token_expires_at = time.time() + int(payload.get("expires_in", 300)) - self.expiry_margin
+        self._token_expires_at = (
+            time.time() + int(payload.get("expires_in", 300)) - self.expiry_margin
+        )
         logger.debug("Token geldig tot %s", self._token_expires_at)
 
     def invalidate_token(self) -> None:

@@ -7,7 +7,12 @@ from typing import Callable, ClassVar, TypeVar
 from django.db import transaction
 
 from inschrijfbeheer.mapping.logic.mapper import Doelgegevens
-from inschrijfbeheer.mapping.utils import InschrijfbeheerDatabank, SynchronisatieConfig, SynchronisatieInfo, SyncOnderdelen
+from inschrijfbeheer.mapping.utils import (
+    InschrijfbeheerDatabank,
+    SynchronisatieConfig,
+    SynchronisatieInfo,
+    SyncOnderdelen,
+)
 
 N = TypeVar("N")
 
@@ -51,7 +56,9 @@ class Synchronisatie(ABC):
         raise NotImplementedError("Deze methode dient geimplementeerd door een subklasse")
 
     @abstractmethod
-    def synchroniseer_evenement(self, evenement_id: str, sync_inschrijvingen: bool = False) -> SynchronisatieInfo:
+    def synchroniseer_evenement(
+        self, evenement_id: str, sync_inschrijvingen: bool = False
+    ) -> SynchronisatieInfo:
         raise NotImplementedError("Deze methode dient geimplementeerd door een subklasse")
 
     @abstractmethod

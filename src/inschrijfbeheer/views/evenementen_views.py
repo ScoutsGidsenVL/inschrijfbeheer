@@ -3,7 +3,13 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from inschrijfbeheer.models import Categorie, Evenement, EvenementVraag, Inschrijving, InschrijvingVraagAntwoord
+from inschrijfbeheer.models import (
+    Categorie,
+    Evenement,
+    EvenementVraag,
+    Inschrijving,
+    InschrijvingVraagAntwoord,
+)
 from inschrijfbeheer.tasks import defer_mail_attesten, defer_synchroniseer_evenement
 from inschrijfbeheer.utils.attesten import genereer_zip_attesten
 from inschrijfbeheer.utils.auth import check_rollen
@@ -38,7 +44,9 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     weez_filter: str = request.GET.get("weez", "")
     sorteer: str = request.GET.get("sorteer", "").strip()
 
-    evenementen = Evenement.objects.select_related("categorie").filter(Q(titel__icontains=zoekterm) | Q(id__icontains=zoekterm))
+    evenementen = Evenement.objects.select_related("categorie").filter(
+        Q(titel__icontains=zoekterm) | Q(id__icontains=zoekterm)
+    )
 
     if categorie_naam:
         categorie = Categorie.objects.get(naam=categorie_naam)
@@ -108,7 +116,9 @@ def evenement_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
 
     kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
 
-    queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
+    queryset = Inschrijving.objects.filter(evenement=id).select_related(
+        "deelnemertype", "evenement", "lid"
+    )
     if zoekterm:
         queryset = queryset.filter(
             Q(lid__id__icontains=zoekterm)
@@ -155,11 +165,17 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 
     vragen = EvenementVraag.objects.filter(evenement=id).select_related("type").order_by("volgorde")
-    return render(request, "evenementen/vragen/evenementen_vragen.html", {"vragen": vragen, "evenement": evenement})
+    return render(
+        request,
+        "evenementen/vragen/evenementen_vragen.html",
+        {"vragen": vragen, "evenement": evenement},
+    )
 
 
 @check_rollen
-def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id: str) -> HttpResponse:
+def evenement_vraag_antwoorden(
+    request: HttpRequest, evenement_id: str, vraag_id: str
+) -> HttpResponse:
     """View voor het tonen van de antwoorden op vragen van een evenement.
     Deze view wordt gebruikt voor `/evenementen/<id>/vragen/<vraag_id>/antwoorden`.
 
@@ -176,14 +192,18 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
 
     antwoorden = InschrijvingVraagAntwoord.objects.filter(vraag=vraag_id)
     return render(
-        request, "evenementen/vragen/evenementen_vragen_antwoorden.html", {"antwoorden": antwoorden, "vraag": vraag, "evenement": evenement}
+        request,
+        "evenementen/vragen/evenementen_vragen_antwoorden.html",
+        {"antwoorden": antwoorden, "vraag": vraag, "evenement": evenement},
     )
 
 
 @check_rollen
-def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement_id: str) -> HttpResponse:
+def evenementen_inschrijvingen_attesten_download(
+    request: HttpRequest, evenement_id: str
+) -> HttpResponse:
     """Functie voor het downloaden van de attesten van alle aanwezige deelnemers.
-    Controleert voor alle inschrijvingen of een deelnemer geldig is en aanwezig was op basis van annulatie.
+    Controleert voor alle inschrijvingen of een deelnemer geldig is en aanwezig was.
 
     Deze functie wordt gebruikt op `/evenementen/<evenement_id>/inschrijvingen/attesten/download`
 
@@ -195,7 +215,11 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
         HttpResponse: HTML document dat een zip bevat met alle attesten
     """
     inschrijvingen = Inschrijving.objects.select_related("lid", "evenement").filter(
-        evenement=evenement_id, annulatie__isnull=True, registratie=True, lid__foutboodschap__isnull=True, evenement__foutboodschap__isnull=True
+        evenement=evenement_id,
+        annulatie__isnull=True,
+        registratie=True,
+        lid__foutboodschap__isnull=True,
+        evenement__foutboodschap__isnull=True,
     )
     buffer = genereer_zip_attesten(inschrijvingen)
 
@@ -205,9 +229,11 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
 
 
 @check_rollen
-def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id: str) -> HttpResponse:
+def evenementen_inschrijvingen_attesten_mail(
+    request: HttpRequest, evenement_id: str
+) -> HttpResponse:
     """Functie voor het mailen van de attesten van alle aanwezige deelnemers.
-    Controleert voor alle inschrijvingen of een deelnemer geldig is en aanwezig was op basis van annulatie.
+    Controleert voor alle inschrijvingen of een deelnemer geldig is en aanwezig was.
 
     Deze functie wordt gebruikt op `/evenementen/<evenement_id>/inschrijvingen/attesten/mail`
 

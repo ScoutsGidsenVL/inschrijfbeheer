@@ -5,7 +5,7 @@ De views in deze module worden gebruikt voor het pad `/deelnemers/*`
 ## Functies:
     **deelnemers_lijst:** Geeft een view voor het oplijsten van alle deelnemers
     **deelnemers_detail:** Geeft een view voor het tonen van details over een deelnemer
-    **deelnemers_inschrijvingen:** Geeft een view voor het tonen van de inschrijvingen van een deelnemer
+    **deelnemers_inschrijvingen:** View voor inshrijvingen van een deelnemer
 """
 
 from django.db.models import Q
@@ -33,7 +33,10 @@ def deelnemers_lijst(request: HttpRequest) -> HttpResponse:
     """
     zoekterm = request.GET.get("q", "")
     deelnemers = Deelnemer.objects.filter(
-        Q(id__icontains=zoekterm) | Q(voornaam__icontains=zoekterm) | Q(achternaam__icontains=zoekterm) | Q(mailadres__icontains=zoekterm)
+        Q(id__icontains=zoekterm)
+        | Q(voornaam__icontains=zoekterm)
+        | Q(achternaam__icontains=zoekterm)
+        | Q(mailadres__icontains=zoekterm)
     ).distinct()
 
     deelnemers, querystring = pagineer(request, deelnemers)
@@ -90,7 +93,9 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     """View die alle inschrijvingen voor een deelnemer oplijst.
     Deze view wordt gebruikt voor /deelnemers/<id>/inschrijvingen.
 
-    De pagina laat filtering toe op basis van de naam of het id van een evenement en de aanwezigheid van de deelnemer.
+    De pagina laat filtering toe op basis van:
+     - de naam of het id van een evenement
+     - de aanwezigheid van de deelnemer
 
     Args:
         request (HttpRequest): HTTP request voor de pagina
@@ -106,7 +111,9 @@ def deelnemers_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     inschrijvingen = Inschrijving.objects.filter(lid=id).select_related("evenement")
 
     if zoekterm:
-        inschrijvingen = inschrijvingen.filter(Q(evenement__id__icontains=zoekterm) | Q(evenement__titel__icontains=zoekterm))
+        inschrijvingen = inschrijvingen.filter(
+            Q(evenement__id__icontains=zoekterm) | Q(evenement__titel__icontains=zoekterm)
+        )
 
     if aanwezig_filter == "1":
         inschrijvingen = inschrijvingen.filter(annulatie__isnull=True)

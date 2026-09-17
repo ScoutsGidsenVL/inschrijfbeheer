@@ -27,7 +27,9 @@ class IntegreatInschrijvingMapper(Mapper[IntegreatRegistration, InschrijvingCont
     en er een tweede rij met dezelfde primaire sleutel aangemaakt werd.
     """
 
-    def map(self, bron: IntegreatRegistration, context: InschrijvingContext) -> Doelgegevens[Inschrijving]:
+    def map(
+        self, bron: IntegreatRegistration, context: InschrijvingContext
+    ) -> Doelgegevens[Inschrijving]:
         return Doelgegevens(
             sleutels={"id": bron.oid},
             velden={

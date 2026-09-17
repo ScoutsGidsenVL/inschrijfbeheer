@@ -46,7 +46,9 @@ class SynchronisatieInfo:
     """Klasse die de resultaten van een synchronisatie bijhoudt."""
 
     _status: SynchronisatieStatus = SynchronisatieStatus.WACHTEND
-    resultaten: dict[type, ModelResultaat] = field(default_factory=lambda: defaultdict(ModelResultaat))
+    resultaten: dict[type, ModelResultaat] = field(
+        default_factory=lambda: defaultdict(ModelResultaat)
+    )
 
     def registreer(self, model: type, actie: SynchronisatieActie) -> None:
         self.resultaten[model].registreer(actie)
@@ -59,7 +61,8 @@ class SynchronisatieInfo:
         for model, resultaat in self.resultaten.items():
             weergave += (
                 f"{model.__name__} model maakte {resultaat.aangemaakt} nieuwe objecten aan, "
-                f"werkte {resultaat.bijgewerkt} objecten bij en sloeg {resultaat.overgeslagen} objecten over\n"
+                f"werkte {resultaat.bijgewerkt} objecten bij "
+                f"en sloeg {resultaat.overgeslagen} objecten over\n"
             )
         return weergave
 

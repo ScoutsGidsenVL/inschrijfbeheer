@@ -36,7 +36,9 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
     inschrijving = Inschrijving.objects.select_related("lid", "evenement").get(id=inschrijving_id)
 
     vraag_antwoorden = (
-        InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+        InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id)
+        .select_related("vraag", "vraag__type")
+        .order_by("vraag__volgorde")
     )
     return render(
         request,
@@ -50,9 +52,13 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
 @check_rollen
 def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
-    inschrijving = Inschrijving.objects.select_related("lid", "evenement", "deelnemertype").get(id=inschrijving_id)
+    inschrijving = Inschrijving.objects.select_related("lid", "evenement", "deelnemertype").get(
+        id=inschrijving_id
+    )
     vraag_antwoorden = (
-        InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+        InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id)
+        .select_related("vraag", "vraag__type")
+        .order_by("vraag__volgorde")
     )
 
     if request.method == "POST":

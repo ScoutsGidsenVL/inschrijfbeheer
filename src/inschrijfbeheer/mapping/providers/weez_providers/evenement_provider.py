@@ -19,7 +19,8 @@ class EvenementFilter:
 class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
     """Evenementen ophalen uit de WeezTicket API
 
-    Maakt gebruik van de WeezClient om API requests te maken en zo alle evenementen of een specifiek evenement op te halen.
+    Maakt gebruik van de WeezClient om API requests te maken
+    en zo alle evenementen of een specifiek evenement op te halen.
     """
 
     MODULE = "ticket"
@@ -29,7 +30,9 @@ class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
         self.client = client
 
     def haal_op(self, identifier: str) -> dict | None:
-        evenement = self.client.get(f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{identifier}")
+        evenement = self.client.get(
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{identifier}"
+        )
         if evenement is None:
             logger.warning("Geen evenement gevonden bij Weez voor id %s", identifier)
         return evenement
@@ -38,7 +41,7 @@ class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
         """Haalt alle evenementen op
 
         Args:
-            filter (EvenementFilter | None, optional): filter die kan aangeven of alle evenementen moeten worden opgehaald. Defaults to None.
+            filter (EvenementFilter | None, optional): filter voor de provider. Defaults to None.
 
         Returns:
             Iterable[dict]: lijst van evenementen zoals teruggegeven door de API en gefilterd
@@ -47,7 +50,8 @@ class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
             filter = EvenementFilter()
 
         respons = self.client.get(
-            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events", params={"time_status": "terminated"}
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events",
+            params={"time_status": "terminated"},
         )
 
         if filter.alles:

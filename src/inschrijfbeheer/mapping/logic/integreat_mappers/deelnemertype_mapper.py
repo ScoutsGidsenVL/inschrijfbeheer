@@ -16,5 +16,7 @@ class IntegreatDeelnemerTypeMapper(Mapper[IntegreatParticipantType, None, Deelne
     quota wiste en de inschrijvingsperiode naar het huidige moment opschoof.
     """
 
-    def map(self, bron: IntegreatParticipantType, context: None = None) -> Doelgegevens[DeelnemerType]:
+    def map(
+        self, bron: IntegreatParticipantType, context: None = None
+    ) -> Doelgegevens[DeelnemerType]:
         return Doelgegevens(sleutels={"id": str(bron.oid)}, velden={"naam": tekst(bron.naam)})
