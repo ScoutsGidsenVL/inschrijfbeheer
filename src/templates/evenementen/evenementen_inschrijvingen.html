@@ -20,9 +20,23 @@
     </label>
     <button type="submit">Filter</button>
 </form>
+
+<div class="inschrijving-acties" data-bulk-url="{% url "inschrijvingen_registreren" %}">
+    <button type="button" id="registreer-aanwezig" disabled>
+        Registreer selectie als aanwezig (<span class="selectie-teller">0</span>)
+    </button>
+    <button type="button" id="registreer-afwezig" disabled>
+        Zet selectie op afwezig (<span class="selectie-teller">0</span>)
+    </button>
+    <span id="registreer-voortgang" aria-live="polite"></span>
+</div>
+
 <table class="inschrijving-tabel">
     <thead>
         <tr>
+            <th class="selectie-cel">
+                <input type="checkbox" id="selecteer-alles" aria-label="Selecteer alle inschrijvingen op deze pagina">
+            </th>
             <th>ID</th>
             <th>Deelnemer</th>
             <th>Deelnemertype</th>
@@ -37,18 +51,160 @@
             <tr class="inschrijving-rij {% if inschrijving.lid.foutboodschap %}foutrij{% endif %}"
                 onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=inschrijving.id %}'"
                 {% if inschrijving.lid.foutboodschap %}title="{{ inschrijving.lid.foutboodschap }}"{% endif %}>
+                <td class="selectie-cel" onclick="event.stopPropagation()">
+                    <input type="checkbox"
+                           class="selectie-vinkje"
+                           data-id="{{ inschrijving.id }}"
+                           aria-label="Selecteer {{ inschrijving.lid }}">
+                </td>
                 <td>{{ inschrijving.id }}</td>
                 <td>{{ inschrijving.lid }}</td>
                 <td>{{ inschrijving.deelnemertype }}</td>
                 <td>{{ inschrijving.tijdstip|date:"d/m/Y H:i" }}</td>
                 <td>{{ inschrijving.prijs }}</td>
                 <td>{{ inschrijving.annulatie_reden|default:"" }}</td>
-                <td><input type="checkbox" disabled {% if inschrijving.aanwezig %}checked{% endif %}></td>
+                <td class="aanwezig-cel" data-aanwezig="{{ inschrijving.aanwezig|yesno:'1,0' }}">
+                    <span class="aanwezig-waarde">{% if inschrijving.aanwezig %}✓{% else %}–{% endif %}</span>
+                    <span class="aanwezig-status" aria-live="polite"></span>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 {% include "widgets/paginering.html" with pagina=pagina %}
+
+<script>
+(function () {
+    const csrfToken = "{{ csrf_token }}";
+    const bulkUrl = document.querySelector(".inschrijving-acties").dataset.bulkUrl;
+    const vinkjes = Array.from(document.querySelectorAll(".selectie-vinkje"));
+    const selecteerAlles = document.getElementById("selecteer-alles");
+    const tellers = Array.from(document.querySelectorAll(".selectie-teller"));
+    const knoppen = [
+        document.getElementById("registreer-aanwezig"),
+        document.getElementById("registreer-afwezig"),
+    ];
+    const voortgang = document.getElementById("registreer-voortgang");
+
+    function selectie() {
+        return vinkjes.filter(function (vinkje) { return vinkje.checked; });
+    }
+
+    function werkKnoppenBij() {
+        const aantal = selectie().length;
+        tellers.forEach(function (teller) { teller.textContent = aantal; });
+        knoppen.forEach(function (knop) { knop.disabled = aantal === 0; });
+        if (selecteerAlles) {
+            selecteerAlles.checked = aantal > 0 && aantal === vinkjes.length;
+            selecteerAlles.indeterminate = aantal > 0 && aantal < vinkjes.length;
+        }
+    }
+
+    function toonStatus(vinkje, tekst, uitleg) {
+        const status = vinkje.closest("tr").querySelector(".aanwezig-status");
+        status.textContent = tekst;
+        status.title = uitleg || "";
+    }
+
+    function toonAanwezigheid(vinkje, aanwezig) {
+        const cel = vinkje.closest("tr").querySelector(".aanwezig-cel");
+        cel.dataset.aanwezig = aanwezig ? "1" : "0";
+        cel.querySelector(".aanwezig-waarde").textContent = aanwezig ? "✓" : "–";
+    }
+
+    function verwerkSelectie(aanwezig) {
+        const rijen = selectie();
+        if (!rijen.length) {
+            return;
+        }
+
+        knoppen.forEach(function (knop) { knop.disabled = true; });
+        voortgang.textContent = "Bezig met registreren van " + rijen.length + " deelnemer(s)…";
+        rijen.forEach(function (vinkje) { toonStatus(vinkje, "…", "Bezig met registreren"); });
+
+        const vinkjePerId = {};
+        rijen.forEach(function (vinkje) { vinkjePerId[vinkje.dataset.id] = vinkje; });
+
+        fetch(bulkUrl, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({
+                inschrijving_ids: rijen.map(function (vinkje) { return Number(vinkje.dataset.id); }),
+                aanwezig: aanwezig,
+            }),
+        })
+            .then(function (antwoord) {
+                return antwoord.json()
+                    .catch(function () { return {}; })
+                    .then(function (gegevens) {
+                        if (!antwoord.ok) {
+                            throw new Error(gegevens.boodschap || antwoord.statusText);
+                        }
+                        return gegevens;
+                    });
+            })
+            .then(function (gegevens) {
+                let gelukt = 0;
+                let mislukt = 0;
+
+                gegevens.resultaten.forEach(function (resultaat) {
+                    const vinkje = vinkjePerId[resultaat.id];
+                    if (!vinkje) {
+                        return;
+                    }
+                    if (resultaat.aanwezig === null) {
+                        toonStatus(vinkje, "✗", resultaat.boodschap);
+                        mislukt++;
+                        return;
+                    }
+                    toonAanwezigheid(vinkje, resultaat.aanwezig);
+                    if (resultaat.scan_gelukt === false) {
+                        toonStatus(vinkje, "⚠", resultaat.boodschap);
+                    } else {
+                        toonStatus(vinkje, "✓", "Geregistreerd");
+                    }
+                    vinkje.checked = false;
+                    gelukt++;
+                });
+
+                voortgang.textContent = mislukt
+                    ? gelukt + " verwerkt, " + mislukt + " mislukt"
+                    : gelukt + " verwerkt";
+            })
+            .catch(function (fout) {
+                rijen.forEach(function (vinkje) { toonStatus(vinkje, "✗", fout.message); });
+                voortgang.textContent = "Registreren mislukt: " + fout.message;
+            })
+            .finally(function () {
+                werkKnoppenBij();
+            });
+    }
+
+    vinkjes.forEach(function (vinkje) {
+        vinkje.addEventListener("change", werkKnoppenBij);
+    });
+
+    if (selecteerAlles) {
+        selecteerAlles.addEventListener("change", function () {
+            vinkjes.forEach(function (vinkje) { vinkje.checked = selecteerAlles.checked; });
+            werkKnoppenBij();
+        });
+    }
+
+    document.getElementById("registreer-aanwezig").addEventListener("click", function () {
+        verwerkSelectie(true);
+    });
+
+    document.getElementById("registreer-afwezig").addEventListener("click", function () {
+        verwerkSelectie(false);
+    });
+
+    werkKnoppenBij();
+})();
+</script>
 
 {% endblock evenementen_content %}

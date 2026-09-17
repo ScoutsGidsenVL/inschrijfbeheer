@@ -3,16 +3,20 @@
 ## Functies:
     **inschrijvingen_detail:** Geeft een view voor het tonen van alle details van een inschrijving
 """
+import json
+
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse, Http404
+from django.http import HttpRequest, HttpResponse, Http404, JsonResponse
 from django.contrib import messages
 import logging
+from django.views.decorators.http import require_http_methods
 
 from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.utils.auth import check_rollen
 from inschrijfbeheer.utils.attesten import genereer_deelname_attest
 from inschrijfbeheer.utils.mailer import stuur_attest_mail
 from inschrijfbeheer.tasks import defer_synchroniseer_inschrijvingen
+from inschrijfbeheer.utils.scanner import WeezScanFout, stuur_scan
 from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van
 
@@ -133,3 +137,82 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
         messages.success(request, "Het attest werd succesvol verstuurd.")
         return redirect("inschrijving_detail", inschrijving_id=inschrijving_id)
     raise Http404()
+
+
+@check_rollen
+@require_http_methods(["PATCH"])
+def inschrijvingen_registreren(request):
+    """Zet de aanwezigheid van meerdere inschrijvingen in één keer en stuur de scans door.
+
+    Body: {"inschrijving_ids": [1, 2, 3], "aanwezig": true}
+
+    Antwoord: {"resultaten": [
+        {"id": 1, "aanwezig": bool of null, "scan_gelukt": bool, "boodschap": str}, ...
+    ]}
+    Een niet-gevonden id krijgt "aanwezig": null en "scan_gelukt": false terug.
+    """
+    try:
+        gegevens = json.loads(request.body or b"{}")
+    except ValueError:
+        return JsonResponse({"boodschap": "Stuur geldige JSON mee."}, status=400)
+
+    inschrijving_ids = gegevens.get("inschrijving_ids")
+    if not isinstance(inschrijving_ids, list) or not inschrijving_ids:
+        return JsonResponse(
+            {"boodschap": "Het veld inschrijving_ids moet een niet-lege lijst zijn."},
+            status=400,
+        )
+    if not all(isinstance(inschrijving_id, int) for inschrijving_id in inschrijving_ids):
+        return JsonResponse(
+            {"boodschap": "inschrijving_ids moet een lijst van getallen zijn."}, status=400
+        )
+
+    aanwezig = gegevens.get("aanwezig", True)
+    if not isinstance(aanwezig, bool):
+        return JsonResponse(
+            {"boodschap": "Het veld aanwezig moet true of false zijn."}, status=400
+        )
+
+    inschrijvingen = {
+        inschrijving.pk: inschrijving
+        for inschrijving in Inschrijving.objects.filter(pk__in=inschrijving_ids)
+    }
+
+    resultaten = []
+    for inschrijving_id in inschrijving_ids:
+        inschrijving = inschrijvingen.get(str(inschrijving_id))
+        if inschrijving is None:
+            resultaten.append(
+                {
+                    "id": inschrijving_id,
+                    "aanwezig": None,
+                    "scan_gelukt": False,
+                    "boodschap": "Inschrijving niet gevonden.",
+                }
+            )
+            continue
+
+        inschrijving.registratie = aanwezig
+        inschrijving.save(update_fields=["registratie"])
+
+        scan_gelukt = True
+        boodschap = ""
+        try:
+            stuur_scan(inschrijving.weez_barcode, status=1 if aanwezig else 0)
+        except WeezScanFout as fout:
+            scan_gelukt = False
+            boodschap = str(fout)
+            logger.warning(
+                "Scan voor inschrijving %s mislukte: %s", inschrijving.pk, fout
+            )
+
+        resultaten.append(
+            {
+                "id": inschrijving.pk,
+                "aanwezig": inschrijving.aanwezig,
+                "scan_gelukt": scan_gelukt,
+                "boodschap": boodschap,
+            }
+        )
+
+    return JsonResponse({"resultaten": resultaten})
