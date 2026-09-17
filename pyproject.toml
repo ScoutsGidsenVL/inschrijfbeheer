@@ -1,6 +1,10 @@
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = [
+  "migrations",
+  "!migrations/0001_initial.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]  # errors, fouten, import-sortering
