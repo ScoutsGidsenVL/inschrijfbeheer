@@ -146,3 +146,7 @@ Voor een worker op te starten die deze taken uitvoert, kan het volgende commando
         ├── logging
         └── mails
 ```
+
+## Toekomstig werk
+
+ [ ] 
