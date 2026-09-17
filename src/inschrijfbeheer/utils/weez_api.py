@@ -1,7 +1,7 @@
 """Module met met hulpfuncties voor de API van Weez
 
 ## Functies:
-    **doe_weez_get:** maakt een GET request naar de Weez API met de nodige extra parameters
+    **doe_weez_patch:** maakt een PATCH request naar de Weez API met de nodige extra parameters
 """
 from requests import get, Response, Session
 import json
@@ -15,31 +15,6 @@ WEEZ_API_KEY = os.getenv("WEEZ_API_KEY")
 
 def maak_sessie() -> Session:
     return Session()
-
-def doe_weez_get(sessie: Session, url: str, parameters: dict = {}) -> Response:
-    """Doet een GET request naar de API van Weez met de nodige extra parameters
-
-    Args:
-        sessie (Session): sessie waarbinnen de requests gemaakt kunnen worden
-        url (str): url waar de request gemaakt moet worden, exclusief BASE_URL
-        parameters (dict): dict met extra URL parameters. Defaults to {}
-
-    Returns:
-        Response: respons van de API
-
-    Raises:
-        HTTPError: indien de request een foutstatus ontvangt
-    """
-    extra_parameters = ''.join([f"&{param}={waarde}" for param, waarde in parameters.items()])
-
-    response = get(
-        f"{BASE_URL}{url}?api_key={WEEZ_API_KEY}&access_token={WEEZ_ACCESS_TOKEN}{extra_parameters}",
-        timeout=10
-    )
-
-    response.raise_for_status()
-
-    return response.json()
 
 
 def doe_weez_patch(sessie: Session, url: str, data: dict) -> Response:

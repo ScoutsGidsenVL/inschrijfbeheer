@@ -77,14 +77,16 @@ WEEZ_ACCESS_CLIENT_SECRET=
 Doordat de functionaliteit van Inschrijfbeheer uit meerdere onderdelen bestaat dienen migratie van de gegevens en het uitvoeren van de webapplicatie apart gedaan te worden.
 
 Voor het uitvoeren van een migratie van de data van Integreat naar de databank van Inschrijfbeheer kan het commando [`sync`](./synchroniseer.md) uitgevoerd te worden.
-
-Momenteel is er een taak die ieder uur een synchronisatie uitvoert van beide databronnen.
+Verder is er een taak die ieder uur een synchronisatie uitvoert van beide databronnen.
 
 ```shell
 > cd src
 > python manage.py sync <weez|integreat> [--dry-run] [--alles] [--terugblik-dagen TERUG_BLIKDAGEN]
 > python manage.py sync --help # meer info
 ```
+
+> [!WARNING]
+> Voor het updaten van vragen van een formulier wordt een oude endpoint gebruikt, indien deze dus ooit verdwijnt kan deze functionaliteit niet gegarandeerd worden.
 
 ### Webapplicatie
 
