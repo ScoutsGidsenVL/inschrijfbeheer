@@ -174,8 +174,10 @@ def inschrijvingen_registreren(request):
         )
 
     inschrijvingen = {
-        inschrijving.pk: inschrijving
-        for inschrijving in Inschrijving.objects.filter(pk__in=inschrijving_ids)
+        inschrijving.id: inschrijving
+        for inschrijving in Inschrijving.objects.filter(
+            pk__in=inschrijving_ids, is_weez=False
+        )
     }
 
     resultaten = []
