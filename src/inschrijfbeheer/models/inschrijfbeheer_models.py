@@ -149,6 +149,7 @@ class Inschrijving(models.Model):
         annulatie_reden (str): reden van de annulatie. Nullable, null als niet geannuleerd
         registratie (bool): geeft aan of een deelnemer aanwezig was
         is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
+        weez_barcode (str): id van de barcode indien weez, gebruikt om te scannen
     """
     id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
@@ -160,6 +161,7 @@ class Inschrijving(models.Model):
     annulatie_reden = models.TextField(null=True, blank=True)
     registratie = models.BooleanField(default=False)
     is_weez = models.BooleanField(default=False, blank=True)
+    weez_barcode = models.CharField(null=True, blank=True)
 
     class Meta:
         app_label = "inschrijfbeheer"

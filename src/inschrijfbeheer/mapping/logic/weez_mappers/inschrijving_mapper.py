@@ -47,7 +47,8 @@ class WeezInschrijvingMapper(Mapper[dict, InschrijvingContext, Inschrijving]):
                 "is_weez": True,
                 "annulatie": annulatie,
                 "annulatie_reden": "Inschrijving verwijderd uit Weez" if annulatie else None,
-                "registratie": bron.get("scanned", False)
+                "registratie": bron.get("scanned", False),
+                "weez_barcode": bron.get("barcode")
             },
             vervang_bestaande=True,
             vervang_sleutels={
