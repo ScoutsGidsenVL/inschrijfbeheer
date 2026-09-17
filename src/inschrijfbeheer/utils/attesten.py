@@ -39,7 +39,7 @@ def genereer_deelname_attest(inschrijving_id: str):
 
     pdf.drawString(300, 545, f"{inschrijving.evenement.starttijd.strftime("%d/%m/%Y")} - {inschrijving.evenement.eindtijd.strftime("%d/%m/%Y")}")
     pdf.drawString(300, 525, inschrijving.evenement.locatie_naam)
-    pdf.drawString(300, 505, f"€ {'{:.2g}'.format(inschrijving.prijs)}")
+    pdf.drawString(300, 505, f"€ {'{0:.2f}'.format(inschrijving.prijs)}")
     pdf.drawString(300, 455, str(lidgegevens.lidnummer))
     pdf.drawString(300, 435, lidgegevens.volledige_naam)
     pdf.drawString(300, 415, __bepaal_postadres(lidgegevens))
