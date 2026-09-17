@@ -1,15 +1,14 @@
-from io import BytesIO
-import zipfile
-from pypdf import PdfReader, PdfWriter
-from dotenv import load_dotenv
-import os
 import logging
+import os
+import zipfile
+from io import BytesIO
 
-from reportlab.lib.pagesizes import A4
+from dotenv import load_dotenv
+from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 
 from inschrijfbeheer.models import Inschrijving
-from inschrijfbeheer.utils.soap import haal_lidgegevens, LidGegevens
+from inschrijfbeheer.utils.soap import LidGegevens, haal_lidgegevens
 
 load_dotenv()
 PDF_PAD = os.getenv("DEELNAME_ATTEST_PDF")
@@ -60,6 +59,7 @@ def genereer_deelname_attest(inschrijving_id: str):
     resultaat_buffer.seek(0)
     logger.info(f"Attest gegenereerd voor {lidgegevens.volledige_naam}")
     return resultaat_buffer
+
 
 def genereer_zip_attesten(inschrijvingen: list[Inschrijving]) -> BytesIO:
     buffer = BytesIO()

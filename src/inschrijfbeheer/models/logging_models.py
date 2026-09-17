@@ -4,12 +4,13 @@
     **LogLevel:** level van logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     **LogEntry:** log
 """
+
 from django.db import models
 
 
 class LogLevel(models.IntegerChoices):
-    """Model dat de verschillende loglevels bijhoudt
-    """
+    """Model dat de verschillende loglevels bijhoudt"""
+
     DEBUG = 10, "Debug"
     INFO = 20, "Info"
     WARNING = 30, "Warning"
@@ -18,8 +19,8 @@ class LogLevel(models.IntegerChoices):
 
 
 class LogEntry(models.Model):
-    """Model dat een log bijhoudt over Inschrijfbeheer
-    """
+    """Model dat een log bijhoudt over Inschrijfbeheer"""
+
     id = models.AutoField(primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     level = models.PositiveSmallIntegerField(choices=LogLevel.choices, db_index=True)
@@ -42,8 +43,9 @@ class WeezSynchronisatie(models.Model):
     Attributes:
         tijdstip (datetime): tijdstip van synchronisatie
     """
+
     tijdstip = models.DateTimeField(primary_key=True, auto_now=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = 'weez_sync'
+        db_table = "weez_sync"

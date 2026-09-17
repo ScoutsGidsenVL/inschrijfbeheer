@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
     EvenementVraag,
     Inschrijving,
     InschrijvingVraagAntwoord,
     IntegreatRegistrationfreefield,
 )
-
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 
 
 @dataclass(frozen=True)
@@ -18,14 +17,10 @@ class AntwoordContext:
     inschrijving: Inschrijving
 
 
-class IntegreatAntwoordMapper(
-    Mapper[IntegreatRegistrationfreefield, AntwoordContext, InschrijvingVraagAntwoord]
-):
+class IntegreatAntwoordMapper(Mapper[IntegreatRegistrationfreefield, AntwoordContext, InschrijvingVraagAntwoord]):
     """InschrijvingVraagAntwoord uit een antwoord op een vrij veld."""
 
-    def map(
-        self, bron: IntegreatRegistrationfreefield, context: AntwoordContext
-    ) -> Doelgegevens[InschrijvingVraagAntwoord]:
+    def map(self, bron: IntegreatRegistrationfreefield, context: AntwoordContext) -> Doelgegevens[InschrijvingVraagAntwoord]:
         return Doelgegevens(
             sleutels={"id": bron.oid},
             velden={

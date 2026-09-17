@@ -3,20 +3,23 @@
 ## Functies:
     **inschrijvingen_detail:** Geeft een view voor het tonen van alle details van een inschrijving
 """
-from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse, Http404
-from django.contrib import messages
+
 import logging
 
-from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
-from inschrijfbeheer.utils.auth import check_rollen
-from inschrijfbeheer.utils.attesten import genereer_deelname_attest
-from inschrijfbeheer.utils.mailer import stuur_attest_mail
-from inschrijfbeheer.tasks import defer_synchroniseer_inschrijvingen
-from inschrijfbeheer.utils.weez_api import maak_sessie, doe_weez_patch
+from django.contrib import messages
+from django.http import Http404, HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
+
 from inschrijfbeheer.mapping.logic.weez_mappers import weez_sleutel_van
+from inschrijfbeheer.models import Inschrijving, InschrijvingVraagAntwoord
+from inschrijfbeheer.tasks import defer_synchroniseer_inschrijvingen
+from inschrijfbeheer.utils.attesten import genereer_deelname_attest
+from inschrijfbeheer.utils.auth import check_rollen
+from inschrijfbeheer.utils.mailer import stuur_attest_mail
+from inschrijfbeheer.utils.weez_api import doe_weez_patch, maak_sessie
 
 logger = logging.getLogger("inschrijfbeheer")
+
 
 @check_rollen
 def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
@@ -32,18 +35,25 @@ def inschrijvingen_detail(request: HttpRequest, inschrijving_id: str) -> HttpRes
     """
     inschrijving = Inschrijving.objects.select_related("lid", "evenement").get(id=inschrijving_id)
 
-    vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
-    return render(request, "inschrijvingen/inschrijvingen_detail.html", {
-        "vraag_antwoorden" : vraag_antwoorden,
-        "inschrijving": inschrijving,
-    })
-
+    vraag_antwoorden = (
+        InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+    )
+    return render(
+        request,
+        "inschrijvingen/inschrijvingen_detail.html",
+        {
+            "vraag_antwoorden": vraag_antwoorden,
+            "inschrijving": inschrijving,
+        },
+    )
 
 
 @check_rollen
 def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
     inschrijving = Inschrijving.objects.select_related("lid", "evenement", "deelnemertype").get(id=inschrijving_id)
-    vraag_antwoorden = InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+    vraag_antwoorden = (
+        InschrijvingVraagAntwoord.objects.filter(inschrijving=inschrijving_id).select_related("vraag", "vraag__type").order_by("vraag__volgorde")
+    )
 
     if request.method == "POST":
         if inschrijving.evenement.is_weez:
@@ -59,10 +69,14 @@ def inschrijvingen_vragen(request: HttpRequest, inschrijving_id: str) -> HttpRes
 
         return redirect("inschrijving_vragen", inschrijving_id=inschrijving_id)
 
-    return render(request, "inschrijvingen/inschrijvingen_vragen.html", {
-        "vraag_antwoorden": vraag_antwoorden,
-        "inschrijving": inschrijving,
-    })
+    return render(
+        request,
+        "inschrijvingen/inschrijvingen_vragen.html",
+        {
+            "vraag_antwoorden": vraag_antwoorden,
+            "inschrijving": inschrijving,
+        },
+    )
 
 
 def stuur_weezevent_update(inschrijving: Inschrijving, antwoorden: dict[str, str]) -> None:
@@ -97,7 +111,7 @@ def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -
 
     Returns:
         HttpResponse: pdf van het attest
-    
+
     Raises:
         Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
     """
@@ -108,6 +122,7 @@ def inschrijvingen_attest_download(request: HttpRequest, inschrijving_id: str) -
         response["Content-Disposition"] = 'attachment; filename="deelname_attest.pdf"'
         return response
     raise Http404()
+
 
 @check_rollen
 def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> HttpResponse:
@@ -122,7 +137,7 @@ def inschrijvingen_attest_mail(request: HttpRequest, inschrijving_id: str) -> Ht
 
     Returns:
         HttpResponse: redirect naar de inschrijving pagina
-    
+
     Raises:
         Http404: indien deelnemer of inschrijving niet geldig was wordt het attest niet gevonden
     """

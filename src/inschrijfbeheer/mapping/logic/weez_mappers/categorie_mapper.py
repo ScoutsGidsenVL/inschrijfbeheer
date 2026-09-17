@@ -1,13 +1,11 @@
-from inschrijfbeheer.models import (
-    Categorie,
-)
-
 from inschrijfbeheer.mapping.logic.mapper import (
     Doelgegevens,
     Mapper,
     MappingFout,
 )
-
+from inschrijfbeheer.models import (
+    Categorie,
+)
 
 
 class WeezCategorieMapper(Mapper[dict, None, Categorie]):
@@ -26,10 +24,5 @@ class WeezCategorieMapper(Mapper[dict, None, Categorie]):
             sleutels={
                 "naam": naam,
             },
-            velden={
-                "id": bron.get("id"),
-                "alt_naam": naam,
-                "is_weez": True
-            },
+            velden={"id": bron.get("id"), "alt_naam": naam, "is_weez": True},
         )
-

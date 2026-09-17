@@ -10,13 +10,12 @@ zitten nu in de sleutels en velden van Doelgegevens. Synchronisatie.bewaar()
 voert ze uit en telt wat er gebeurde.
 """
 
+
 def tekst(waarde: str | None) -> str:
-    """Maakt witruimte en None onschadelijk.
-    """
+    """Maakt witruimte en None onschadelijk."""
     return (waarde or "").strip()
 
 
 def normaliseer_code(code: str | None) -> str:
-    """De code van een seminar of seminartype is de sleutel in de nieuwe databank.
-    """
+    """De code van een seminar of seminartype is de sleutel in de nieuwe databank."""
     return tekst(code)

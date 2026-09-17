@@ -1,12 +1,13 @@
 from django.utils import timezone
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     Categorie,
     Evenement,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .weez_mappers import parse_datetime
+
 
 class WeezEvenementMapper(Mapper[dict, Categorie | None, Evenement]):
     """Evenement uit een detailrecord. De context is de al bewaarde categorie.
@@ -40,6 +41,6 @@ class WeezEvenementMapper(Mapper[dict, Categorie | None, Evenement]):
                 "categorie": context,
                 "is_weez": True,
                 "laatste_sync": timezone.now(),
-                "status": bron.get("status") 
+                "status": bron.get("status"),
             },
         )

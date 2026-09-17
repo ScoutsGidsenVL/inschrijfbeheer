@@ -1,13 +1,12 @@
-from enum import Enum, auto
-from typing import TypeVar, Any, Generic
-from dataclasses import dataclass, field, fields
 from collections import defaultdict
+from dataclasses import dataclass, field, fields
+from enum import Enum, auto
+from typing import Any, Generic, TypeVar
 
 from inschrijfbeheer.mapping.logic.mapper import Mapper
 from inschrijfbeheer.mapping.providers.data_provider import LijstProvider, ObjectProvider
 
-
-N = TypeVar('N')
+N = TypeVar("N")
 
 
 class SynchronisatieActie(Enum):
@@ -20,6 +19,7 @@ class SynchronisatieActie(Enum):
 @dataclass
 class ModelResultaat:
     """Houdt de tellers van één model bij binnen een synchronisatie."""
+
     aangemaakt: int = 0
     bijgewerkt: int = 0
     overgeslagen: int = 0
@@ -33,6 +33,7 @@ class ModelResultaat:
             case SynchronisatieActie.OVERGESLAGEN:
                 self.overgeslagen += 1
 
+
 class SynchronisatieStatus(Enum):
     GESLAAGD = auto()
     FOUTIEF = auto()
@@ -43,10 +44,9 @@ class SynchronisatieStatus(Enum):
 @dataclass
 class SynchronisatieInfo:
     """Klasse die de resultaten van een synchronisatie bijhoudt."""
+
     _status: SynchronisatieStatus = SynchronisatieStatus.WACHTEND
-    resultaten: dict[type, ModelResultaat] = field(
-        default_factory=lambda: defaultdict(ModelResultaat)
-    )
+    resultaten: dict[type, ModelResultaat] = field(default_factory=lambda: defaultdict(ModelResultaat))
 
     def registreer(self, model: type, actie: SynchronisatieActie) -> None:
         self.resultaten[model].registreer(actie)
@@ -67,19 +67,19 @@ class SynchronisatieInfo:
 @dataclass(frozen=True)
 class SynchronisatieConfig:
     """Alles wat de gebruiker kiest bij het starten van een synchronisatie.
- 
+
     Alleen deze waarden komen van buitenaf. Providers en SyncOnderdelen stelt
     elke syncer zelf samen, dus je maakt een syncer met niets meer dan dit.
     """
- 
+
     sync_alles: bool = False
     dry_run: bool = False
     terugblik_dagen: int | None = None
- 
+
     @classmethod
     def van_opties(cls, opties: dict[str, Any]) -> "SynchronisatieConfig":
         """Zet de opties van het management command om naar een config.
- 
+
         De namen van de commandoregel wijken op één plek af: --alles heet in de
         config sync_alles. Die vertaling staat hier, zodat het commando zelf
         niets meer over de config hoeft te weten.
@@ -89,21 +89,17 @@ class SynchronisatieConfig:
             dry_run=bool(opties.get("dry_run", False)),
             terugblik_dagen=opties.get("terugblik_dagen"),
         )
- 
+
     def is_gezet(self, veld: str) -> bool:
         """Zegt of je dit veld zelf meegaf, of het op de standaardwaarde staat."""
         standaard = {veld_info.name: veld_info.default for veld_info in fields(self)}
         return getattr(self, veld) != standaard[veld]
- 
-
-
-
 
 
 @dataclass
 class SyncOnderdelen(Generic[N]):
     """Bundelt wat nodig is om één modeltype te synchroniseren.
- 
+
     Attributes:
         model: het Django-model, nodig om te bewaren en om de actie in
             SynchronisatieInfo te registreren
@@ -115,7 +111,7 @@ class SyncOnderdelen(Generic[N]):
             aanmaken niet meer mag overschrijven. Dan gebruikt bewaar()
             get_or_create in plaats van update_or_create.
     """
- 
+
     model: type[N]
     mapper: Mapper[Any, Any, N]
     provider: ObjectProvider | LijstProvider | None = None

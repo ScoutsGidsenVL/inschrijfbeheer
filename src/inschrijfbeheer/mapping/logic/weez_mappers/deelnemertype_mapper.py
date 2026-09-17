@@ -1,5 +1,6 @@
-from inschrijfbeheer.mapping.logic import Mapper, Doelgegevens, MappingFout
+from inschrijfbeheer.mapping.logic import Doelgegevens, Mapper
 from inschrijfbeheer.models import Categorie
+
 
 class WeezDeelnemerTypeMapper(Mapper[dict, None, Categorie]):
     """Categorie uit het `category`-blok van een evenement.

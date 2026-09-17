@@ -1,9 +1,10 @@
 import logging
-from typing import Any, Iterable
 from dataclasses import dataclass
-from .weez_client import WeezClient
+from typing import Iterable
+
 from inschrijfbeheer.mapping.providers.data_provider import LijstProvider
 
+from .weez_client import WeezClient
 
 logger = logging.getLogger("inschrijfbeheer")
 
@@ -22,7 +23,7 @@ class WeezTariefProvider(LijstProvider[dict, TariefFilter]):
 
     MODULE = "ticket"
     RESOURCE = "events"
- 
+
     def __init__(self, client: WeezClient):
         self.client = client
 
@@ -30,7 +31,5 @@ class WeezTariefProvider(LijstProvider[dict, TariefFilter]):
         if filter is None:
             raise ValueError("TariefFilter met een evenement_id is verplicht")
 
-        respons = self.client.get(
-            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{filter.evenement_id}/rates"
-        )
+        respons = self.client.get(f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{filter.evenement_id}/rates")
         return respons

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, TypeVar
 from dataclasses import dataclass
+from typing import Generic, Iterable, TypeVar
 
 from django.db.models import Model
 from django.db.models.query import QuerySet
@@ -33,18 +33,18 @@ class LijstProvider(Generic[T, F], ABC):
 
     @abstractmethod
     def haal_alle_op(self, filter: F | None = None) -> Iterable[T]:
-        """Haalt meerdere objecten op, eventueel afgebakend door filter.
-        """
+        """Haalt meerdere objecten op, eventueel afgebakend door filter."""
         raise NotImplementedError
 
 
 class DataProvider(ObjectProvider[T], LijstProvider[T, F], ABC):
     """Voor bronnen die zowel één object als een lijst kunnen leveren."""
 
+
 @dataclass
 class IntegreatFilter:
     """Filter voor de Integreat-providers.
- 
+
     Attributes:
         sync_alles: True haalt alles op, ongeacht wanneer het seminar eindigde.
             False beperkt tot seminars die nog bezig zijn, nog moeten
@@ -52,33 +52,32 @@ class IntegreatFilter:
         terugblik_dagen: hoeveel dagen na de eindtijd van een seminar er nog
             gesynchroniseerd wordt
     """
- 
+
     sync_alles: bool = False
     terugblik_dagen: int = 14
+
 
 @dataclass
 class EvenementFilter(IntegreatFilter):
     evenement_id: str | None = None
 
+
 class DatabaseDataProvider(DataProvider[M, F], ABC):
-    """Provider die zijn data uit een databank haalt.
-    """
- 
+    """Provider die zijn data uit een databank haalt."""
+
     identifier_veld: str = "id"
     databank: str = "default"
     selecteer_relaties: tuple[str, ...] = ()
     prefetch_relaties: tuple[str, ...] = ()
- 
+
     @property
     @abstractmethod
     def model(self) -> type[M]:
-        """Het model waarvan deze provider objecten ophaalt.
-        """
+        """Het model waarvan deze provider objecten ophaalt."""
         raise NotImplementedError
- 
+
     def basis_queryset(self) -> QuerySet[M]:
-        """Vertrekpunt voor beide ophaalmethodes.
-        """
+        """Vertrekpunt voor beide ophaalmethodes."""
         queryset = self.model.objects.all()
         if self.databank:
             queryset = queryset.using(self.databank)
@@ -86,17 +85,16 @@ class DatabaseDataProvider(DataProvider[M, F], ABC):
             queryset = queryset.select_related(*self.selecteer_relaties)
         if self.prefetch_relaties:
             queryset = queryset.prefetch_related(*self.prefetch_relaties)
- 
+
         return queryset
- 
+
     def pas_filter_toe(self, queryset: QuerySet[M], filter: F) -> QuerySet[M]:
-        """Zet het filter om naar een afbakening op de queryset.
-        """
+        """Zet het filter om naar een afbakening op de queryset."""
         return queryset
- 
+
     def haal_op(self, identifier: str) -> M | None:
         return self.basis_queryset().filter(**{self.identifier_veld: identifier}).first()
- 
+
     def haal_alle_op(self, filter: F | None = None) -> QuerySet[M]:
         queryset = self.basis_queryset()
         if filter is None:

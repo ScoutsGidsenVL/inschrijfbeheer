@@ -1,18 +1,19 @@
-"""Module met extra functies/decorators voor de authenticatie/autorisatie van Inschrijfbeheer
-"""
-from dotenv import load_dotenv
-import os
+"""Module met extra functies/decorators voor de authenticatie/autorisatie van Inschrijfbeheer"""
+
 import logging
+import os
 from functools import wraps
-from django.contrib.auth.decorators import login_required
 
 import requests
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
+from dotenv import load_dotenv
 
 load_dotenv()
 GA_API = os.getenv("GA_RESTAPI_URL")
 
 logger = logging.getLogger("inschrijfbeheer")
+
 
 def haal_groepen(request):
     """Haalt het profiel van de ingelogde gebruiker op bij Groepsadmin.

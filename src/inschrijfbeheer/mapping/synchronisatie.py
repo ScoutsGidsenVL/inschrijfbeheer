@@ -1,20 +1,16 @@
-"""Module die een klasse bevat die als interface kan dienen voor synchronisatie met een databron
-"""
-from abc import ABC, abstractmethod
+"""Module die een klasse bevat die als interface kan dienen voor synchronisatie met een databron"""
+
 import logging
+from abc import ABC, abstractmethod
 from typing import Callable, ClassVar, TypeVar
 
 from django.db import transaction
 
 from inschrijfbeheer.mapping.logic.mapper import Doelgegevens
-from inschrijfbeheer.mapping.utils import (
-    SynchronisatieConfig,
-    SynchronisatieInfo,
-    SyncOnderdelen,
-    InschrijfbeheerDatabank
-)
+from inschrijfbeheer.mapping.utils import InschrijfbeheerDatabank, SynchronisatieConfig, SynchronisatieInfo, SyncOnderdelen
 
-N = TypeVar('N')
+N = TypeVar("N")
+
 
 class Synchronisatie(ABC):
     """Superklasse voor synchronisaties, geeft elke bron dezelfde interface.
@@ -61,7 +57,6 @@ class Synchronisatie(ABC):
     @abstractmethod
     def synchroniseer_inschrijvingen(self, evenement=None) -> SynchronisatieInfo:
         raise NotImplementedError("Deze methode dient geimplementeerd door een subklasse")
-
 
     def voer_uit(self, actie: Callable[[], SynchronisatieInfo] | None = None) -> SynchronisatieInfo:
         """Draait een synchronisatie in een eigen transactie en logt het resultaat.

@@ -1,8 +1,8 @@
 import logging
 import os
-from dotenv import load_dotenv
 
 from django.db import transaction
+from dotenv import load_dotenv
 from procrastinate import exceptions
 from procrastinate.contrib.django import app
 
@@ -41,11 +41,7 @@ def synchroniseer_inschrijvingen_taak(evenement_id: str):
 @app.task(name="mail_attesten")
 def mail_attesten_taak(evenement_id: str):
     inschrijvingen = Inschrijving.objects.select_related("lid", "evenement").filter(
-        evenement=evenement_id,
-        annulatie__isnull=True,
-        registratie=True,
-        lid__foutboodschap__isnull=True,
-        evenement__foutboodschap__isnull=True
+        evenement=evenement_id, annulatie__isnull=True, registratie=True, lid__foutboodschap__isnull=True, evenement__foutboodschap__isnull=True
     )
 
     maildata = []
@@ -116,7 +112,7 @@ def defer_synchroniseer_evenement(evenement_id: str) -> int | None:
 
 BRON_LOCK = "synchronisatie:weez"
 
- 
+
 @app.periodic(cron="0 * * * *")
 @app.task(
     name="uurlijkse_synchronisatie",
@@ -126,17 +122,17 @@ BRON_LOCK = "synchronisatie:weez"
 )
 def uurlijkse_synchronisatie_taak(timestamp: int) -> str:
     """Draait elk uur een volledige synchronisatie bij de bron.
- 
+
     De `lock` houdt twee runs uit elkaar, ook als een run langer duurt dan een
     uur. De `queueing_lock` zorgt dat er ondertussen hoogstens één run in de
     wachtrij staat in plaats van een stapel.
- 
+
     De `timestamp` komt van Procrastinate en bevat het geplande uur als
     unix-timestamp.
- 
+
     Args:
         timestamp (int): het uur waarvoor deze run gepland stond
- 
+
     Returns:
         str: de samenvatting van de synchronisatie, zichtbaar in het jobresultaat
     """
@@ -145,18 +141,18 @@ def uurlijkse_synchronisatie_taak(timestamp: int) -> str:
         dry_run=False,
         terugblik_dagen=TERUGBLIK_DAGEN,
     )
- 
+
     weez_syncer = WeezSyncer(config=config)
     integreat_syncer = IntegreatSyncer(config=config)
- 
+
     logger.info(
         "Start uurlijkse synchronisatie",
         extra={"timestamp": timestamp, "terugblik_dagen": config.terugblik_dagen},
     )
- 
+
     weez_syncer.voer_uit()
     integreat_syncer.voer_uit()
- 
+
     logger.info(
         "Uurlijkse synchronisatie klaar",
         extra={"timestamp": timestamp},

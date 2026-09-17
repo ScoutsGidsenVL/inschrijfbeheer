@@ -3,15 +3,18 @@
 ## Functies:
     **doe_weez_patch:** maakt een PATCH request naar de Weez API met de nodige extra parameters
 """
-from requests import get, Response, Session
+
 import json
 import os
+
 from dotenv import load_dotenv
+from requests import Response, Session
 
 load_dotenv()
 BASE_URL = os.getenv("WEEZ_BASE_URL")
 WEEZ_ACCESS_TOKEN = os.getenv("WEEZ_ACCESS_TOKEN")
 WEEZ_API_KEY = os.getenv("WEEZ_API_KEY")
+
 
 def maak_sessie() -> Session:
     return Session()

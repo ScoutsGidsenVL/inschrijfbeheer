@@ -1,10 +1,10 @@
 import logging
 import os
-from dotenv import load_dotenv
 from io import BytesIO
 
 from django.core.mail import EmailMessage, get_connection
 from django.template.loader import render_to_string
+from dotenv import load_dotenv
 
 from inschrijfbeheer.models import Deelnemer
 
@@ -13,12 +13,11 @@ logger = logging.getLogger("inschrijfbeheer")
 load_dotenv()
 FROM_MAIL_ADDRESS = os.getenv("FROM_MAIL_ADDRESS")
 
+
 def stuur_attest_mail(attest, deelnemer: Deelnemer, connection=None):
     html_content = render_to_string(
         "mails/attesten_mail.html",
-        context={
-            "deelnemer": deelnemer
-        },
+        context={"deelnemer": deelnemer},
     )
 
     msg = EmailMessage(

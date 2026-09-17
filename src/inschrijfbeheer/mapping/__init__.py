@@ -1,8 +1,6 @@
-from .providers import *
+from .integreat_syncer import IntegreatProviders, IntegreatSyncer
 from .logic import *
-
-from .utils import *
-
+from .providers import *
 from .synchronisatie import Synchronisatie
+from .utils import *
 from .weez_syncer import WeezSyncer
-from .integreat_syncer import IntegreatSyncer, IntegreatProviders

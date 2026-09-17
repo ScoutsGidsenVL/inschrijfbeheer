@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     Evenement,
     EvenementVraag,
@@ -7,7 +8,6 @@ from inschrijfbeheer.models import (
     IntegreatSeminarFreeField,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .integreat_mapper import tekst
 
 
@@ -38,4 +38,3 @@ class IntegreatEvenementVraagMapper(Mapper[IntegreatSeminarFreeField, VraagConte
                 "volgorde": bron.sortorder,
             },
         )
-

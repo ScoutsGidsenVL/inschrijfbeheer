@@ -1,1 +1,1 @@
-from .mapper import Mapper, Doelgegevens, MappingFout
+from .mapper import Doelgegevens, Mapper, MappingFout

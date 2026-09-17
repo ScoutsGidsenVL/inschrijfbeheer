@@ -1,29 +1,23 @@
 from inschrijfbeheer.models.inschrijfbeheer_models import (
-    Deelnemer,
     Categorie,
-    Evenement,
+    Deelnemer,
     DeelnemerType,
-    Inschrijving,
-    EvenementVraagType,
+    Evenement,
     EvenementVraag,
+    EvenementVraagType,
+    Inschrijving,
     InschrijvingVraagAntwoord,
 )
-
 from inschrijfbeheer.models.integreat_models import (
-    IntegreatParticipantType,
+    IntegreatCity,
     IntegreatParticipant,
+    IntegreatParticipantType,
+    IntegreatRegistration,
+    IntegreatRegistrationfreefield,
+    IntegreatSeminar,
+    IntegreatSeminarFreeField,
+    IntegreatSeminarFreeFieldType,
     IntegreatSeminarStatus,
     IntegreatSeminarType,
-    IntegreatCity,
-    IntegreatSeminar,
-    IntegreatRegistration,
-    IntegreatSeminarFreeFieldType,
-    IntegreatSeminarFreeField,
-    IntegreatRegistrationfreefield,
 )
-
-from inschrijfbeheer.models.logging_models import (
-    LogEntry,
-    LogLevel,
-    WeezSynchronisatie
-)
+from inschrijfbeheer.models.logging_models import LogEntry, LogLevel, WeezSynchronisatie

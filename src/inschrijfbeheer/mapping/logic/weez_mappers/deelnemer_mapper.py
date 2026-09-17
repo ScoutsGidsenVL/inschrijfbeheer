@@ -1,9 +1,10 @@
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from inschrijfbeheer.models import (
     Deelnemer,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper
 from .weez_mappers import InschrijvingsGegevens, LidResultaat
+
 
 class WeezDeelnemerMapper(Mapper[InschrijvingsGegevens, LidResultaat, Deelnemer]):
     """Deelnemer uit de ingevulde ledengegevens plus de opzoeking.
@@ -33,5 +34,3 @@ class WeezDeelnemerMapper(Mapper[InschrijvingsGegevens, LidResultaat, Deelnemer]
                 "mailadres": lid.emailadres,
             },
         )
-
-

@@ -11,12 +11,12 @@
     **InschrijvingVraagAntwoord:** antwoorden van de deelnemers op de vragen
 """
 
-from datetime import timedelta
 import os
-from dotenv import load_dotenv
+from datetime import timedelta
 
-from django.db import models, connection
+from django.db import connection, models
 from django.utils import timezone
+from dotenv import load_dotenv
 
 load_dotenv()
 TERUGBLIK_DAGEN = int(os.getenv("INTEGREAT_TERUGBLIK_DAGEN"))
@@ -36,7 +36,7 @@ def volgende_deelnemer_id():
 
 class Deelnemer(models.Model):
     """Model voor een deelnemer.
-    Dit model is niet strikt nodig, als enkel het deelnemer id wordt bijgehouden in Inschrijving, 
+    Dit model is niet strikt nodig, als enkel het deelnemer id wordt bijgehouden in Inschrijving,
     moet de UI steeds SOAP calls maken naar de GA wat lange wachttijden tot gevolg heeft
 
     Attributes:
@@ -46,6 +46,7 @@ class Deelnemer(models.Model):
         mailadres (str): mailadres van het lid
         foutboodschap (str): boodschap bij het lid als het foutief is. Nullable
     """
+
     id = models.CharField(primary_key=True, max_length=50, default=volgende_deelnemer_id)
     voornaam = models.CharField(null=False)
     achternaam = models.CharField(null=False)
@@ -59,6 +60,7 @@ class Deelnemer(models.Model):
     def __str__(self):
         return f"{self.voornaam} {self.achternaam}"
 
+
 class Categorie(models.Model):
     """Categorie van een evenement
 
@@ -68,6 +70,7 @@ class Categorie(models.Model):
         alt_naam (str): alternatieve naam, meestal een kopie van naam
         is_weez (str): geeft aan of de categorie van weez is
     """
+
     id = models.CharField(primary_key=True)
     naam = models.CharField()
     alt_naam = models.CharField()
@@ -79,6 +82,7 @@ class Categorie(models.Model):
 
     def __str__(self):
         return self.naam
+
 
 class Evenement(models.Model):
     """Model voor een evenement
@@ -99,6 +103,7 @@ class Evenement(models.Model):
         laatste_sync (datetime): wanneer laatste synchronisatie was met Weez
         foutboodschap (str): geeft een foutboodschap bij een Evenement aan. Nullable
     """
+
     id = models.CharField(primary_key=True)
     titel = models.CharField()
     beschrijving = models.CharField()
@@ -127,6 +132,7 @@ class Evenement(models.Model):
             return self.eindtijd > timezone.now()
         return self.eindtijd + timedelta(days=TERUGBLIK_DAGEN) > timezone.now()
 
+
 class DeelnemerType(models.Model):
     id = models.CharField(primary_key=True)
     naam = models.CharField()
@@ -138,6 +144,7 @@ class DeelnemerType(models.Model):
     def __str__(self):
         return self.naam
 
+
 def volgend_inschrijving_id():
     """Functie die een uniek ID genereert voor een Inschrijving.
     Dit wordt gebruikt omdat Weezevent geen IDs bijhoudt voor inschrijvingen, dus deze moeten ingevuld worden.
@@ -148,6 +155,7 @@ def volgend_inschrijving_id():
     with connection.cursor() as cursor:
         cursor.execute("SELECT nextval('inschrijving_id_seq')")
         return str(cursor.fetchone()[0])
+
 
 class Inschrijving(models.Model):
     """Model voor een inschrijving
@@ -164,6 +172,7 @@ class Inschrijving(models.Model):
         registratie (bool): geeft aan of een deelnemer aanwezig was
         is_weez (bool): geeft aan of het gaat om een evenement van Weez. Defaults to True
     """
+
     id = models.CharField(primary_key=True, default=volgend_inschrijving_id)
     evenement = models.ForeignKey(Evenement, db_column="evenement", on_delete=models.RESTRICT)
     lid = models.ForeignKey(Deelnemer, db_column="lid", on_delete=models.RESTRICT)
@@ -195,13 +204,14 @@ class EvenementVraagType(models.Model):
         items_vereist (bool): onduidelijk. Nullable
         items_toegestaan (bool): onduidelijk. Nullable
     """
-    naam = models.CharField(primary_key=True, db_column='Code', max_length=50)
+
+    naam = models.CharField(primary_key=True, db_column="Code", max_length=50)
     items_vereist = models.BooleanField(blank=True, null=True)
     items_toegestaan = models.BooleanField(blank=True, null=True)
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = 'evenement_vraagtype'
+        db_table = "evenement_vraagtype"
 
 
 def volgend_evenement_vraag_id():
@@ -215,6 +225,7 @@ def volgend_evenement_vraag_id():
         cursor.execute("SELECT nextval('evenement_vraag_id_seq')")
         return str(cursor.fetchone()[0])
 
+
 class EvenementVraag(models.Model):
     """Model voor vrije vragen bij een evenement
 
@@ -227,6 +238,7 @@ class EvenementVraag(models.Model):
         vereist (bool): geeft aan of de vraag vereist is. Nullable
         volgorde (int): geeft aan in welke volgorde de vragen moeten getoond worden. Nullable
     """
+
     id = models.CharField(primary_key=True, default=volgend_evenement_vraag_id)
     type = models.ForeignKey(EvenementVraagType, models.DO_NOTHING, blank=True, null=True)
     vraag = models.TextField()
@@ -234,9 +246,11 @@ class EvenementVraag(models.Model):
     evenement = models.ForeignKey(Evenement, models.CASCADE)
     vereist = models.BooleanField(blank=True, null=True)
     volgorde = models.IntegerField(blank=True, null=True)
+
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = 'evenement_vraag'
+        db_table = "evenement_vraag"
+
 
 def volgend_inschrijving_vraagantwoord_id() -> str:
     """Functie die een uniek ID genereert voor een InschrijvingVraagAntwoord.
@@ -249,6 +263,7 @@ def volgend_inschrijving_vraagantwoord_id() -> str:
         cursor.execute("SELECT nextval('inschrijving_vraagantwoord_id_seq')")
         return str(cursor.fetchone()[0])
 
+
 class InschrijvingVraagAntwoord(models.Model):
     """Model voor een antwoord op een vrije vraag bij een evenement
 
@@ -258,6 +273,7 @@ class InschrijvingVraagAntwoord(models.Model):
         antwoord (str): antwoord op de vraag. Nullable
         inschrijving (Inschrijving): verwijst naar de inschrijving. Nullable
     """
+
     id = models.CharField(primary_key=True, default=volgend_inschrijving_vraagantwoord_id)
     vraag = models.ForeignKey(EvenementVraag, models.CASCADE)
     antwoord = models.TextField(blank=True, null=True)
@@ -265,4 +281,4 @@ class InschrijvingVraagAntwoord(models.Model):
 
     class Meta:
         app_label = "inschrijfbeheer"
-        db_table = 'inschrijving_vraagantwoord'
+        db_table = "inschrijving_vraagantwoord"

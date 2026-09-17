@@ -1,12 +1,15 @@
-from datetime import datetime, timedelta, timezone
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from typing import Iterable
+
 from inschrijfbeheer.mapping.logic.weez_mappers.weez_mappers import parse_datetime
 from inschrijfbeheer.mapping.providers.data_provider import DataProvider
+
 from .weez_client import WeezClient
 
 logger = logging.getLogger("inschrijfbeheer")
+
 
 @dataclass(frozen=True)
 class EvenementFilter:
@@ -21,16 +24,16 @@ class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
 
     MODULE = "ticket"
     RESOURCE = "events"
- 
+
     def __init__(self, client: WeezClient):
         self.client = client
- 
+
     def haal_op(self, identifier: str) -> dict | None:
         evenement = self.client.get(f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events/{identifier}")
         if evenement is None:
             logger.warning("Geen evenement gevonden bij Weez voor id %s", identifier)
         return evenement
- 
+
     def haal_alle_op(self, filter: EvenementFilter | None = None) -> Iterable[dict]:
         """Haalt alle evenementen op
 
@@ -44,8 +47,7 @@ class WeezEvenementProvider(DataProvider[dict, EvenementFilter]):
             filter = EvenementFilter()
 
         respons = self.client.get(
-            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events",
-            params={"time_status": "terminated"}
+            f"https://api.weezevent.com/ticket/organizations/{self.client.organisatie}/events", params={"time_status": "terminated"}
         )
 
         if filter.alles:

@@ -27,7 +27,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from inschrijfbeheer.mapping.logic.mapper import MappingFout
 from inschrijfbeheer.mapping.logic.integreat_mappers import (
     AntwoordContext,
     EvenementContext,
@@ -43,6 +42,7 @@ from inschrijfbeheer.mapping.logic.integreat_mappers import (
     VraagContext,
     normaliseer_code,
 )
+from inschrijfbeheer.mapping.logic.mapper import MappingFout
 from inschrijfbeheer.mapping.providers.data_provider import EvenementFilter, IntegreatFilter, LijstProvider
 from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatParticipantTypeProvider,
@@ -53,8 +53,8 @@ from inschrijfbeheer.mapping.providers.integreat_providers import (
     IntegreatSeminarProvider,
 )
 from inschrijfbeheer.mapping.providers.lid_provider import LidProvider
-from inschrijfbeheer.mapping import (
-    Synchronisatie,
+from inschrijfbeheer.mapping.synchronisatie import Synchronisatie
+from inschrijfbeheer.mapping.utils import (
     SynchronisatieActie,
     SynchronisatieConfig,
     SynchronisatieInfo,
@@ -142,9 +142,7 @@ class IntegreatSyncer(Synchronisatie):
         """
         providers = self.providers
         self.categorieen = SyncOnderdelen(model=Categorie, mapper=IntegreatCategorieMapper())
-        self.evenementen = SyncOnderdelen(
-            model=Evenement, mapper=IntegreatEvenementMapper(), provider=providers.seminars
-        )
+        self.evenementen = SyncOnderdelen(model=Evenement, mapper=IntegreatEvenementMapper(), provider=providers.seminars)
         self.deelnemertypes = SyncOnderdelen(
             model=DeelnemerType,
             mapper=IntegreatDeelnemerTypeMapper(),
@@ -161,9 +159,7 @@ class IntegreatSyncer(Synchronisatie):
             mapper=IntegreatVraagTypeMapper(),
             provider=providers.vraagtypes,
         )
-        self.vragen = SyncOnderdelen(
-            model=EvenementVraag, mapper=IntegreatEvenementVraagMapper(), provider=providers.vragen
-        )
+        self.vragen = SyncOnderdelen(model=EvenementVraag, mapper=IntegreatEvenementVraagMapper(), provider=providers.vragen)
         self.antwoorden = SyncOnderdelen(
             model=InschrijvingVraagAntwoord,
             mapper=IntegreatAntwoordMapper(),
@@ -194,9 +190,7 @@ class IntegreatSyncer(Synchronisatie):
         # finally:
         return self.info
 
-    def synchroniseer_evenement(
-        self, evenement_id: str, sync_inschrijvingen: bool = False
-    ) -> SynchronisatieInfo:
+    def synchroniseer_evenement(self, evenement_id: str, sync_inschrijvingen: bool = False) -> SynchronisatieInfo:
         """Synchroniseert één seminar, opgezocht via zijn code.
 
         De vragen horen bij het seminar en gaan dus altijd mee. De registraties
@@ -241,9 +235,7 @@ class IntegreatSyncer(Synchronisatie):
 
         return self.info
 
-    def synchroniseer_vragen(
-        self, evenement: Evenement, inschrijving: Inschrijving | None = None
-    ) -> SynchronisatieInfo:
+    def synchroniseer_vragen(self, evenement: Evenement, inschrijving: Inschrijving | None = None) -> SynchronisatieInfo:
         """Synchroniseert de vrije velden van één seminar naar EvenementVraag.
 
         De antwoorden erop zijn een eigen stap, want die hangen zowel van de
@@ -251,8 +243,7 @@ class IntegreatSyncer(Synchronisatie):
         """
         if inschrijving is not None:
             raise NotImplementedError(
-                "Vragen per inschrijving heeft geen betekenis in Integreat, "
-                "een vraag hoort bij een seminar en niet bij een registratie"
+                "Vragen per inschrijving heeft geen betekenis in Integreat, " "een vraag hoort bij een seminar en niet bij een registratie"
             )
 
         for vrij_veld in self.__haal_vragen_op(evenement):
@@ -280,18 +271,14 @@ class IntegreatSyncer(Synchronisatie):
             vraag = EvenementVraag.objects.filter(id=vraag_oid).first()
             inschrijving = Inschrijving.objects.filter(id=registratie_oid).first()
             if vraag is None or inschrijving is None:
-                logger.warning(
-                    "Antwoord %s overgeslagen: vraag of inschrijving nog niet aanwezig", bron.oid
-                )
+                logger.warning("Antwoord %s overgeslagen: vraag of inschrijving nog niet aanwezig", bron.oid)
                 self.info.registreer(InschrijvingVraagAntwoord, SynchronisatieActie.OVERGESLAGEN)
                 continue
 
             try:
                 self.bewaar(
                     self.antwoorden,
-                    self.antwoorden.mapper.map(
-                        bron, AntwoordContext(vraag=vraag, inschrijving=inschrijving)
-                    ),
+                    self.antwoorden.mapper.map(bron, AntwoordContext(vraag=vraag, inschrijving=inschrijving)),
                 )
             except MappingFout as fout:
                 logger.warning("Antwoord %s overgeslagen: %s", bron.oid, fout)
@@ -309,25 +296,18 @@ class IntegreatSyncer(Synchronisatie):
         return self.providers.seminars.haal_alle_op(self.bron_filter)
 
     def __haal_registraties_op(self, evenement: Evenement):
-        """De registraties van één evenement.
-        """
+        """De registraties van één evenement."""
         filter = EvenementFilter(evenement_id=evenement.id)
 
-        return self.__voor_seminar(
-            self.providers.registraties.haal_alle_op(filter=filter), "seminar__code", evenement
-        )
+        return self.__voor_seminar(self.providers.registraties.haal_alle_op(filter=filter), "seminar__code", evenement)
 
     def __haal_vragen_op(self, evenement: Evenement):
-        """De vrije velden van één evenement.
-        """
+        """De vrije velden van één evenement."""
         filter = EvenementFilter(evenement_id=evenement.id)
-        return self.__voor_seminar(
-            self.providers.vragen.haal_alle_op(filter=filter), "seminar__code", evenement
-        )
+        return self.__voor_seminar(self.providers.vragen.haal_alle_op(filter=filter), "seminar__code", evenement)
 
     def __haal_antwoorden_op(self, evenement: Evenement):
-        """De antwoorden van één evenement.
-        """
+        """De antwoorden van één evenement."""
         filter = EvenementFilter(evenement_id=evenement.id)
         return self.__voor_seminar(
             self.providers.antwoorden.haal_alle_op(filter=filter),
@@ -362,14 +342,10 @@ class IntegreatSyncer(Synchronisatie):
 
     def __bewaar_seminar(self, seminar) -> Evenement | None:
         try:
-            categorie, _ = self.bewaar(
-                self.categorieen, self.categorieen.mapper.map(seminar.type, None)
-            )
+            categorie, _ = self.bewaar(self.categorieen, self.categorieen.mapper.map(seminar.type, None))
             evenement, _ = self.bewaar(
                 self.evenementen,
-                self.evenementen.mapper.map(
-                    seminar, EvenementContext(categorie=categorie)
-                ),
+                self.evenementen.mapper.map(seminar, EvenementContext(categorie=categorie)),
             )
             return evenement
         except MappingFout as fout:
@@ -389,9 +365,7 @@ class IntegreatSyncer(Synchronisatie):
 
         deelnemertype = self.__deelnemertype(registratie.deelnemers_type)
         if deelnemertype is None:
-            logger.warning(
-                "Registratie %s overgeslagen: deelnemertype nog niet aanwezig", registratie.oid
-            )
+            logger.warning("Registratie %s overgeslagen: deelnemertype nog niet aanwezig", registratie.oid)
             self.info.registreer(Inschrijving, SynchronisatieActie.OVERGESLAGEN)
             return
 
@@ -426,9 +400,7 @@ class IntegreatSyncer(Synchronisatie):
         try:
             self.bewaar(
                 self.vragen,
-                self.vragen.mapper.map(
-                    vrij_veld, VraagContext(evenement=evenement, type=vraagtype)
-                ),
+                self.vragen.mapper.map(vrij_veld, VraagContext(evenement=evenement, type=vraagtype)),
             )
         except MappingFout as fout:
             logger.warning("Vrij veld %s overgeslagen: %s", vrij_veld.oid, fout)
@@ -443,15 +415,12 @@ class IntegreatSyncer(Synchronisatie):
 
         lidgegevens = self.providers.leden.haal_op(lidnummer)
         try:
-            deelnemer, _ = self.bewaar(
-                self.deelnemers, self.deelnemers.mapper.map(bron, lidgegevens)
-            )
+            deelnemer, _ = self.bewaar(self.deelnemers, self.deelnemers.mapper.map(bron, lidgegevens))
             return deelnemer
         except MappingFout as fout:
             logger.warning("Deelnemer overgeslagen: %s", fout)
             self.info.registreer(Deelnemer, SynchronisatieActie.OVERGESLAGEN)
             return None
-
 
     def __deelnemertype(self, bron) -> DeelnemerType | None:
         """Zoekt het deelnemerstype, en maakt het aan als het er nog niet staat.
@@ -469,9 +438,7 @@ class IntegreatSyncer(Synchronisatie):
             return bestaand
 
         try:
-            deelnemertype, _ = self.bewaar(
-                self.deelnemertypes, self.deelnemertypes.mapper.map(bron, None)
-            )
+            deelnemertype, _ = self.bewaar(self.deelnemertypes, self.deelnemertypes.mapper.map(bron, None))
             return deelnemertype
         except MappingFout as fout:
             logger.warning("Deelnemertype %s overgeslagen: %s", type_oid, fout)

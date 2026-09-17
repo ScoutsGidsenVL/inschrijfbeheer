@@ -1,12 +1,11 @@
-from dataclasses import dataclass
-
+from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from inschrijfbeheer.models import (
     EvenementVraagType,
     IntegreatSeminarFreeFieldType,
 )
 
-from inschrijfbeheer.mapping.logic.mapper import Doelgegevens, Mapper, MappingFout
 from .integreat_mapper import normaliseer_code
+
 
 class IntegreatVraagTypeMapper(Mapper[IntegreatSeminarFreeFieldType, None, EvenementVraagType]):
     """EvenementVraagType, ontdubbeld op naam.
@@ -16,9 +15,7 @@ class IntegreatVraagTypeMapper(Mapper[IntegreatSeminarFreeFieldType, None, Evene
     naam aanmaakte. Nu zijn ze gewone velden.
     """
 
-    def map(
-        self, bron: IntegreatSeminarFreeFieldType, context: None = None
-    ) -> Doelgegevens[EvenementVraagType]:
+    def map(self, bron: IntegreatSeminarFreeFieldType, context: None = None) -> Doelgegevens[EvenementVraagType]:
         naam = normaliseer_code(bron.code)
         if not naam:
             raise MappingFout("vraagtype zonder code")

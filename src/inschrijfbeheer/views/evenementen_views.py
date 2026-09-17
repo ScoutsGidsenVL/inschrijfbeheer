@@ -1,13 +1,13 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpRequest, HttpResponse
-from django.db.models import Q
 from django.contrib import messages
+from django.db.models import Q
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 
-from inschrijfbeheer.models import Evenement, Inschrijving, EvenementVraag, InschrijvingVraagAntwoord, Categorie
-from inschrijfbeheer.utils.auth import check_rollen
-from inschrijfbeheer.utils.attesten import genereer_zip_attesten
-from inschrijfbeheer.utils.paginering import pagineer
+from inschrijfbeheer.models import Categorie, Evenement, EvenementVraag, Inschrijving, InschrijvingVraagAntwoord
 from inschrijfbeheer.tasks import defer_mail_attesten, defer_synchroniseer_evenement
+from inschrijfbeheer.utils.attesten import genereer_zip_attesten
+from inschrijfbeheer.utils.auth import check_rollen
+from inschrijfbeheer.utils.paginering import pagineer
 
 KOLOMMEN = {
     "id": "ID",
@@ -33,24 +33,19 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: HTML document dat de pagina voorstelt
     """
-    zoekterm: str = request.GET.get('q', '').strip()
-    categorie_naam: str = request.GET.get('categorie', '').strip()
-    weez_filter: str = request.GET.get("weez", '')
-    sorteer: str = request.GET.get("sorteer", '').strip()
+    zoekterm: str = request.GET.get("q", "").strip()
+    categorie_naam: str = request.GET.get("categorie", "").strip()
+    weez_filter: str = request.GET.get("weez", "")
+    sorteer: str = request.GET.get("sorteer", "").strip()
 
-    evenementen = Evenement.objects.select_related("categorie").filter(
-        Q(titel__icontains=zoekterm)
-        | Q(id__icontains=zoekterm)
-    )
+    evenementen = Evenement.objects.select_related("categorie").filter(Q(titel__icontains=zoekterm) | Q(id__icontains=zoekterm))
 
     if categorie_naam:
         categorie = Categorie.objects.get(naam=categorie_naam)
-        evenementen = evenementen.filter(
-            categorie=categorie.id
-        )
+        evenementen = evenementen.filter(categorie=categorie.id)
 
     if weez_filter:
-        if weez_filter == '1':
+        if weez_filter == "1":
             evenementen = evenementen.filter(is_weez=True)
         else:
             evenementen = evenementen.exclude(is_weez=True)
@@ -62,12 +57,15 @@ def evenement_lijst(request: HttpRequest) -> HttpResponse:
 
     evenementen, querystring = pagineer(request, evenementen)
 
-    return render(request, "evenementen/evenementen_lijst.html", {
-        "evenementen": evenementen,
-        "categorieen": categorieen,
-        "querystring": querystring,
-    })
-
+    return render(
+        request,
+        "evenementen/evenementen_lijst.html",
+        {
+            "evenementen": evenementen,
+            "categorieen": categorieen,
+            "querystring": querystring,
+        },
+    )
 
 
 @check_rollen
@@ -84,18 +82,15 @@ def evenement_detail(request: HttpRequest, id: str) -> HttpResponse:
     """
     evenement = get_object_or_404(Evenement, id=id)
     synchroniseer = request.GET.get("sync", None)
-    if synchroniseer is not None and synchroniseer == '1':
+    if synchroniseer is not None and synchroniseer == "1":
         defer_synchroniseer_evenement(evenement_id=id)
-        return redirect('evenement_detail', id=id)
+        return redirect("evenement_detail", id=id)
 
-
-    return render(request, "evenementen/evenementen_detail.html", {
-        "evenement": evenement
-    })
+    return render(request, "evenementen/evenementen_detail.html", {"evenement": evenement})
 
 
 @check_rollen
-def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
+def evenement_inschrijvingen(request: HttpRequest, id: str) -> HttpResponse:
     """View voor het tonen van de inschrijvingen van een evenement.
     Deze view wordt gebruikt voor `/evenementen/<id>/inschrijvingen`.
 
@@ -109,8 +104,8 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
         HttpResponse: HTML document dat de pagina voorstelt
     """
     evenement = get_object_or_404(Evenement, id=id)
-    zoekterm = request.GET.get('q', '')
- 
+    zoekterm = request.GET.get("q", "")
+
     kolommen = ["ID", "Lid", "Deelnemertype", "Tijdstip", "Betaald", "Annulatie", "Aanwezig"]
 
     queryset = Inschrijving.objects.filter(evenement=id).select_related("deelnemertype", "evenement", "lid")
@@ -131,14 +126,18 @@ def evenement_inschrijvingen(request: HttpRequest, id:str) -> HttpResponse:
     pagina, querystring = pagineer(request, queryset)
 
     inschrijvingen = pagina
- 
-    return render(request, "evenementen/evenementen_inschrijvingen.html", {
-        "kolommen": kolommen,
-        "inschrijvingen": inschrijvingen,
-        "evenement": evenement,
-        "pagina": pagina,
-        "querystring": querystring,
-    })
+
+    return render(
+        request,
+        "evenementen/evenementen_inschrijvingen.html",
+        {
+            "kolommen": kolommen,
+            "inschrijvingen": inschrijvingen,
+            "evenement": evenement,
+            "pagina": pagina,
+            "querystring": querystring,
+        },
+    )
 
 
 @check_rollen
@@ -156,10 +155,7 @@ def evenement_vragen(request: HttpRequest, id: str) -> HttpResponse:
     evenement = get_object_or_404(Evenement, id=id)
 
     vragen = EvenementVraag.objects.filter(evenement=id).select_related("type").order_by("volgorde")
-    return render(request, "evenementen/vragen/evenementen_vragen.html", {
-        "vragen" : vragen,
-        "evenement": evenement
-    })
+    return render(request, "evenementen/vragen/evenementen_vragen.html", {"vragen": vragen, "evenement": evenement})
 
 
 @check_rollen
@@ -179,11 +175,9 @@ def evenement_vraag_antwoorden(request: HttpRequest, evenement_id: str, vraag_id
     vraag = get_object_or_404(EvenementVraag, id=vraag_id)
 
     antwoorden = InschrijvingVraagAntwoord.objects.filter(vraag=vraag_id)
-    return render(request, "evenementen/vragen/evenementen_vragen_antwoorden.html", {
-        "antwoorden" : antwoorden,
-        "vraag": vraag,
-        "evenement": evenement
-    })
+    return render(
+        request, "evenementen/vragen/evenementen_vragen_antwoorden.html", {"antwoorden": antwoorden, "vraag": vraag, "evenement": evenement}
+    )
 
 
 @check_rollen
@@ -201,17 +195,14 @@ def evenementen_inschrijvingen_attesten_download(request: HttpRequest, evenement
         HttpResponse: HTML document dat een zip bevat met alle attesten
     """
     inschrijvingen = Inschrijving.objects.select_related("lid", "evenement").filter(
-        evenement=evenement_id,
-        annulatie__isnull=True,
-        registratie=True,
-        lid__foutboodschap__isnull=True,
-        evenement__foutboodschap__isnull=True
+        evenement=evenement_id, annulatie__isnull=True, registratie=True, lid__foutboodschap__isnull=True, evenement__foutboodschap__isnull=True
     )
     buffer = genereer_zip_attesten(inschrijvingen)
 
     response = HttpResponse(buffer, content_type="application/zip")
     response["Content-Disposition"] = 'attachment; filename="deelname_attesten.zip"'
     return response
+
 
 @check_rollen
 def evenementen_inschrijvingen_attesten_mail(request: HttpRequest, evenement_id: str) -> HttpResponse:

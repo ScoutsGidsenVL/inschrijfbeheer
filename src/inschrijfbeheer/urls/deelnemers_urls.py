@@ -1,5 +1,5 @@
-"""Module die de urls afhandelt voor /deelnemers/
-"""
+"""Module die de urls afhandelt voor /deelnemers/"""
+
 from django.urls import path
 
 from inschrijfbeheer import views

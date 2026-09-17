@@ -26,15 +26,15 @@ import time
 from typing import Any, Iterator, Mapping, Sequence
 
 import requests
+from dotenv import load_dotenv
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
-from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger(__name__)
 
 TOKEN_URL = os.getenv("ACCOUNTS_URL")
+
 
 class WeezError(Exception):
     """Basisfout voor alles wat misloopt in deze client."""
@@ -70,15 +70,12 @@ class WeezClient:
         timeout: float = 30.0,
         max_retries: int = 3,
         expiry_margin: int = 60,
-        organisatie: str = ""
+        organisatie: str = "",
     ) -> None:
         self.client_id = client_id or os.environ.get("WEEZ_ACCESS_CLIENT_ID")
         self.client_secret = client_secret or os.environ.get("WEEZ_ACCESS_CLIENT_SECRET")
         if not self.client_id or not self.client_secret:
-            raise WeezAuthError(
-                "Zet WEEZ_ACCESS_CLIENT_ID en WEEZ_ACCESS_CLIENT_SECRET in je omgeving "
-                "of geef ze mee aan WeezClient(...)."
-            )
+            raise WeezAuthError("Zet WEEZ_ACCESS_CLIENT_ID en WEEZ_ACCESS_CLIENT_SECRET in je omgeving " "of geef ze mee aan WeezClient(...).")
 
         self.organisatie = organisatie or os.getenv("WEEZ_ORGANISATIE_ID")
         self.token_url = token_url
@@ -128,8 +125,7 @@ class WeezClient:
 
         if response.status_code != 200:
             raise WeezAuthError(
-                f"Token ophalen mislukte met status {response.status_code}. "
-                f"Controleer je client id en secret. Antwoord: {response.text}"
+                f"Token ophalen mislukte met status {response.status_code}. " f"Controleer je client id en secret. Antwoord: {response.text}"
             )
 
         payload = response.json()
@@ -148,7 +144,7 @@ class WeezClient:
             self._token_expires_at = 0.0
 
     def _url(self, path: str) -> str:
-        if  not path.startswith(("http://", "https://")):
+        if not path.startswith(("http://", "https://")):
             raise ValueError("Pad moet beginnen met http(s)://")
         return path
 

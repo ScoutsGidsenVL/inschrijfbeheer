@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from . import WeezClient
+
+from inschrijfbeheer.mapping.providers.weez_providers.weez_client import WeezClient
+
 
 @dataclass(frozen=True)
 class FormFilter:
