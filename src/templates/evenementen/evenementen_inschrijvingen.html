@@ -41,7 +41,7 @@
                 <td>{{ inschrijving.lid }}</td>
                 <td>{{ inschrijving.deelnemertype }}</td>
                 <td>{{ inschrijving.tijdstip|date:"d/m/Y H:i" }}</td>
-                <td>{{ inschrijving.betaald }}</td>
+                <td>{{ inschrijving.prijs }}</td>
                 <td>{{ inschrijving.annulatie_reden|default:"" }}</td>
                 <td><input type="checkbox" disabled {% if inschrijving.aanwezig %}checked{% endif %}></td>
             </tr>
