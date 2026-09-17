@@ -21,6 +21,7 @@
     <button type="submit">Filter</button>
 </form>
 
+{% if evenement.is_weez %}
 <div class="inschrijving-acties" data-bulk-url="{% url "inschrijvingen_registreren" %}">
     <button type="button" id="registreer-aanwezig" disabled>
         Registreer selectie als aanwezig (<span class="selectie-teller">0</span>)
@@ -30,13 +31,16 @@
     </button>
     <span id="registreer-voortgang" aria-live="polite"></span>
 </div>
+{% endif %}
 
 <table class="inschrijving-tabel">
     <thead>
         <tr>
-            <th class="selectie-cel">
-                <input type="checkbox" id="selecteer-alles" aria-label="Selecteer alle inschrijvingen op deze pagina">
-            </th>
+            {% if evenement.is_weez %}
+                <th class="selectie-cel">
+                    <input type="checkbox" id="selecteer-alles" aria-label="Selecteer alle inschrijvingen op deze pagina">
+                </th>
+            {% endif %}
             <th>ID</th>
             <th>Deelnemer</th>
             <th>Deelnemertype</th>
@@ -51,12 +55,14 @@
             <tr class="inschrijving-rij {% if inschrijving.lid.foutboodschap %}foutrij{% endif %}"
                 onclick="window.location.href='{% url "inschrijving_detail" inschrijving_id=inschrijving.id %}'"
                 {% if inschrijving.lid.foutboodschap %}title="{{ inschrijving.lid.foutboodschap }}"{% endif %}>
-                <td class="selectie-cel" onclick="event.stopPropagation()">
-                    <input type="checkbox"
-                           class="selectie-vinkje"
-                           data-id="{{ inschrijving.id }}"
-                           aria-label="Selecteer {{ inschrijving.lid }}">
-                </td>
+                {% if evenement.is_weez %}
+                    <td class="selectie-cel" onclick="event.stopPropagation()">
+                        <input type="checkbox"
+                            class="selectie-vinkje"
+                            data-id="{{ inschrijving.id }}"
+                            aria-label="Selecteer {{ inschrijving.lid }}">
+                    </td>
+                {% endif %}
                 <td>{{ inschrijving.id }}</td>
                 <td>{{ inschrijving.lid }}</td>
                 <td>{{ inschrijving.deelnemertype }}</td>
@@ -74,6 +80,7 @@
 
 {% include "widgets/paginering.html" with pagina=pagina %}
 
+{% if evenement.is_weez %}
 <script>
 (function () {
     const csrfToken = "{{ csrf_token }}";
@@ -206,5 +213,5 @@
     werkKnoppenBij();
 })();
 </script>
-
+{% endif %}
 {% endblock evenementen_content %}
