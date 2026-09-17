@@ -149,4 +149,6 @@ Voor een worker op te starten die deze taken uitvoert, kan het volgende commando
 
 ## Toekomstig werk
 
- [ ] 
+ - [ ] Registreren via Inschrijvingsbeheer
+ - [ ] Excels genereren van de antwoorden op vragen
+ - [ ] Toevoegen voor ondersteuning attest van vorming (met KAVO ID)
