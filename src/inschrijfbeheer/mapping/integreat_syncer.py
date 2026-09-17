@@ -184,7 +184,6 @@ class IntegreatSyncer(Synchronisatie):
         oud is.
         """
         self.info.status(SynchronisatieStatus.BEZIG)
-        # try:
         self.__synchroniseer_vraagtypes()
         self.__synchroniseer_deelnemertypes()
 
@@ -192,10 +191,6 @@ class IntegreatSyncer(Synchronisatie):
             self.__synchroniseer_seminar(seminar, met_inschrijvingen=True)
 
         self.info.status(SynchronisatieStatus.GESLAAGD)
-        # except Exception as e:
-        # logger.error(f"Error opgeworpen bij synchronisatie: {e}")
-        # self.info.status(SynchronisatieStatus.FOUTIEF)
-        # finally:
         return self.info
 
     def synchroniseer_evenement(
