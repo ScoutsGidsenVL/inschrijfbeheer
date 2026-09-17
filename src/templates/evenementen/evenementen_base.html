@@ -11,7 +11,9 @@
     <div class="evenement-titelrij">
         <button class="evenement-terug-knop" onclick="history.back()">Back</button>
         {% if evenement.is_weez %}
-            <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="evenement-icoon">
+            <a href="https://admin.weezevent.com/ticket/O464400/E{{ evenement.id }}/dashboard">
+                <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="evenement-icoon">
+            </a>
         {% endif %}
         <h1 class="evenement-titel">{{ evenement.id }} - {{ evenement.titel }}</h1>
     </div>

@@ -2,14 +2,21 @@
 {% load static %}
 
 {% block extra_headers %}
-    <link rel="stylesheet" href="{% static "styles/evenementen/evenementen_base.css" %}">
+    <link rel="stylesheet" href="{% static "styles/header_base.css" %}">
     {% block extra_inschrijvingen_headers %}{% endblock extra_inschrijvingen_headers %}
 {% endblock extra_headers %}
 
 {% block content %}
 <div class="evenement-hoofding">
-    <div class="evenement-titel-rij">
+    <div class="evenement-titelrij">
         <button class="evenement-terug-knop" onclick="history.back()">Back</button>
+
+        {% if inschrijving.is_weez %}
+            <a href="https://admin.weezevent.com/ticket/O464400/E{{ inschrijving.evenement.id }}/manager/attendees/{{ inschrijving.id }}">
+                <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="evenement-icoon">
+            </a>
+        {% endif %}
+
         <h1 class="evenement-titel">{{ inschrijving.evenement }} - {{ inschrijving.lid }}</h1>
     </div>
     {% if inschrijving.evenement.foutboodschap %}
