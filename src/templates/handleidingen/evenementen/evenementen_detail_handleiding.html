@@ -1,0 +1,34 @@
+{% extends "handleidingen/base.html" %}
+
+{% block nav_evenementen_detail %}geselecteerd{% endblock nav_evenementen_detail %}
+
+{% block handleiding_titel %}Evenementen detailpagina{% endblock handleiding_titel %}
+
+{% block handleiding_content %}
+<p>Deze pagina bestaat uit drie tabbladen.</p>
+
+<nav class="handleiding-tabblad-lijst">
+    <a href="#algemeen">Algemeen</a>
+    <a href="#inschrijvingen">Inschrijvingen</a>
+    <a href="#vragen">Vragen</a>
+</nav>
+
+<p>Bovenaan zie je wanneer het evenement voor het laatst gesynchroniseerd werd. Klik op de synchroniseerknop om dit zelf opnieuw te doen. Het synchroniseren zelf duurt even en zie je niet meteen op het scherm.</p>
+<p>Komt het evenement uit Weez, dan zie je ook het Weez-logo. Klik erop om naar het dashboard van dat evenement in Weez te gaan.</p>
+
+<h2 id="algemeen">Algemeen</h2>
+<p>Dit tabblad toont algemene informatie over het evenement: beschrijving, status, locatie en categorie.</p>
+
+<h2 id="inschrijvingen">Inschrijvingen</h2>
+<p>Dit tabblad lijst de inschrijvingen van het evenement op. Je filtert op:</p>
+<ul>
+    <li>Mailadres, naam of lid-ID van de deelnemer</li>
+    <li>Aanwezigheid</li>
+</ul>
+<p>Je downloadt hier ook alle deelname-attesten van de aanwezige leden, of verstuurt ze per mail. Het mailen gebeurt niet in de applicatie zelf en kan dus even duren. Je krijgt een bevestiging dat het mailen gepland staat.</p>
+<p>Klik op een rij om naar de <a href="/handleidingen/inschrijvingen">detailpagina van die inschrijving</a> te gaan.</p>
+
+<h2 id="vragen">Vragen</h2>
+<p>Dit tabblad toont alle vragen van het evenement. Klik op "Antwoorden bekijken" om alle antwoorden op één specifieke vraag te zien.</p>
+<p>Je past een antwoord alleen individueel aan, per deelnemer, via de <a href="/handleidingen/inschrijvingen">inschrijving zelf</a>.</p>
+{% endblock handleiding_content %}
