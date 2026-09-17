@@ -55,6 +55,7 @@ from inschrijfbeheer.mapping import (
     SynchronisatieStatus,
     SyncOnderdelen,
 )
+from inschrijfbeheer.mapping.providers.weez_providers.evenement_provider import EvenementFilter
 from inschrijfbeheer.models import (
     Categorie,
     Deelnemer,
@@ -153,7 +154,9 @@ class WeezSyncer(Synchronisatie):
         self.info.status(SynchronisatieStatus.BEZIG)
 
         with self:
-            overzicht = list(self.evenement_provider.haal_alle_op())
+            overzicht = list(self.evenement_provider.haal_alle_op(
+                EvenementFilter(alles=self.config.sync_alles)
+            ))
 
             for samenvatting in overzicht:
                 evenement_id = samenvatting.get("id")
