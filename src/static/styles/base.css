@@ -71,6 +71,7 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
+    margin: 4px;
 }
 
 .foutboodschap {

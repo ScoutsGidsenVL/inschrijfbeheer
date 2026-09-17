@@ -7,16 +7,18 @@
 {% endblock extra_headers %}
 
 {% block content %}
-<div class="evenement-hoofding">
-    <button class="evenement-terug-knop" onclick="history.back()">Back</button>
-    <h1 class="evenement-titel">{{ deelnemer }}</h1>
+<div class="header-hoofding">
+    <div class="header-titelrij">
+        <button class="header-terug-knop" onclick="history.back()">Back</button>
+        <h1 class="header-titel">{{ deelnemer }}</h1>
+    </div>
     {% if deelnemer.foutboodschap %}
     <div class="foutboodschap">
         <div class="foutboodschap-icoon">!</div>
         <div class="foutboodschap-tekst">{{ deelnemer.foutboodschap }}</div>
     </div>
     {% endif %}
-    <nav class="evenement-nav">
+    <nav class="header-nav">
         <a href="/deelnemers/{{ deelnemer.id }}" class="geselecteerd">Algemeen</a>
         <a href="/deelnemers/{{ deelnemer.id }}/inschrijvingen">Inschrijvingen</a>
     </nav>

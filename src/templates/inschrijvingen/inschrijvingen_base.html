@@ -7,17 +7,17 @@
 {% endblock extra_headers %}
 
 {% block content %}
-<div class="evenement-hoofding">
-    <div class="evenement-titelrij">
-        <button class="evenement-terug-knop" onclick="history.back()">Back</button>
+<div class="header-hoofding">
+    <div class="header-titelrij">
+        <button class="header-terug-knop" onclick="history.back()">Back</button>
 
         {% if inschrijving.is_weez %}
             <a href="https://admin.weezevent.com/ticket/O464400/E{{ inschrijving.evenement.id }}/manager/attendees/{{ inschrijving.id }}">
-                <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="evenement-icoon">
+                <img src="{% static "images/weez.png" %}" alt="Wees-evenement" class="header-icoon">
             </a>
         {% endif %}
 
-        <h1 class="evenement-titel">{{ inschrijving.evenement }} - {{ inschrijving.lid }}</h1>
+        <h1 class="header-titel">{{ inschrijving.evenement }} - {{ inschrijving.lid }}</h1>
     </div>
     {% if inschrijving.evenement.foutboodschap %}
     <div class="foutboodschap">
@@ -31,7 +31,7 @@
         <div class="foutboodschap-tekst">{{inschrijving.lid.foutboodschap}}</div>
     </div>
     {% endif %}
-    <nav class="evenement-nav">
+    <nav class="header-nav">
         <a href="/inschrijvingen/{{ inschrijving.id }}" class="geselecteerd">Algemeen</a>
         <a href="/inschrijvingen/{{ inschrijving.id }}/vragen">Vragen</a>
     </nav>
