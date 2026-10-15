@@ -221,6 +221,22 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        # Zonder deze logger verdwijnen tracebacks van 500's bij DEBUG=False
+        "django": {
+            "handlers": ["console"],
+            "level": "ERROR",
+        },
+        # CSRF-weigeringen (403) en SuspiciousOperation, relevant achter de WAF
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        # Mislukte OIDC-logins en tokenvernieuwingen bij Keycloak
+        "mozilla_django_oidc": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
     },
 }
 
