@@ -31,6 +31,12 @@ SECRET_KEY = os.getenv("DJANGO_KEY")
 DEBUG = True if os.getenv("DEBUG") == "true" else False
 ALLOWED_HOSTS = ["*"]
 
+# Achter de reverse proxy (WAF) komt https binnen als X-Forwarded-Proto
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
 
 # Application definition
 
@@ -43,7 +49,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "mozilla_django_oidc",
     "procrastinate.contrib.django",
-    "debug_toolbar",
     "inschrijfbeheer",
 ]
 
@@ -56,8 +61,12 @@ MIDDLEWARE = [
     "mozilla_django_oidc.middleware.SessionRefresh",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+
+# De debug toolbar enkel laden bij lokale ontwikkeling
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = 60
 
@@ -174,6 +183,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = "static/"
+# Doelmap voor collectstatic in productie. Lokaal niet nodig.
+STATIC_ROOT = os.getenv("STATIC_ROOT")
 
 STATICFILES_DIRS = [
     BASE_DIR / "static/",

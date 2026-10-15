@@ -5,7 +5,6 @@ The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.1/topics/http/urls/
 """
 
-from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf import settings
 from django.urls import include, path
 from django.views.generic.base import RedirectView
@@ -27,4 +26,9 @@ urlpatterns = [
     path("deelnemers/", include("inschrijfbeheer.urls.deelnemers_urls")),
     path("inschrijvingen/", include("inschrijfbeheer.urls.inschrijvingen_urls")),
     path("handleidingen/", include("inschrijfbeheer.urls.handleidingen_urls")),
-] + debug_toolbar_urls()
+]
+
+if settings.DEBUG:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()

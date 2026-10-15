@@ -25,6 +25,10 @@ DEBUG=false
 
 DJANGO_KEY=
 
+# enkel nodig op acceptatie en productie, die achter een lokale nginx en de WAF (az-deb-waf) draaien
+STATIC_ROOT=<doelmap voor collectstatic>
+CSRF_TRUSTED_ORIGINS=<https-URL van de site, bv. https://inschrijvingsbeheer.scoutsengidsenvlaanderen.be>
+
 # attributen voor de nieuwe databank
 DB_name=
 DB_host=
