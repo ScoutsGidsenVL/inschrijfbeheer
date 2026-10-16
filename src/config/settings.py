@@ -95,7 +95,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        # PostgreSQL 13 is end-of-life, tijdelijke backend tot de upgrade naar 14+
+        # Normale waarde: "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "config.postgresql13_eol",
         "NAME": os.getenv("DB_name"),
         "HOST": os.getenv("DB_host"),
         "USER": os.getenv("DB_username"),
@@ -116,7 +118,9 @@ DATABASES = {
         },
     },
     "logging": {
-        "ENGINE": "django.db.backends.postgresql",
+        # PostgreSQL 13 is end-of-life, tijdelijke backend tot de upgrade naar 14+
+        # Normale waarde: "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "config.postgresql13_eol",
         "NAME": os.getenv("DB_name"),
         "HOST": os.getenv("DB_host"),
         "USER": os.getenv("DB_username"),
