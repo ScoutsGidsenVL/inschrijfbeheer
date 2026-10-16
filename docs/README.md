@@ -21,13 +21,13 @@ Alle dependencies zijn te vinden in [requirements.txt](../requirements.txt). Het
 Dit bestand moet de volgende attributen bevatten.
 
 ```shell
-DEBUG=false
+# lokaal op true: dan toont runserver de CSS en afbeeldingen en zie je de debug toolbar
+DEBUG=true
 
 DJANGO_KEY=
 
-# enkel nodig op acceptatie en productie, die achter een lokale nginx en de WAF (az-deb-waf) draaien
-STATIC_ROOT=<doelmap voor collectstatic>
-CSRF_TRUSTED_ORIGINS=<https-URL van de site, bv. https://inschrijvingsbeheer.scoutsengidsenvlaanderen.be>
+# STATIC_ROOT en CSRF_TRUSTED_ORIGINS laat je lokaal weg.
+# Op de servers (acceptatie en productie) vult Ansible ze in.
 
 # attributen voor de nieuwe databank
 DB_name=
