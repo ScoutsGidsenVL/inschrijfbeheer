@@ -150,6 +150,10 @@ OIDC_RP_SIGN_ALGO = "RS256"
 LOGIN_URL = reverse_lazy("oidc_authentication_init")
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+# Een geweigerde login mag niet naar "/" gaan: dat geeft een lus via de SSO van Keycloak
+LOGIN_REDIRECT_URL_FAILURE = "/geen-toegang/"
+# SessionRefresh mag deze URL's niet naar Keycloak omleiden
+OIDC_EXEMPT_URLS = ["oidc_frontchannel_logout", "geen_toegang"]
 
 
 # Password validation

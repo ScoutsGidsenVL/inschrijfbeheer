@@ -8,6 +8,8 @@ from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
+from inschrijfbeheer.utils.auth import is_personeel, onthoud_toegang
+
 logger = logging.getLogger(__name__)
 
 USERINFO_CACHE_TIMEOUT = 300  # korter dan de levensduur van het access token
@@ -21,6 +23,28 @@ JWKS_FAILURE_BACKOFF = 30  # seconden, geen nieuwe poging binnen dit venster
 
 
 class KeycloakOIDCBackend(OIDCAuthenticationBackend):
+    def get_or_create_user(self, access_token, id_token, payload):
+        """Laat enkel personeel inloggen en bewaart enkel hen als gebruiker.
+
+        Wie geen personeel is, krijgt geen gebruiker in de databank.
+        """
+        try:
+            toegang = is_personeel(access_token)
+        except (requests.RequestException, ValueError):
+            logger.exception("Controle bij Groepsadmin faalde tijdens het inloggen")
+            toegang = False
+
+        if not toegang:
+            logger.warning("Login geweigerd: geen personeel")
+            # store_tokens bewaarde het access token al in de sessie
+            self.request.session.pop("oidc_access_token", None)
+            return None
+
+        onthoud_toegang(self.request.session)
+        # sid is nodig om een front-channel logout van Keycloak aan deze sessie te koppelen
+        self.request.session["oidc_sid"] = payload.get("sid")
+        return super().get_or_create_user(access_token, id_token, payload)
+
     def retrieve_matching_jwk(self, token):
         jwks = cache.get(JWKS_CACHE_KEY)
 

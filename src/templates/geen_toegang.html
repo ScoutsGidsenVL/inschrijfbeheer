@@ -1,0 +1,15 @@
+{% load static %}
+
+<head>
+    <title>Inschrijvingsbeheer</title>
+    <link rel="stylesheet" href="{% static "styles/base.css" %}">
+</head>
+<body>
+    <header class="hoofding">
+        <h1>Inschrijvingsbeheer</h1>
+    </header>
+    <main class="inhoud">
+        <p>Je bent niet aangemeld of je hebt geen toegang tot inschrijvingsbeheer.</p>
+        <p><a href="{% url "oidc_authentication_init" %}">Aanmelden</a></p>
+    </main>
+</body>
