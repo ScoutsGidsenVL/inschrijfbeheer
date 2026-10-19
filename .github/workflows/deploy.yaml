@@ -1,0 +1,35 @@
+name: Deploy
+run-name: >
+  "${{ github.event.head_commit.message }}" ${{ github.event_name }}ed by ${{ github.actor }}
+
+on:
+  push:
+    branches:
+      - production
+      - staging
+
+permissions:
+  contents: write
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        with:
+          proxy_host: ${{ secrets.PROXYHOST }}
+          proxy_username: ${{ secrets.USER }}
+          proxy_key: ${{ secrets.KEY }}
+          proxy_port: ${{ secrets.PROXYPORT }}
+          host: ${{ secrets.SSHHOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.SSHPORT }}
+          envs: BRANCH_NAME
+          script: |
+            echo "Branch: $BRANCH_NAME"
+            sudo -u ansible /opt/deploy-github-inschrijvingsbeheer.sh backend ${BRANCH_NAME}
